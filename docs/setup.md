@@ -9,7 +9,7 @@ Cloudflare や Google のダッシュボードは画面構成や項目名がよ�
 | [1](#1-必要なもの) | 必要なものを用意する | – |
 | [2](#2-リポジトリを取得してインストールする) | リポジトリを取得してインストールする | 3 分 |
 | [3](#3-cloudflare-アカウントを作成する) | Cloudflare アカウントを作成する | 5 分 |
-| [4](#4-wrangler-で-cloudflare-にログインする) | Wrangler で Cloudflare にログインする | 1 分 |
+| [4](#4-wrangler-で-cloudflare-にログインする) | Wrangler で Cloudflare にログインし、workers.dev のサブドメインを登録する | 3 分 |
 | [5](#5-任意gemini-api-キーを発行する) | （任意）Gemini API キーを発行する | 3 分 |
 | [6](#6-ローカルで動かす) | ローカルで動かす | 3 分 |
 | [7](#7-本番用の-d1-データベースを作成する) | 本番用の D1 データベースを作成する | 2 分 |
@@ -73,8 +73,17 @@ npx wrangler whoami
 
 メールアドレスとアカウント名が表示されれば成功です。
 
+### 4-2. workers.dev のサブドメインを登録する（初回のみ）
+
+`npm run dev` で Workers AI をリモートに接続するときと、本番にデプロイするときに、アカウントの workers.dev サブドメインが必要です。
+
+1. ダッシュボードの **Workers & Pages** を開く（初回は Workers のオンボーディング画面が表示されます）
+2. 好きなサブドメイン名（例: `your-name`）を入力して登録する
+
+登録したサブドメインは、本番の URL `https://kaitokune.<サブドメイン>.workers.dev` に使われます。サブドメインの登録だけならアプリは公開されません。
+
 > [!NOTE]
-> Workers AI はローカル開発中も Cloudflare 上で実行されるため、`npm run dev` にはこのログインが必要です。開発中の AI 呼び出しも自分のアカウントの無料枠から消費されます。
+> Workers AI はローカル開発中も Cloudflare 上で実行されるため、`npm run dev` にはログインとサブドメインの登録が必要です。開発中の AI 呼び出しも自分のアカウントの無料枠から消費されます。
 
 ## 5. （任意）Gemini API キーを発行する
 
@@ -170,7 +179,7 @@ npx wrangler secret put GEMINI_API_KEY
 npm run deploy
 ```
 
-初めてのデプロイでは、`workers.dev` のサブドメインを登録するよう求められることがあります。表示される案内に従って、好きなサブドメイン名（例: `your-name`）を登録してください。完了すると次の URL が表示されます。
+完了すると、[手順 4-2](#4-2-workersdev-のサブドメインを登録する初回のみ) で登録したサブドメインを使った次の URL が表示されます。
 
 ```text
 https://kaitokune.<サブドメイン>.workers.dev
@@ -249,6 +258,7 @@ npm run deploy
 | 症状 | 原因と対処 |
 | --- | --- |
 | `npm run dev` が `it's necessary to set a CLOUDFLARE_API_TOKEN` で止まる | Cloudflare にログインしていません。`npx wrangler login` を実行するか、`npm run dev:local` を使ってください |
+| `npm run dev` が `You need to register a workers.dev subdomain` / `Failed to start the remote proxy session` で止まる | workers.dev のサブドメインが未登録です。エラーに表示される URL か、[手順 4-2](#4-2-workersdev-のサブドメインを登録する初回のみ) の方法で登録してから、もう一度実行してください |
 | 画面に「AI に接続できませんでした」と出る（API は 502） | すべての AI プロバイダが失敗しています。ターミナル（本番では `npx wrangler tail`）に `AI provider ... failed` と原因が出ます |
 | ログに `Binding AI needs to be run remotely` と出る | `npm run dev:local` では Workers AI を使えません。Gemini のキーを設定するか、`npm run dev` を使ってください |
 | ログにモデルが見つからないというエラーが出る | `WORKERS_AI_MODEL` のモデルが提供終了している可能性があります。`npx wrangler ai models` で現在のモデルを確認して変更してください |
