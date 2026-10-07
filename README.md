@@ -120,7 +120,7 @@ npm run dev                       # http://localhost:5173
 
 | 名前 | 初期値 | 説明 |
 | --- | --- | --- |
-| `WORKERS_AI_MODEL` | `@cf/google/gemma-3-12b-it` | Workers AI のモデル。`npx wrangler ai models` で一覧を確認できる |
+| `WORKERS_AI_MODEL` | `@cf/google/gemma-4-26b-a4b-it` | Workers AI のモデル。`npx wrangler ai models list` で一覧を確認できる |
 | `GEMINI_MODEL` | `gemini-flash-latest` | 予備の Gemini モデル |
 | `AI_DAILY_LIMIT` | `50` | 1 日あたりの AI 呼び出し上限 |
 | `TIMEZONE` | `Asia/Tokyo` | 利用上限を数える「1 日」の区切り |

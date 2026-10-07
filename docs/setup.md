@@ -261,7 +261,8 @@ npm run deploy
 | `npm run dev` が `You need to register a workers.dev subdomain` / `Failed to start the remote proxy session` で止まる | workers.dev のサブドメインが未登録です。エラーに表示される URL か、[手順 4-2](#4-2-workersdev-のサブドメインを登録する初回のみ) の方法で登録してから、もう一度実行してください |
 | 画面に「AI に接続できませんでした」と出る（API は 502） | すべての AI プロバイダが失敗しています。ターミナル（本番では `npx wrangler tail`）に `AI provider ... failed` と原因が出ます |
 | ログに `Binding AI needs to be run remotely` と出る | `npm run dev:local` では Workers AI を使えません。Gemini のキーを設定するか、`npm run dev` を使ってください |
-| ログにモデルが見つからないというエラーが出る | `WORKERS_AI_MODEL` のモデルが提供終了している可能性があります。`npx wrangler ai models` で現在のモデルを確認して変更してください |
+| ログに `workers-ai:... failed` と `internal error; reference = ...` が出る | `WORKERS_AI_MODEL` のモデルが提供終了している可能性があります。`npx wrangler ai models list` で現在のモデルを確認し、`wrangler.jsonc` を変更してください（日本語に強い Gemma / Qwen 系がおすすめ） |
+| ログに `unexpected response` と出て、`content` が空で `reasoning` だけが入っている | 推論（thinking）モデルが思考だけで出力上限を使い切っています。思考を無効にできないモデルの場合は、別のモデルに変更してください |
 | 「今日の AI 利用上限に達しました」と出る（API は 429） | `AI_DAILY_LIMIT` に達しました。`TIMEZONE` の日付が変わるとリセットされます |
 | デプロイ時に D1 のデータベースが見つからないと出る | `wrangler.jsonc` の `database_id` が仮の値のままです。手順 7 を行ってください |
 | `requires compatibility date "..."` で起動しない | `wrangler.jsonc` の `compatibility_date` がローカルの実行環境より新しすぎます。表示された日付以前に下げてください |
