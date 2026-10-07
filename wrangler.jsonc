@@ -20,8 +20,8 @@
     {
       "binding": "DB",
       "database_name": "kaitokune",
-      // `npx wrangler d1 create kaitokune` で表示された ID に置き換える（ローカル開発だけならこのままでよい）
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      // `npx wrangler d1 create kaitokune` で作成した本番データベースの ID（秘密情報ではない）
+      "database_id": "5c5dd610-bac0-4515-b2b1-a898515235d8",
       "migrations_dir": "migrations"
     }
   ],
