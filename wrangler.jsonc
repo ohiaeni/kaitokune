@@ -1,0 +1,34 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kaitokune",
+  "main": "src/worker/index.ts",
+  "compatibility_date": "2026-08-15",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  "assets": {
+    // SPA のルート（/entries など）は index.html を返し、/api/* だけ Worker で処理する
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  // AI は開発中もリモート（自分のアカウントの無料枠）を使う。`npx wrangler login` が必要
+  "ai": { "binding": "AI" },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "kaitokune",
+      // `npx wrangler d1 create kaitokune` で表示された ID に置き換える（ローカル開発だけならこのままでよい）
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "vars": {
+    // Workers AI のモデル。`npx wrangler ai models` で一覧を確認できる
+    "WORKERS_AI_MODEL": "@cf/google/gemma-3-12b-it",
+    // Gemini のモデル（GEMINI_API_KEY を設定したときだけ使う予備）
+    "GEMINI_MODEL": "gemini-flash-latest",
+    // 無料枠を守るための、1 日あたりの AI 呼び出し上限
+    "AI_DAILY_LIMIT": "50",
+    // 利用上限を数える「1 日」の区切りに使うタイムゾーン
+    "TIMEZONE": "Asia/Tokyo"
+  }
+}

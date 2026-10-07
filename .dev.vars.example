@@ -1,0 +1,3 @@
+# cp .dev.vars.example .dev.vars して値を入れる（.dev.vars は git 管理外）
+# 任意: Google AI Studio (https://aistudio.google.com/apikey) で発行した無料の API キー
+GEMINI_API_KEY=
