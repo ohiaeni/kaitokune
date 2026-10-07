@@ -130,22 +130,21 @@ npm run dev                # http://localhost:5173 で起動
 npx wrangler d1 create kaitokune
 ```
 
-次のような出力が表示されます。
+途中で次のように、設定ファイルへの追記を提案されます。**`n`（No）を選んでください。**
 
 ```text
-✅ Successfully created DB 'kaitokune'
-{
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "kaitokune",
-      "database_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-    }
-  ]
-}
+? Would you like Wrangler to add it on your behalf?
 ```
 
-表示された `database_id` を、`wrangler.jsonc` の `00000000-0000-0000-0000-000000000000` と置き換えます。この ID は秘密情報ではないので、そのままコミットして構いません。
+Yes を選ぶと、既存の `DB` とは別のバインディング（`kaitokune`）が追加され、ファイル全体の書式も変わってしまいます。アプリが使うのは `DB` なので、自動追記されたバインディングは使われず、`npm run db:migrate:remote` も古い ID を見て失敗します（`The database ... could not be found [code: 7404]`）。誤って Yes を選んだ場合は、追加されたバインディングを削除し、その `database_id` を次のように `DB` に移してください。
+
+作成されたデータベースの ID は、次のコマンドでも確認できます。
+
+```sh
+npx wrangler d1 list
+```
+
+表示された ID（`uuid`）で、`wrangler.jsonc` の `DB` バインディングの `database_id` を置き換えます。この ID は秘密情報ではないので、そのままコミットして構いません。
 
 ```jsonc
   "d1_databases": [
@@ -264,6 +263,6 @@ npm run deploy
 | ログに `workers-ai:... failed` と `internal error; reference = ...` が出る | `WORKERS_AI_MODEL` のモデルが提供終了している可能性があります。`npx wrangler ai models list` で現在のモデルを確認し、`wrangler.jsonc` を変更してください（日本語に強い Gemma / Qwen 系がおすすめ） |
 | ログに `unexpected response` と出て、`content` が空で `reasoning` だけが入っている | 推論（thinking）モデルが思考だけで出力上限を使い切っています。思考を無効にできないモデルの場合は、別のモデルに変更してください |
 | 「今日の AI 利用上限に達しました」と出る（API は 429） | `AI_DAILY_LIMIT` に達しました。`TIMEZONE` の日付が変わるとリセットされます |
-| デプロイ時に D1 のデータベースが見つからないと出る | `wrangler.jsonc` の `database_id` が仮の値のままです。手順 7 を行ってください |
+| `npm run db:migrate:remote` やデプロイで `The database ... could not be found [code: 7404]` と出る | `wrangler.jsonc` の `DB` の `database_id` が実際のデータベースと一致していません。`npx wrangler d1 list` で ID を確認し、[手順 7](#7-本番用の-d1-データベースを作成する) のとおり置き換えてください |
 | `requires compatibility date "..."` で起動しない | `wrangler.jsonc` の `compatibility_date` がローカルの実行環境より新しすぎます。表示された日付以前に下げてください |
 | 本番で日記一覧などが空になる | ローカルと本番の D1 は別のデータベースです。ローカルで書いた日記は本番には反映されません |
