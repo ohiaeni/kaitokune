@@ -5,6 +5,10 @@
   "compatibility_date": "2026-08-15",
   "compatibility_flags": ["nodejs_compat"],
   "observability": { "enabled": true },
+  // <name>.<subdomain>.workers.dev で公開する（Cloudflare Access で本人だけに制限する前提）
+  "workers_dev": true,
+  // バージョンごとのプレビュー URL は Access の保護から漏れやすいので無効にしておく
+  "preview_urls": false,
   "assets": {
     // SPA のルート（/entries など）は index.html を返し、/api/* だけ Worker で処理する
     "not_found_handling": "single-page-application",
