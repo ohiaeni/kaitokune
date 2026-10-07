@@ -91,6 +91,8 @@ kaitokune/
 
 ## セットアップ
 
+Cloudflare アカウントの作成からデプロイ、アクセス制限までの詳しい手順は **[docs/setup.md](docs/setup.md)** にまとめています。以下はローカルで動かすまでの要約です。
+
 必要なもの: Node.js 22 以上、Cloudflare アカウント（無料）、任意で Google AI Studio の API キー（無料）。
 
 ```sh
@@ -131,14 +133,10 @@ npm run dev                       # http://localhost:5173
 npx wrangler d1 create kaitokune      # 表示された database_id を wrangler.jsonc に書き込む
 npm run db:migrate:remote
 npx wrangler secret put GEMINI_API_KEY  # 任意
-npm run deploy                          # https://kaitokune.<アカウント>.workers.dev
+npm run deploy                          # https://kaitokune.<サブドメイン>.workers.dev
 ```
 
-**デプロイしたら必ずアクセス制限をかける。** アプリ自体にはログイン機能がないため、URL を知っていれば誰でも日記を読めてしまう。
-
-1. Cloudflare ダッシュボード → Workers & Pages → `kaitokune` → Settings → Domains & Routes
-2. `workers.dev` の行で **Cloudflare Access を有効化**する
-3. 作成された Access アプリケーションのポリシーで、自分のメールアドレスだけを許可する（ワンタイム PIN でログインできる）
+**デプロイしたら必ず Cloudflare Access で自分だけに制限する。** アプリ自体にはログイン機能がないため、URL を知っていれば誰でも日記を読めてしまう。設定手順は [docs/setup.md の手順 9](docs/setup.md#9-cloudflare-access-で自分だけに制限する) を参照。
 
 ## 開発ロードマップ
 
