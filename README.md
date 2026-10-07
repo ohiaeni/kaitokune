@@ -3,37 +3,34 @@
 AI からの質問に答えるだけで、毎日の日記がかんたんに書けるアプリ。
 
 > **絶対条件: 完全無料で運用できること**
-> ホスティング・DB・認証・AI のすべてを、クレジットカード登録不要／従量課金なしの無料枠で構成する。
+> ホスティング・DB・AI のすべてを、クレジットカード登録不要／従量課金なしの無料枠で構成する。
 
----
+## 使い方の流れ
 
-## コンセプト
+1. アプリを開くと、AI が今日について 1 問ずつ質問してくる（直近の日記を踏まえて話題をつなげることもある）
+2. 短く答えると、AI がその回答を深掘りしたり別の話題に広げたりして、次の質問をする（3〜5 往復）
+3. 「日記にまとめる」を押すと、回答をもとに AI が日記の文章を書く
+4. 文章を自由に直し、気分（5 段階）を選んで保存する
+5. 「これまで」から月ごとに過去の日記を読み返したり、編集・削除したりできる
 
-1. アプリを開くと、AI が今日について 3〜5 問ほど質問してくる
-   （例:「今日いちばん印象に残ったことは？」「それを聞いてどう感じましたか？」）
-2. ユーザーは短く答えるだけ（テキスト入力。将来的に音声入力も可）
-3. 回答をもとに AI が自然な文章の日記にまとめる
-4. ユーザーが確認・編集して保存
-5. 過去の日記をカレンダーや一覧で振り返れる
+書きかけの会話はブラウザに保存されるので、途中で閉じても続きから再開できる。
 
----
+## 構成
 
-## 推奨構成（Cloudflare 無料枠で完結）
-
-ホスティング・DB・AI を Cloudflare にまとめることで、1 つのアカウントで完全無料かつシンプルに運用できる。
+利用者が 1 人（自分だけ）の前提で、アプリにはログイン機能を持たせない。公開するときは Cloudflare Access（無料）で自分のメールアドレスだけを通す。
 
 ```text
 ┌──────────────────────────────┐
-│  ブラウザ / スマホ (PWA)       │
+│  ブラウザ / スマホ             │
 │  React + Vite + Tailwind CSS │
 └──────────────┬───────────────┘
-               │ HTTPS
+               │ HTTPS（Cloudflare Access で本人のみ許可）
 ┌──────────────▼───────────────────────────────┐
 │  Cloudflare Workers (Hono)                    │
-│   ├─ /api/auth/*   … Better Auth              │
-│   ├─ /api/questions … 質問生成                 │
-│   ├─ /api/compose   … 回答 → 日記本文を生成     │
-│   └─ /api/entries   … 日記の CRUD              │
+│   ├─ /api/chat/next     … 次の質問を生成        │
+│   ├─ /api/chat/compose  … 回答 → 日記本文を生成 │
+│   └─ /api/entries       … 日記の CRUD          │
+│   ※ それ以外のパスは静的アセット（SPA）を返す     │
 └───────┬─────────────────────────┬────────────┘
         │                         │
 ┌───────▼────────┐      ┌─────────▼──────────────────┐
@@ -43,139 +40,130 @@ AI からの質問に答えるだけで、毎日の日記がかんたんに書�
 └────────────────┘      └────────────────────────────┘
 ```
 
-### 技術スタック
-
 | レイヤー | 採用技術 | 無料である理由 / 選定理由 |
 | --- | --- | --- |
-| フロントエンド | React 19 + Vite + TypeScript | OSS。軽量で開発体験が良い |
-| UI | Tailwind CSS + shadcn/ui | OSS。チャット風 UI を素早く作れる |
-| ルーティング | TanStack Router | 型安全なルーティング |
-| PWA | vite-plugin-pwa | スマホのホーム画面に追加してネイティブアプリ風に使える（App Store 登録費不要） |
-| API | Hono on Cloudflare Workers | Workers 無料枠（1 日 10 万リクエスト程度）で個人利用には十分 |
-| 静的ホスティング | Cloudflare Workers Static Assets | 無料・帯域無制限 |
-| DB | Cloudflare D1 + Drizzle ORM | D1 無料枠（数 GB のストレージ）。テキスト日記なら事実上使い切れない |
-| 認証 | Better Auth（D1 に保存） | OSS のセルフホスト型で外部の有料認証サービス不要。Google / GitHub ログインも無料 |
-| AI（メイン） | Cloudflare Workers AI | 1 日あたりの無料枠（Neurons）あり。Llama / Gemma / Qwen 系などのオープンモデルを Workers から直接呼べ、API キー管理も不要 |
-| AI（予備） | Google Gemini API 無料枠（Flash 系モデル） | 日本語品質が高い。Workers AI の無料枠を超えた場合のフォールバック先 |
-| 音声入力（任意） | Web Speech API | ブラウザ標準機能なので無料 |
-| CI/CD | GitHub Actions + Wrangler | パブリック／個人リポジトリの無料枠でデプロイ自動化 |
+| フロントエンド | React 19 + Vite + TypeScript | OSS。`@cloudflare/vite-plugin` で Worker と 1 つのプロジェクトとして開発・デプロイできる |
+| UI | Tailwind CSS v4 | OSS。スマホファーストのチャット風 UI |
+| ルーティング / データ取得 | TanStack Router（ファイルベース）+ TanStack Query | 型安全なルーティングとキャッシュ |
+| API | Hono on Cloudflare Workers | Workers の無料枠（1 日 10 万リクエスト程度）で個人利用には十分 |
+| 静的ホスティング | Workers Static Assets | 無料・帯域無制限 |
+| DB | Cloudflare D1 + Drizzle ORM | D1 の無料枠（数 GB）。テキストの日記なら事実上使い切れない |
+| 認証 | Cloudflare Access（Zero Trust 無料プラン） | アプリのコードに認証を持たずに、自分だけに制限できる |
+| AI（メイン） | Cloudflare Workers AI | 1 日あたりの無料枠（Neurons）。API キー不要 |
+| AI（予備） | Google Gemini API 無料ティア | 日本語の品質が高い。Workers AI が失敗したときのフォールバック先 |
+| 品質 | Biome / Vitest（`@cloudflare/vitest-pool-workers`） | Workers ランタイム上でローカル D1 を使ってテストする |
 
----
+### 「完全無料」を守るためのガード
 
-## AI サービスの比較（すべて無料で使えるもの）
+- **カードを登録しない**: Cloudflare・Google AI Studio ともにカード未登録のまま無料枠だけを使う。カード未登録なら超過しても課金されず、エラーになるだけ。
+- **アプリ側の利用上限**: AI の呼び出し回数を D1 で日ごとに数え、`AI_DAILY_LIMIT`（初期値 50 回）を超えたら 429 を返して止める。日記 1 日分で使うのは最大 6 回程度。
+- **フォールバック**: Workers AI がエラー（レート制限・障害・不正な出力など）になったら、Gemini に切り替える。
+- **会話の上限**: 質問は最大 5 問。5 問に達したら AI を呼ばずに会話を終える。
+
+## ディレクトリ構成
+
+```text
+kaitokune/
+├── src/
+│   ├── worker/               # Cloudflare Worker（Hono）
+│   │   ├── app.ts            # アプリ本体（DB・AI の注入、エラーハンドリング）
+│   │   ├── routes/           # chat.ts（質問・日記生成）, entries.ts（CRUD）
+│   │   ├── ai/               # プロバイダ（workers-ai / gemini）、フォールバック、プロンプト
+│   │   ├── db/schema.ts      # Drizzle スキーマ
+│   │   └── usage.ts          # 1 日の AI 呼び出し上限
+│   ├── shared/               # クライアントと Worker で共有する Zod スキーマ・定数・型
+│   └── client/               # React SPA
+│       ├── routes/           # / （今日の日記）, /entries（一覧）, /entries/$date（詳細）
+│       ├── components/       # Interview（会話）, DiaryEditor, EntryView など
+│       └── lib/              # API クライアント、日付、localStorage
+├── test/                     # Vitest（Workers ランタイム上で実行）
+├── migrations/               # drizzle-kit が生成する D1 マイグレーション
+└── wrangler.jsonc            # バインディング（D1 / AI）と設定値
+```
+
+### データモデル
+
+| テーブル | 主なカラム | 説明 |
+| --- | --- | --- |
+| `entries` | `date`（PK, YYYY-MM-DD）, `body`, `mood`（1〜5, 任意）, `created_at`, `updated_at` | 1 日 1 件の日記 |
+| `qa_logs` | `entry_date`（→ entries）, `position`, `question`, `answer` | 日記のもとになった AI との会話 |
+| `ai_usage` | `date`（PK）, `count` | AI 呼び出し回数（利用上限用） |
+
+## セットアップ
+
+必要なもの: Node.js 22 以上、Cloudflare アカウント（無料）、任意で Google AI Studio の API キー（無料）。
+
+```sh
+npm install
+cp .dev.vars.example .dev.vars    # Gemini を使う場合は GEMINI_API_KEY を記入
+npm run db:migrate:local          # ローカル D1 にテーブルを作成
+npx wrangler login                # Workers AI を使うために必要（ブラウザでログイン）
+npm run dev                       # http://localhost:5173
+```
+
+- Workers AI は開発中もリモート（自分のアカウントの無料枠）で動く。そのため `npm run dev` には Cloudflare へのログインが必要。
+- ログインせずに試すときは `npm run dev:local` を使う。この場合 Workers AI は使えず、`.dev.vars` に設定した Gemini だけで動く。
+
+### 主なコマンド
+
+| コマンド | 内容 |
+| --- | --- |
+| `npm run dev` / `npm run dev:local` | 開発サーバー（後者は Cloudflare に接続しない） |
+| `npm test` | テスト（AI はモックするので無料枠を消費しない） |
+| `npm run typecheck` / `npm run check` | 型チェック / Biome による lint・フォーマットのチェック |
+| `npm run db:generate` | `src/worker/db/schema.ts` の変更からマイグレーションを生成 |
+| `npm run cf-typegen` | `wrangler.jsonc` を変えたら実行し、`worker-configuration.d.ts` を更新 |
+
+### 設定値（`wrangler.jsonc` の `vars`）
+
+| 名前 | 初期値 | 説明 |
+| --- | --- | --- |
+| `WORKERS_AI_MODEL` | `@cf/google/gemma-3-12b-it` | Workers AI のモデル。`npx wrangler ai models` で一覧を確認できる |
+| `GEMINI_MODEL` | `gemini-flash-latest` | 予備の Gemini モデル |
+| `AI_DAILY_LIMIT` | `50` | 1 日あたりの AI 呼び出し上限 |
+| `TIMEZONE` | `Asia/Tokyo` | 利用上限を数える「1 日」の区切り |
+
+シークレットの `GEMINI_API_KEY` は、ローカルでは `.dev.vars`、本番では `npx wrangler secret put GEMINI_API_KEY` で設定する。
+
+## デプロイ
+
+```sh
+npx wrangler d1 create kaitokune      # 表示された database_id を wrangler.jsonc に書き込む
+npm run db:migrate:remote
+npx wrangler secret put GEMINI_API_KEY  # 任意
+npm run deploy                          # https://kaitokune.<アカウント>.workers.dev
+```
+
+**デプロイしたら必ずアクセス制限をかける。** アプリ自体にはログイン機能がないため、URL を知っていれば誰でも日記を読めてしまう。
+
+1. Cloudflare ダッシュボード → Workers & Pages → `kaitokune` → Settings → Domains & Routes
+2. `workers.dev` の行で **Cloudflare Access を有効化**する
+3. 作成された Access アプリケーションのポリシーで、自分のメールアドレスだけを許可する（ワンタイム PIN でログインできる）
+
+## 開発ロードマップ
+
+- [x] **MVP**: 会話型の質問 → 日記の生成 → 編集・保存、一覧・詳細、利用上限、フォールバック
+- [ ] 振り返り: カレンダー表示、気分の推移グラフ
+- [ ] PWA 化、毎晩のリマインド通知（Cron Trigger + Web Push。どちらも無料）
+- [ ] 音声入力（Web Speech API）、週・月ごとの振り返りを AI がまとめる機能
+
+<details>
+<summary>技術選定時に比較した AI サービス・代替構成</summary>
 
 | サービス | 無料の形態 | 日本語品質 | 長所 | 注意点 |
 | --- | --- | --- | --- | --- |
-| **Cloudflare Workers AI** | 1 日ごとの無料枠 | ○ | インフラと統合、キー不要、カード登録不要 | 無料枠超過分は課金対象になるため、上限チェックを実装する（後述） |
+| **Cloudflare Workers AI** | 1 日ごとの無料枠 | ○ | インフラと統合、キー不要、カード登録不要 | 無料枠超過分は課金対象になるため、上限チェックを実装する |
 | **Google Gemini API** | 無料ティア（レート制限あり） | ◎ | 日本語が自然、高性能 | 無料ティアでは入力データが Google の品質改善に使われる可能性がある |
 | **Groq** | 無料ティア（レート制限あり） | ○ | 非常に高速 | モデルの入れ替わりが早い |
 | **OpenRouter（`:free` モデル）** | 無料モデル枠 | △〜○ | 多数のモデルを 1 つの API で試せる | 1 日のリクエスト数制限が厳しめ |
 | **ブラウザ内 AI（WebLLM / Chrome Built-in AI）** | 完全ローカル | △ | サーバー不要、データが端末外に出ない | 端末性能に依存、初回のモデルダウンロードが重い |
 
-**方針:** Workers AI をメインにし、`AIProvider` インターフェースで抽象化して Gemini / Groq などへ簡単に切り替えられるようにする。
+- **ローカルファースト構成**（IndexedDB + ブラウザ内 AI）: 日記が端末の外に出ないが、端末間で同期できず、日本語の文章品質も下がる。
+- **Next.js + Supabase 構成**: 情報は多いが、Vercel Hobby は非商用に限られ、Supabase の無料プロジェクトはしばらく使わないと一時停止される。
 
-```ts
-interface AIProvider {
-  generateQuestions(context: DiaryContext): Promise<string[]>;
-  composeDiary(qa: { question: string; answer: string }[]): Promise<string>;
-}
-```
-
-### 「完全無料」を守るためのガード
-
-- **カードを登録しない**: Cloudflare・Google AI Studio ともにカード未登録のまま無料枠だけを使う。カード未登録なら超過しても課金されず、エラーになるだけ。
-- **アプリ側の利用上限**: 1 ユーザーあたり 1 日の AI 呼び出し回数を D1 で数え、上限を超えたら停止する。
-- **フォールバック**: メインの AI がレート制限（HTTP 429）になったら予備のプロバイダに切り替える。
-- **トークン節約**: 質問生成は 1 リクエストでまとめて 3〜5 問を返させ、日記の生成も 1 回で済ませる。
-
----
-
-## 代替構成
-
-### A. ローカルファースト構成（サーバー 0・完全プライベート）
-
-- React + Vite の PWA を GitHub Pages / Cloudflare Pages で静的配信
-- データは IndexedDB（Dexie.js）に端末内保存
-- AI は WebLLM（小型モデル）または Chrome Built-in AI をブラウザ内で実行
-- **長所:** 運用コストがゼロで、レート制限もない。日記が外部に送信されない
-- **短所:** 端末間で同期できない。古いスマホでは動作が重い。日本語の文章品質は下がる
-
-### B. Next.js + Supabase 構成
-
-- Next.js（Vercel Hobby）+ Supabase（Postgres / Auth）+ Gemini API
-- **長所:** 情報が多く、認証が簡単
-- **短所:** Vercel Hobby は非商用利用に限られる。Supabase の無料プロジェクトは一定期間アクセスがないと一時停止される
-
-→ 個人利用でクラウド同期もしたい場合は **推奨構成（Cloudflare）**、プライバシーを最優先する場合は **A** を選ぶ。
-
----
-
-## データモデル（案）
-
-```sql
--- users / sessions は Better Auth が管理
-
-CREATE TABLE entries (
-  id          TEXT PRIMARY KEY,
-  user_id     TEXT NOT NULL,
-  date        TEXT NOT NULL,          -- YYYY-MM-DD
-  body        TEXT NOT NULL,          -- AI が生成し、ユーザーが編集した日記本文
-  mood        INTEGER,                -- 1〜5（任意）
-  created_at  INTEGER NOT NULL,
-  updated_at  INTEGER NOT NULL,
-  UNIQUE (user_id, date)
-);
-
-CREATE TABLE qa_logs (
-  id          TEXT PRIMARY KEY,
-  entry_id    TEXT NOT NULL REFERENCES entries(id) ON DELETE CASCADE,
-  position    INTEGER NOT NULL,
-  question    TEXT NOT NULL,
-  answer      TEXT NOT NULL
-);
-
-CREATE TABLE ai_usage (
-  user_id     TEXT NOT NULL,
-  date        TEXT NOT NULL,
-  count       INTEGER NOT NULL DEFAULT 0,
-  PRIMARY KEY (user_id, date)
-);
-```
-
----
-
-## ディレクトリ構成（案）
-
-```text
-kaitokune/
-├── apps/
-│   ├── web/            # React + Vite (PWA)
-│   └── api/            # Hono on Cloudflare Workers
-├── packages/
-│   ├── db/             # Drizzle スキーマ & マイグレーション
-│   ├── ai/             # AIProvider 実装 (workers-ai / gemini / groq)
-│   └── shared/         # 型定義・バリデーション (Zod)
-├── pnpm-workspace.yaml
-└── README.md
-```
-
-- パッケージ管理: pnpm workspaces
-- Lint / Format: Biome
-- テスト: Vitest
-
----
-
-## 開発ロードマップ
-
-1. **MVP**: 質問 → 回答 → 日記生成 → 保存（ログインなし、1 ユーザー）
-2. 認証を追加（Better Auth）、日記の一覧とカレンダー表示
-3. 過去の日記を踏まえた質問のパーソナライズ（直近数日の要約をプロンプトに含める）
-4. PWA 化、毎日のリマインド通知（Web Push は無料）
-5. 音声入力、気分グラフ、週や月ごとの振り返りを AI がまとめる機能
-
----
+</details>
 
 ## 注意事項
 
-- 各サービスの無料枠の内容（回数・容量・対象モデル）は頻繁に変わるため、実装前に必ず公式の料金ページを確認すること。
-- 日記はプライベートな情報のため、無料の AI API に送る内容とプライバシーポリシー（学習に利用されるかどうか）をユーザーに明示すること。
+- 各サービスの無料枠の内容（回数・容量・対象モデル）は頻繁に変わるため、公式の料金ページで確認すること。
+- 日記はプライベートな情報。Gemini の無料ティアでは、送った内容が Google の品質改善に使われる可能性がある。気になる場合は `GEMINI_API_KEY` を設定せず、Workers AI だけで使う。
