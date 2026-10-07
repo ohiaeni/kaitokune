@@ -26,8 +26,8 @@
     }
   ],
   "vars": {
-    // Workers AI のモデル。`npx wrangler ai models` で一覧を確認できる
-    "WORKERS_AI_MODEL": "@cf/google/gemma-3-12b-it",
+    // Workers AI のモデル。`npx wrangler ai models list` で一覧を確認できる
+    "WORKERS_AI_MODEL": "@cf/google/gemma-4-26b-a4b-it",
     // Gemini のモデル（GEMINI_API_KEY を設定したときだけ使う予備）
     "GEMINI_MODEL": "gemini-flash-latest",
     // 無料枠を守るための、1 日あたりの AI 呼び出し上限

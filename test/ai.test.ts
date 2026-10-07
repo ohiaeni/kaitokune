@@ -3,6 +3,7 @@ import { AllProvidersFailedError, generateWithFallback } from "../src/worker/ai/
 import { createGemini } from "../src/worker/ai/gemini";
 import { parseDiary, parseNextQuestion } from "../src/worker/ai/prompts";
 import { type Prompt, ProviderError, type TextGenerator } from "../src/worker/ai/provider";
+import { extractText } from "../src/worker/ai/workers-ai";
 
 const prompt: Prompt = { system: "sys", user: "user", json: true };
 
@@ -100,5 +101,25 @@ describe("createGemini", () => {
       .catch((e) => e);
     expect(error).toBeInstanceOf(ProviderError);
     expect(error.status).toBe(429);
+  });
+});
+
+describe("Workers AI extractText", () => {
+  it("reads the OpenAI-compatible format used by newer models", () => {
+    expect(extractText({ choices: [{ message: { content: "こんにちは" } }] })).toBe("こんにちは");
+    expect(extractText({ choices: [{ message: { content: [{ type: "text", text: "a" }, { text: "b" }] } }] })).toBe(
+      "ab",
+    );
+  });
+
+  it("reads the legacy response format", () => {
+    expect(extractText({ response: "こんにちは" })).toBe("こんにちは");
+    expect(extractText({ response: { question: "Q" } })).toBe('{"question":"Q"}');
+  });
+
+  it("returns null when there is no text", () => {
+    expect(extractText({ choices: [{ message: { content: null } }] })).toBeNull();
+    expect(extractText({ response: "  " })).toBeNull();
+    expect(extractText(null)).toBeNull();
   });
 });
