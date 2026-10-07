@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@layer base {
+  html {
+    color-scheme: light dark;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-stone-50 text-stone-900 antialiased dark:bg-stone-950 dark:text-stone-100;
+    font-family: "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+  }
+
+  /* iOS で入力欄にフォーカスしたときにズームされないよう 16px 以上にする */
+  textarea,
+  input {
+    font-size: 16px;
+  }
+}
