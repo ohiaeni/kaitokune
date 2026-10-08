@@ -1,6 +1,5 @@
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
-import { todayIn } from "../../shared/date";
 import {
   type ComposeResponse,
   composeRequestSchema,
@@ -12,7 +11,6 @@ import {
 import { listRecentEntries } from "../db/entries";
 import { listNotes } from "../db/notes";
 import type { AppEnv } from "../types";
-import { consumeAiQuota } from "../usage";
 import { validationHook } from "../validation";
 
 const RECENT_ENTRIES = 3;
@@ -25,8 +23,6 @@ export const chatRoutes = new Hono<AppEnv>()
 
     const db = c.get("db");
     const userId = c.get("userId");
-    await consumeAiQuota(db, userId, todayIn(c.env.TIMEZONE), Number(c.env.AI_DAILY_LIMIT));
-
     // 最初の質問だけ、直近の日記を文脈に入れてパーソナライズする
     const recent =
       qa.length === 0
@@ -43,7 +39,6 @@ export const chatRoutes = new Hono<AppEnv>()
     const { date, qa } = c.req.valid("json");
     const db = c.get("db");
     const userId = c.get("userId");
-    await consumeAiQuota(db, userId, todayIn(c.env.TIMEZONE), Number(c.env.AI_DAILY_LIMIT));
     const notes = (await listNotes(db, userId, date)).map((n) => n.body);
     const body = await c.get("ai").composeDiary({ date, qa, notes });
     return c.json<ComposeResponse>({ body });
