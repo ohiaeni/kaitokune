@@ -8,7 +8,17 @@ export default defineConfig({
       // テストでは AI をモックするので、リモート（Cloudflare アカウント）には接続しない
       remoteBindings: false,
       miniflare: {
-        bindings: { TEST_MIGRATIONS: await readD1Migrations("./migrations") },
+        // マイグレーションで既存のデータが失われないかを確かめるための、空のデータベース（test/migrations.test.ts）
+        d1Databases: ["MIGRATION_TEST_DB"],
+        bindings: {
+          TEST_MIGRATIONS: await readD1Migrations("./migrations"),
+          // テストは Access を通らないので、ローカル開発と同じく固定のユーザーとして扱う
+          DEV_USER_EMAIL: "owner@example.invalid",
+          // .dev.vars の値（ローカル開発用のシークレット）はテストに持ち込まない
+          GEMINI_API_KEY: "",
+          CF_ANALYTICS_TOKEN: "",
+          CF_ACCOUNT_ID: "",
+        },
       },
     })),
   ],

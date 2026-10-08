@@ -104,7 +104,7 @@ function UsagePage() {
       ) : (
         <>
           <Card className="flex flex-col gap-4">
-            <h2 className="font-bold">AI の利用回数（アプリの上限）</h2>
+            <h2 className="font-bold">AI の利用回数（あなたの 1 日の上限）</h2>
             <Meter label={`今日（${formatDate(usage.data.ai.date)}）`} meter={usage.data.ai.today} />
             {usage.data.ai.history.length > 0 && (
               <ul className="flex flex-col gap-1 text-sm text-stone-600 dark:text-stone-400">

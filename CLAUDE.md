@@ -2,7 +2,7 @@
 
 ## プロジェクトの概要
 
-AI の質問に答えるだけで日記が書ける、自分 1 人で使うアプリ。詳しい構成・データモデル・設定値は [README.md](README.md)、Cloudflare のセットアップは [docs/setup.md](docs/setup.md) を参照する。
+AI の質問に答えるだけで日記が書ける、少人数（今は 2 人）で使うアプリ。詳しい構成・データモデル・設定値は [README.md](README.md)、Cloudflare のセットアップは [docs/setup.md](docs/setup.md) を参照する。
 
 - `src/client/`: React SPA（Vite・TanStack Router / Query・Tailwind CSS）
 - `src/worker/`: Cloudflare Worker（Hono）。`/api/*` を処理し、それ以外は静的アセットを返す
@@ -17,7 +17,7 @@ AI の質問に答えるだけで日記が書ける、自分 1 人で使うア�
 - **生成ファイルは手で編集しない**: `src/client/routeTree.gen.ts`（TanStack Router）、`worker-configuration.d.ts`（`npm run cf-typegen`）、`migrations/`（`npm run db:generate`）
 - **スキーマを変えたらマイグレーションを生成する**: `src/worker/db/schema.ts` を変えたら `npm run db:generate` を実行し、生成された SQL もコミットする
 - **`wrangler.jsonc` を変えたら型を更新する**: `npm run cf-typegen` を実行する
-- 利用者は自分 1 人で、アプリにログイン機能はない（本番は Cloudflare Access で保護する）
+- **データは必ずユーザーごとに分ける**: 利用者は `users` テーブルに登録した人だけで、アプリにログイン画面はない（本番は Cloudflare Access で保護し、Worker が JWT を検証してユーザーを決める）。ユーザーのデータを持つテーブルには `user_id` を持たせ、すべてのクエリを `c.get("userId")` で絞り込む。API の返り値に `user_id` を含めない
 
 ### よく使うコマンド
 

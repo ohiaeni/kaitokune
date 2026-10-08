@@ -1,5 +1,5 @@
 import { zValidator } from "@hono/zod-validator";
-import { desc, lt } from "drizzle-orm";
+import { and, desc, eq, lt } from "drizzle-orm";
 import { Hono } from "hono";
 import {
   type ComposeResponse,
@@ -24,7 +24,8 @@ export const chatRoutes = new Hono<AppEnv>()
     if (qa.length >= MAX_QUESTIONS) return c.json<NextResponse>({ done: true });
 
     const db = c.get("db");
-    await consumeAiQuota(db, todayIn(c.env.TIMEZONE), Number(c.env.AI_DAILY_LIMIT));
+    const userId = c.get("userId");
+    await consumeAiQuota(db, userId, todayIn(c.env.TIMEZONE), Number(c.env.AI_DAILY_LIMIT));
 
     // 最初の質問だけ、直近の日記を文脈に入れてパーソナライズする
     const recent =
@@ -33,21 +34,22 @@ export const chatRoutes = new Hono<AppEnv>()
             await db
               .select({ date: entries.date, body: entries.body })
               .from(entries)
-              .where(lt(entries.date, date))
+              .where(and(eq(entries.userId, userId), lt(entries.date, date)))
               .orderBy(desc(entries.date))
               .limit(RECENT_ENTRIES)
           ).map((e) => `${e.date}: ${e.body.slice(0, RECENT_EXCERPT_LENGTH)}`)
         : [];
 
-    const notes = (await listNotes(db, date)).map((n) => n.body);
+    const notes = (await listNotes(db, userId, date)).map((n) => n.body);
     const result = await c.get("ai").nextQuestion({ date, qa, notes, recent, allowDone: qa.length >= MIN_QUESTIONS });
     return c.json<NextResponse>(result);
   })
   .post("/compose", zValidator("json", composeRequestSchema, validationHook), async (c) => {
     const { date, qa } = c.req.valid("json");
     const db = c.get("db");
-    await consumeAiQuota(db, todayIn(c.env.TIMEZONE), Number(c.env.AI_DAILY_LIMIT));
-    const notes = (await listNotes(db, date)).map((n) => n.body);
+    const userId = c.get("userId");
+    await consumeAiQuota(db, userId, todayIn(c.env.TIMEZONE), Number(c.env.AI_DAILY_LIMIT));
+    const notes = (await listNotes(db, userId, date)).map((n) => n.body);
     const body = await c.get("ai").composeDiary({ date, qa, notes });
     return c.json<ComposeResponse>({ body });
   });

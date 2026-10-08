@@ -5,3 +5,5 @@ GEMINI_API_KEY=
 # 「Account Analytics: Read」だけを持つ API トークンと、アカウント ID（npx wrangler whoami で確認できる）
 CF_ANALYTICS_TOKEN=
 CF_ACCOUNT_ID=
+# ローカル開発で使うユーザーのメールアドレス。本番では Access の JWT から決めるので設定しない（docs/setup.md）
+DEV_USER_EMAIL=owner@example.invalid

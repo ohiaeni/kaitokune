@@ -26,6 +26,15 @@ const SEARCH_LIMIT = 50;
 /** 検索結果の抜粋で、一致した箇所より前に残す文字数 */
 const SEARCH_CONTEXT = 20;
 
+/** API で返す日記の列（user_id は返さない） */
+export const entryColumns = {
+  date: entries.date,
+  body: entries.body,
+  mood: entries.mood,
+  createdAt: entries.createdAt,
+  updatedAt: entries.updatedAt,
+};
+
 /** LIKE の特殊文字（% と _、エスケープ文字の \）をエスケープし、部分一致のパターンにする */
 function likePattern(q: string): string {
   return `%${q.replace(/[\\%_]/g, (ch) => `\\${ch}`)}%`;
@@ -44,16 +53,31 @@ function excerptAround(text: string, q: string): string {
   return `${start > 0 ? "…" : ""}${text.slice(start, end)}${end < text.length ? "…" : ""}`;
 }
 
-async function searchEntries(db: DrizzleD1Database, q: string): Promise<EntrySummary[]> {
+/** そのユーザーの日記を絞り込む条件 */
+function ownEntry(userId: number, date: string): SQL | undefined {
+  return and(eq(entries.userId, userId), eq(entries.date, date));
+}
+
+function ownQaLogs(userId: number, date: string): SQL | undefined {
+  return and(eq(qaLogs.userId, userId), eq(qaLogs.entryDate, date));
+}
+
+async function searchEntries(db: DrizzleD1Database, userId: number, q: string): Promise<EntrySummary[]> {
   const pattern = likePattern(q);
   const qaMatches = and(
+    eq(qaLogs.userId, entries.userId),
     eq(qaLogs.entryDate, entries.date),
     or(contains(qaLogs.question, pattern), contains(qaLogs.answer, pattern)),
   );
   const rows = await db
     .select({ date: entries.date, body: entries.body, mood: entries.mood })
     .from(entries)
-    .where(or(contains(entries.body, pattern), exists(db.select({ id: qaLogs.id }).from(qaLogs).where(qaMatches))))
+    .where(
+      and(
+        eq(entries.userId, userId),
+        or(contains(entries.body, pattern), exists(db.select({ id: qaLogs.id }).from(qaLogs).where(qaMatches))),
+      ),
+    )
     .orderBy(desc(entries.date))
     .limit(SEARCH_LIMIT);
 
@@ -65,7 +89,7 @@ async function searchEntries(db: DrizzleD1Database, q: string): Promise<EntrySum
     const logs = await db
       .select({ date: qaLogs.entryDate, question: qaLogs.question, answer: qaLogs.answer })
       .from(qaLogs)
-      .where(inArray(qaLogs.entryDate, qaOnly))
+      .where(and(eq(qaLogs.userId, userId), inArray(qaLogs.entryDate, qaOnly)))
       .orderBy(asc(qaLogs.entryDate), asc(qaLogs.position));
     for (const log of logs) {
       if (qaTexts.has(log.date)) continue;
@@ -89,12 +113,18 @@ export const entryRoutes = new Hono<AppEnv>()
     zValidator("query", z.object({ month: monthSchema.optional(), q: searchQuerySchema.optional() }), validationHook),
     async (c) => {
       const { month, q } = c.req.valid("query");
-      if (q) return c.json<EntrySummary[]>(await searchEntries(c.get("db"), q));
+      const userId = c.get("userId");
+      if (q) return c.json<EntrySummary[]>(await searchEntries(c.get("db"), userId, q));
       const rows = await c
         .get("db")
         .select({ date: entries.date, body: entries.body, mood: entries.mood })
         .from(entries)
-        .where(month ? and(gte(entries.date, `${month}-01`), lte(entries.date, `${month}-31`)) : undefined)
+        .where(
+          and(
+            eq(entries.userId, userId),
+            month ? and(gte(entries.date, `${month}-01`), lte(entries.date, `${month}-31`)) : undefined,
+          ),
+        )
         .orderBy(desc(entries.date))
         .limit(LIST_LIMIT);
       return c.json<EntrySummary[]>(
@@ -105,12 +135,13 @@ export const entryRoutes = new Hono<AppEnv>()
   .get("/:date", dateParam, async (c) => {
     const { date } = c.req.valid("param");
     const db = c.get("db");
-    const [entry] = await db.select().from(entries).where(eq(entries.date, date));
+    const userId = c.get("userId");
+    const [entry] = await db.select(entryColumns).from(entries).where(ownEntry(userId, date));
     if (!entry) return c.json<ApiErrorBody>({ error: "not_found", message: `${date} の日記はありません` }, 404);
     const qa = await db
       .select({ question: qaLogs.question, answer: qaLogs.answer })
       .from(qaLogs)
-      .where(eq(qaLogs.entryDate, date))
+      .where(ownQaLogs(userId, date))
       .orderBy(asc(qaLogs.position));
     return c.json<EntryDetail>({ entry, qa });
   })
@@ -118,23 +149,24 @@ export const entryRoutes = new Hono<AppEnv>()
     const { date } = c.req.valid("param");
     const { body, mood = null, qa } = c.req.valid("json");
     const db = c.get("db");
+    const userId = c.get("userId");
     const now = Date.now();
 
     const upsert = db
       .insert(entries)
-      .values({ date, body, mood, createdAt: now, updatedAt: now })
-      .onConflictDoUpdate({ target: entries.date, set: { body, mood, updatedAt: now } })
-      .returning();
+      .values({ userId, date, body, mood, createdAt: now, updatedAt: now })
+      .onConflictDoUpdate({ target: [entries.userId, entries.date], set: { body, mood, updatedAt: now } })
+      .returning(entryColumns);
 
     // qa が送られてきたときだけ、会話ログを丸ごと入れ替える（本文だけの編集では既存のログを残す）
     if (qa) {
-      const deleteQa = db.delete(qaLogs).where(eq(qaLogs.entryDate, date));
+      const deleteQa = db.delete(qaLogs).where(ownQaLogs(userId, date));
       const [[entry]] =
         qa.length > 0
           ? await db.batch([
               upsert,
               deleteQa,
-              db.insert(qaLogs).values(qa.map((x, i) => ({ entryDate: date, position: i, ...x }))),
+              db.insert(qaLogs).values(qa.map((x, i) => ({ userId, entryDate: date, position: i, ...x }))),
             ])
           : await db.batch([upsert, deleteQa]);
       return c.json<Entry>(entry);
@@ -147,35 +179,37 @@ export const entryRoutes = new Hono<AppEnv>()
     const { date } = c.req.valid("param");
     const { date: newDate } = c.req.valid("json");
     const db = c.get("db");
+    const userId = c.get("userId");
 
     if (newDate > todayIn(c.env.TIMEZONE)) {
       return c.json<ApiErrorBody>({ error: "invalid_request", message: "未来の日付には変更できません" }, 400);
     }
-    const [entry] = await db.select().from(entries).where(eq(entries.date, date));
+    const [entry] = await db.select(entryColumns).from(entries).where(ownEntry(userId, date));
     if (!entry) return c.json<ApiErrorBody>({ error: "not_found", message: `${date} の日記はありません` }, 404);
     if (newDate === date) return c.json<Entry>(entry);
-    const [existing] = await db.select({ date: entries.date }).from(entries).where(eq(entries.date, newDate));
+    const [existing] = await db.select({ date: entries.date }).from(entries).where(ownEntry(userId, newDate));
     if (existing) {
       return c.json<ApiErrorBody>({ error: "conflict", message: `${newDate} にはすでに日記があります` }, 409);
     }
 
-    // date は主キーで qa_logs から参照されているため、新しい日付の行を作って会話ログを付け替えてから古い行を消す
+    // (user_id, date) は主キーで qa_logs から参照されているため、新しい日付の行を作って会話ログを付け替えてから古い行を消す
     const [[moved]] = await db.batch([
       db
         .insert(entries)
-        .values({ ...entry, date: newDate, updatedAt: Date.now() })
-        .returning(),
-      db.update(qaLogs).set({ entryDate: newDate }).where(eq(qaLogs.entryDate, date)),
-      db.delete(entries).where(eq(entries.date, date)),
+        .values({ ...entry, userId, date: newDate, updatedAt: Date.now() })
+        .returning(entryColumns),
+      db.update(qaLogs).set({ entryDate: newDate }).where(ownQaLogs(userId, date)),
+      db.delete(entries).where(ownEntry(userId, date)),
     ]);
     return c.json<Entry>(moved);
   })
   .delete("/:date", dateParam, async (c) => {
     const { date } = c.req.valid("param");
     const db = c.get("db");
+    const userId = c.get("userId");
     await db.batch([
-      db.delete(qaLogs).where(eq(qaLogs.entryDate, date)),
-      db.delete(entries).where(eq(entries.date, date)),
+      db.delete(qaLogs).where(ownQaLogs(userId, date)),
+      db.delete(entries).where(ownEntry(userId, date)),
     ]);
     return c.body(null, 204);
   });
