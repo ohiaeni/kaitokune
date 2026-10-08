@@ -6,8 +6,12 @@ import { calendarDays, today } from "../lib/date";
 
 /** 曜日の見出しの文字色（日曜は赤、土曜は青） */
 function weekdayColor(index: number): string {
-  if (index === 0) return "text-red-600 dark:text-red-400";
-  if (index === 6) return "text-sky-600 dark:text-sky-400";
+  if (index === 0) {
+    return "text-red-600 dark:text-red-400";
+  }
+  if (index === 6) {
+    return "text-sky-600 dark:text-sky-400";
+  }
   return "text-stone-500";
 }
 

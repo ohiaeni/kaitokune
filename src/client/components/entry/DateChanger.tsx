@@ -31,9 +31,13 @@ export function DateChanger({
       className="flex flex-col gap-3"
       onSubmit={(e) => {
         e.preventDefault();
-        if (!newDate || newDate === date || newDate > max) return;
+        if (!newDate || newDate === date || newDate > max) {
+          return;
+        }
         const hasDraft = loadDraft(newDate) !== null;
-        if (hasDraft && !confirm(`${formatDate(newDate)}の書きかけの会話は削除されます。日付を変更しますか？`)) return;
+        if (hasDraft && !confirm(`${formatDate(newDate)}の書きかけの会話は削除されます。日付を変更しますか？`)) {
+          return;
+        }
         change.mutate({ date, newDate });
       }}
     >

@@ -67,7 +67,9 @@ export const api = {
     try {
       return await request<EntryDetail>(`/entries/${date}`);
     } catch (e) {
-      if (e instanceof ApiError && e.status === 404) return null;
+      if (e instanceof ApiError && e.status === 404) {
+        return null;
+      }
       throw e;
     }
   },

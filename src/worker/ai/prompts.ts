@@ -65,14 +65,18 @@ const nextResultSchema = z.union([
 function extractJson(text: string): unknown {
   const start = text.indexOf("{");
   const end = text.lastIndexOf("}");
-  if (start === -1 || end <= start) throw new Error(`JSON not found in AI output: ${text.slice(0, 200)}`);
+  if (start === -1 || end <= start) {
+    throw new Error(`JSON not found in AI output: ${text.slice(0, 200)}`);
+  }
   return JSON.parse(text.slice(start, end + 1));
 }
 
 export function parseNextQuestion(text: string, allowDone: boolean): NextResponse {
   const result = nextResultSchema.parse(extractJson(text));
   if ("done" in result) {
-    if (!allowDone) throw new Error("AI ended the conversation too early");
+    if (!allowDone) {
+      throw new Error("AI ended the conversation too early");
+    }
     return { done: true };
   }
   return { question: result.question };
@@ -92,7 +96,9 @@ export function buildComposePrompt(input: { date: string; qa: QA[]; notes: strin
   ].join("\n");
 
   const parts = [`日付: ${formatDate(input.date, { withYear: true })}`];
-  if (input.notes.length > 0) parts.push(`# 今日のメモ\n${formatNotes(input.notes)}`);
+  if (input.notes.length > 0) {
+    parts.push(`# 今日のメモ\n${formatNotes(input.notes)}`);
+  }
   parts.push(`# インタビューの内容\n${formatQA(input.qa)}`, "この内容で今日の日記を書いてください。");
   const user = parts.join("\n\n");
 
@@ -105,6 +111,8 @@ const CODE_FENCE_END = /\n?```$/;
 
 export function parseDiary(text: string): string {
   const body = text.trim().replace(CODE_FENCE_START, "").replace(CODE_FENCE_END, "").trim();
-  if (body.length < 10) throw new Error(`AI output is too short: ${body}`);
+  if (body.length < 10) {
+    throw new Error(`AI output is too short: ${body}`);
+  }
   return body;
 }

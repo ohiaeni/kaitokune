@@ -7,7 +7,9 @@ import { useEntry } from "../lib/queries";
 
 export const Route = createFileRoute("/entries/$date")({
   beforeLoad: ({ params }) => {
-    if (!DATE_PATTERN.test(params.date)) throw notFound();
+    if (!DATE_PATTERN.test(params.date)) {
+      throw notFound();
+    }
   },
   component: EntryPage,
 });

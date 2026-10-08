@@ -23,8 +23,12 @@ export function MonthEntries({ month, onMonthChange }: { month: string; onMonthC
 
       <QueryResult query={list}>
         {(entries) => {
-          if (view === "calendar") return <MonthCalendar month={month} entries={entries} />;
-          if (entries.length === 0) return <EmptyState>この月の日記はまだありません</EmptyState>;
+          if (view === "calendar") {
+            return <MonthCalendar month={month} entries={entries} />;
+          }
+          if (entries.length === 0) {
+            return <EmptyState>この月の日記はまだありません</EmptyState>;
+          }
           return <EntryList entries={entries} />;
         }}
       </QueryResult>

@@ -36,7 +36,9 @@ export function createGemini(apiKey: string, model: string, fetcher: typeof fetc
         ?.map((p) => p.text ?? "")
         .join("")
         .trim();
-      if (!text) throw new ProviderError("empty response", { provider: name });
+      if (!text) {
+        throw new ProviderError("empty response", { provider: name });
+      }
       return text;
     },
   };

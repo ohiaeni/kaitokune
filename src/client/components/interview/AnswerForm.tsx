@@ -16,7 +16,9 @@ export function AnswerForm({
 }) {
   const [answer, setAnswer] = useState("");
   const submit = () => {
-    if (onSubmit(answer)) setAnswer("");
+    if (onSubmit(answer)) {
+      setAnswer("");
+    }
   };
 
   return (

@@ -26,8 +26,12 @@ export function calendarDays(month: string): (string | null)[] {
   const leading = new Date(y, m - 1, 1).getDay();
   const days = new Date(y, m, 0).getDate();
   const cells: (string | null)[] = Array.from({ length: leading }, () => null);
-  for (let d = 1; d <= days; d++) cells.push(`${month}-${pad(d)}`);
-  while (cells.length % 7 !== 0) cells.push(null);
+  for (let d = 1; d <= days; d++) {
+    cells.push(`${month}-${pad(d)}`);
+  }
+  while (cells.length % 7 !== 0) {
+    cells.push(null);
+  }
   return cells;
 }
 

@@ -54,7 +54,9 @@ export function DiaryEditor({
       className="flex flex-col gap-4"
       onSubmit={(e) => {
         e.preventDefault();
-        if (body.trim()) onSave(body.trim(), mood);
+        if (body.trim()) {
+          onSave(body.trim(), mood);
+        }
       }}
     >
       <label className="flex flex-col gap-1">

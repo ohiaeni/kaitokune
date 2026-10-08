@@ -97,7 +97,8 @@
         "useSingleVarDeclarator": "error",
         "useConsistentBuiltinInstantiation": "error",
         "noNestedTernary": "error",
-        "useErrorCause": "error"
+        "useErrorCause": "error",
+        "useBlockStatements": "error"
       },
       "complexity": {
         "noForEach": "error",

@@ -19,7 +19,9 @@ const RECENT_EXCERPT_LENGTH = 150;
 export const chatRoutes = new Hono<AppEnv>()
   .post("/next", zValidator("json", nextRequestSchema, validationHook), async (c) => {
     const { date, qa } = c.req.valid("json");
-    if (qa.length >= MAX_QUESTIONS) return c.json<NextResponse>({ done: true });
+    if (qa.length >= MAX_QUESTIONS) {
+      return c.json<NextResponse>({ done: true });
+    }
 
     const db = c.get("db");
     const userId = c.get("userId");

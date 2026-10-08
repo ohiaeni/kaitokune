@@ -7,8 +7,12 @@ import { useUsage } from "../lib/queries";
 export const Route = createFileRoute("/usage")({ component: UsagePage });
 
 function formatBytes(n: number): string {
-  if (n >= 1e9) return `${(n / 1e9).toFixed(2)} GB`;
-  if (n >= 1e6) return `${(n / 1e6).toFixed(1)} MB`;
+  if (n >= 1e9) {
+    return `${(n / 1e9).toFixed(2)} GB`;
+  }
+  if (n >= 1e6) {
+    return `${(n / 1e6).toFixed(1)} MB`;
+  }
   return `${Math.ceil(n / 1e3)} KB`;
 }
 
@@ -28,7 +32,9 @@ function CloudflareSection({ usage }: { usage: CloudflareUsage }) {
       </p>
     );
   }
-  if (usage.status === "error") return <ErrorMessage error={new Error(usage.message)} />;
+  if (usage.status === "error") {
+    return <ErrorMessage error={new Error(usage.message)} />;
+  }
   return (
     <div className="flex flex-col gap-4">
       <p className="text-stone-500 text-xs dark:text-stone-400">

@@ -13,7 +13,9 @@ export function NotesPanel({ date }: { date: string }) {
   const isFull = (notes.data?.length ?? 0) >= MAX_NOTES;
   const submit = () => {
     const body = text.trim();
-    if (body && !add.isPending && !isFull) add.mutate(body, { onSuccess: () => setText("") });
+    if (body && !add.isPending && !isFull) {
+      add.mutate(body, { onSuccess: () => setText("") });
+    }
   };
 
   return (

@@ -14,13 +14,19 @@ function fakeAI(options: { done?: boolean; fail?: boolean } = {}) {
   const ai: DiaryAI = {
     nextQuestion(input) {
       calls.next.push(input);
-      if (options.fail) return Promise.reject(new AllProvidersFailedError([new Error("down")]));
-      if (options.done && input.allowDone) return Promise.resolve({ done: true });
+      if (options.fail) {
+        return Promise.reject(new AllProvidersFailedError([new Error("down")]));
+      }
+      if (options.done && input.allowDone) {
+        return Promise.resolve({ done: true });
+      }
       return Promise.resolve({ question: `質問${input.qa.length + 1}` });
     },
     composeDiary(input) {
       calls.compose.push(input);
-      if (options.fail) return Promise.reject(new AllProvidersFailedError([new Error("down")]));
+      if (options.fail) {
+        return Promise.reject(new AllProvidersFailedError([new Error("down")]));
+      }
       return Promise.resolve(`日記: ${input.qa.map((x) => x.answer).join("、")}`);
     },
   };

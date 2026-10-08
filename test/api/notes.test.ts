@@ -27,7 +27,9 @@ describe("/api/notes", () => {
     const { request } = setup();
     expect((await addNote(request, "2026-10-08", "あ".repeat(201))).status).toBe(400);
     expect((await addNote(request, "2026-10-08", "   ")).status).toBe(400);
-    for (let i = 0; i < 20; i++) expect((await addNote(request, "2026-10-08", `メモ${i}`)).status).toBe(201);
+    for (let i = 0; i < 20; i++) {
+      expect((await addNote(request, "2026-10-08", `メモ${i}`)).status).toBe(201);
+    }
     const over = await addNote(request, "2026-10-08", "21 件目");
     expect(over.status).toBe(400);
     expect((await over.json<ApiErrorBody>()).message).toContain("20 件");

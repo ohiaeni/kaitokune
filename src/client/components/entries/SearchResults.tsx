@@ -5,8 +5,12 @@ import { EntryList } from "./EntryList";
 export function SearchResults({ q }: { q: string }) {
   const results = useEntrySearch(q);
 
-  if (results.isPending) return <Spinner label="検索中…" />;
-  if (results.isError) return <ErrorMessage error={results.error} onRetry={() => results.refetch()} />;
+  if (results.isPending) {
+    return <Spinner label="検索中…" />;
+  }
+  if (results.isError) {
+    return <ErrorMessage error={results.error} onRetry={() => results.refetch()} />;
+  }
   if (results.data.length === 0) {
     return <EmptyState>「{q}」を含む日記は見つかりませんでした</EmptyState>;
   }

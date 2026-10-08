@@ -39,15 +39,21 @@ export function useInterview(date: string) {
 
   // 最初の質問を自動で取りに行く（StrictMode の二重実行を避ける）
   useEffect(() => {
-    if (started.current) return;
+    if (started.current) {
+      return;
+    }
     started.current = true;
-    if (!draft.pending && !draft.done && draft.composed === null) askNext(draft.qa);
+    if (!draft.pending && !draft.done && draft.composed === null) {
+      askNext(draft.qa);
+    }
   }, [askNext, draft]);
 
   /** 回答待ちの質問に答える。受け付けたら true（入力欄を空にしてよい） */
   const submitAnswer = (answer: string): boolean => {
     const text = answer.trim();
-    if (!draft.pending || !text || busy) return false;
+    if (!draft.pending || !text || busy) {
+      return false;
+    }
     const qa = [...draft.qa, { question: draft.pending, answer: text }];
     setDraft((d) => ({ ...d, qa, pending: null }));
     askNext(qa);
