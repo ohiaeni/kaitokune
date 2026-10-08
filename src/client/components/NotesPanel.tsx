@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { MAX_NOTES, NOTE_MAX_LENGTH } from "../../shared/constants";
 import { useAddNote, useDeleteNote, useNotes } from "../lib/queries";
-import { Button, Card, ErrorMessage, Spinner } from "./ui";
+import { Button, Card, ErrorMessage, Spinner, TextInput } from "./ui";
 
 /** 日中に思ったことをメモしておく欄。メモは「日記にまとめる」ときに AI に渡す */
 export function NotesPanel({ date }: { date: string }) {
@@ -56,14 +56,15 @@ export function NotesPanel({ date }: { date: string }) {
           submit();
         }}
       >
-        <input
+        <TextInput
+          variant="pill"
           value={text}
           onChange={(e) => setText(e.target.value)}
           maxLength={NOTE_MAX_LENGTH}
           disabled={isFull}
           placeholder={isFull ? `メモは ${MAX_NOTES} 件までです` : "例: 昼に新しいカフェに行った"}
           aria-label="メモ"
-          className="min-w-0 flex-1 rounded-full border border-stone-300 bg-white px-4 py-2 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30 disabled:opacity-50 dark:border-stone-700 dark:bg-stone-900"
+          className="min-w-0 flex-1"
         />
         <Button type="submit" variant="secondary" disabled={!text.trim() || add.isPending || isFull}>
           {add.isPending ? "追加中…" : "追加"}

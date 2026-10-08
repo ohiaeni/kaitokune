@@ -1,6 +1,6 @@
 import { type ReactNode, useState } from "react";
 import { MOODS } from "../../shared/constants";
-import { Button } from "./ui";
+import { Button, TextArea } from "./ui";
 
 function MoodPicker({ value, onChange }: { value: number | null; onChange: (mood: number | null) => void }) {
   return (
@@ -59,13 +59,7 @@ export function DiaryEditor({
     >
       <label className="flex flex-col gap-1">
         <span className="text-sm text-stone-600 dark:text-stone-400">日記（自由に直せます）</span>
-        <textarea
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          rows={12}
-          maxLength={10000}
-          className="w-full resize-y rounded-xl border border-stone-300 bg-white p-3 leading-relaxed outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30 dark:border-stone-700 dark:bg-stone-900"
-        />
+        <TextArea value={body} onChange={(e) => setBody(e.target.value)} rows={12} maxLength={10000} />
         <span className="self-end text-xs text-stone-500">{body.length} 文字</span>
       </label>
       <MoodPicker value={mood} onChange={setMood} />

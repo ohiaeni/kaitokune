@@ -2,7 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { DATE_PATTERN } from "../../shared/constants";
 import { formatDate } from "../../shared/date";
 import { EntryView } from "../components/EntryView";
-import { ErrorMessage, Spinner } from "../components/ui";
+import { EmptyState, ErrorMessage, Spinner } from "../components/ui";
 import { useEntry } from "../lib/queries";
 
 export const Route = createFileRoute("/entries/$date")({
@@ -38,7 +38,7 @@ function EntryPage() {
           onDateChanged={(newDate) => navigate({ to: "/entries/$date", params: { date: newDate }, replace: true })}
         />
       ) : (
-        <p className="py-10 text-center text-sm text-stone-500">この日の日記はありません</p>
+        <EmptyState>この日の日記はありません</EmptyState>
       )}
     </div>
   );
