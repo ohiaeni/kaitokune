@@ -78,6 +78,21 @@ gh pr create --base main --title "..." --label enhancement --assignee @me \
 - 開いているマイルストーンは `gh api repos/ohiaeni/kaitokune/milestones --jq '.[] | "\(.title): \(.description)"'` で確認し、内容が合うものを選ぶ
 - どのマイルストーンにも合わない、または新しいバージョンを切るべきだと思ったら、勝手に作らずユーザーに確認する
 
+### リリース
+
+マイルストーンの issue がすべて閉じたら、マイルストーンと同じ名前のタグを main に付けてリリースする。タグを push すると `.github/workflows/release.yml` が GitHub Release を作り、ノートを PR のラベルごと（`.github/release.yml`）に分類して自動生成する。
+
+```sh
+git switch main && git pull
+git tag v0.1.0
+git push origin v0.1.0
+gh api -X PATCH repos/ohiaeni/kaitokune/milestones/<番号> -f state=closed
+```
+
+- `v<MAJOR>.<MINOR>.<PATCH>` 以外の形のタグでは Release を作らない
+- `v*` のタグはルールセットで保護されていて、作成・削除・付け替えは管理者だけができる
+- リリースはユーザーに頼まれたときだけ行う
+
 ### ラベル
 
 ここにあるラベルだけを使う。新しいラベルが必要になったら、勝手に作らずユーザーに確認する。

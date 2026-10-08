@@ -1,0 +1,13 @@
+# GitHub Release の自動生成ノートの分類。PR のラベルで振り分ける（ラベルは CLAUDE.md の表を参照）
+changelog:
+  categories:
+    - title: 新機能・改善
+      labels: [enhancement]
+    - title: 不具合の修正
+      labels: [bug]
+    - title: ドキュメント
+      labels: [documentation]
+    - title: 依存関係の更新
+      labels: [dependencies]
+    - title: その他（CI・ツール・設定など）
+      labels: ["*"]
