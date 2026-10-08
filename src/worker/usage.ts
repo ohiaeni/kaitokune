@@ -1,6 +1,5 @@
-import { sql } from "drizzle-orm";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
-import { aiUsage } from "./db/schema";
+import { incrementAiUsage } from "./db/ai-usage";
 
 export class DailyLimitError extends Error {
   constructor(readonly limit: number) {
@@ -19,11 +18,7 @@ export async function consumeAiQuota(
   date: string,
   limit: number,
 ): Promise<number> {
-  const [row] = await db
-    .insert(aiUsage)
-    .values({ userId, date, count: 1 })
-    .onConflictDoUpdate({ target: [aiUsage.userId, aiUsage.date], set: { count: sql`${aiUsage.count} + 1` } })
-    .returning({ count: aiUsage.count });
-  if (row.count > limit) throw new DailyLimitError(limit);
-  return row.count;
+  const count = await incrementAiUsage(db, userId, date);
+  if (count > limit) throw new DailyLimitError(limit);
+  return count;
 }
