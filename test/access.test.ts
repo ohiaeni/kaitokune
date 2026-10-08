@@ -180,6 +180,17 @@ describe("authentication middleware", () => {
     expect(res.status).toBe(401);
   });
 
+  it("rejects a user who passed Access but is not registered", async () => {
+    const res = await request(access, { "cf-access-jwt-assertion": await sign({ email: "stranger@example.invalid" }) });
+    expect(res.status).toBe(403);
+    expect(((await res.json()) as ApiErrorBody).error).toBe("forbidden");
+  });
+
+  it("matches the registered email case-insensitively", async () => {
+    const res = await request({ DEV_USER_EMAIL: "OWNER@example.invalid" });
+    expect(res.status).toBe(200);
+  });
+
   it("uses DEV_USER_EMAIL in local development", async () => {
     const res = await request({});
     expect(res.status).toBe(200);

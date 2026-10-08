@@ -25,7 +25,10 @@ export const noteRoutes = new Hono<AppEnv>()
     if (total >= MAX_NOTES) {
       return c.json<ApiErrorBody>({ error: "invalid_request", message: `メモは 1 日 ${MAX_NOTES} 件までです` }, 400);
     }
-    const [note] = await db.insert(notes).values({ date, body, createdAt: Date.now() }).returning();
+    const [note] = await db
+      .insert(notes)
+      .values({ userId: c.get("userId"), date, body, createdAt: Date.now() })
+      .returning();
     return c.json<Note>(note, 201);
   })
   .delete(

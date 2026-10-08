@@ -391,7 +391,7 @@ describe("GET /api/usage", () => {
     await request("/api/chat/next", { method: "POST", json: { date: "2026-10-08", qa: [] } });
     await request("/api/chat/next", { method: "POST", json: { date: "2026-10-08", qa: [] } });
     await request("/api/chat/next", { method: "POST", json: { date: "2026-10-08", qa: [] } });
-    await env.DB.prepare("INSERT INTO ai_usage (date, count) VALUES ('2000-01-01', 1)").run();
+    await env.DB.prepare("INSERT INTO ai_usage (user_id, date, count) VALUES (1, '2000-01-01', 1)").run();
 
     const body = await (await request("/api/usage")).json<UsageResponse>();
     expect(body.ai.today).toEqual({ used: 2, limit: 2 });

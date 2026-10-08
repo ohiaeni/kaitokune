@@ -1,9 +1,11 @@
+import { eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import { Hono } from "hono";
 import type { ApiErrorBody } from "../shared/schemas";
 import { AccessError, type AccessVerifier, createAccessVerifier } from "./access";
 import { createDiaryAI, createGeneratorsFromEnv, type DiaryAI } from "./ai";
 import { AllProvidersFailedError } from "./ai/fallback";
+import { users } from "./db/schema";
 import type { Bindings } from "./env";
 import { chatRoutes } from "./routes/chat";
 import { entryRoutes } from "./routes/entries";
@@ -43,8 +45,22 @@ export function createApp({
   return new Hono<AppEnv>()
     .basePath("/api")
     .use(async (c, next) => {
-      c.set("userEmail", await authenticate(c.env, c.req.header("cf-access-jwt-assertion"), verifyAccess));
-      c.set("db", drizzle(c.env.DB));
+      const email = await authenticate(c.env, c.req.header("cf-access-jwt-assertion"), verifyAccess);
+      const db = drizzle(c.env.DB);
+      // Access を通っても、users に登録していない人には使わせない
+      const [user] = await db
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(sql`lower(${users.email})`, email));
+      if (!user) {
+        console.warn(`unregistered user: ${email}`);
+        return c.json<ApiErrorBody>(
+          { error: "forbidden", message: `${email} はまだ登録されていません。管理者に登録を頼んでください` },
+          403,
+        );
+      }
+      c.set("userId", user.id);
+      c.set("db", db);
       c.set("ai", createAI(c.env));
       c.set("fetcher", fetcher);
       await next();

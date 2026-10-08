@@ -118,12 +118,13 @@ export const entryRoutes = new Hono<AppEnv>()
     const { date } = c.req.valid("param");
     const { body, mood = null, qa } = c.req.valid("json");
     const db = c.get("db");
+    const userId = c.get("userId");
     const now = Date.now();
 
     const upsert = db
       .insert(entries)
-      .values({ date, body, mood, createdAt: now, updatedAt: now })
-      .onConflictDoUpdate({ target: entries.date, set: { body, mood, updatedAt: now } })
+      .values({ userId, date, body, mood, createdAt: now, updatedAt: now })
+      .onConflictDoUpdate({ target: [entries.userId, entries.date], set: { body, mood, updatedAt: now } })
       .returning();
 
     // qa が送られてきたときだけ、会話ログを丸ごと入れ替える（本文だけの編集では既存のログを残す）
@@ -134,7 +135,7 @@ export const entryRoutes = new Hono<AppEnv>()
           ? await db.batch([
               upsert,
               deleteQa,
-              db.insert(qaLogs).values(qa.map((x, i) => ({ entryDate: date, position: i, ...x }))),
+              db.insert(qaLogs).values(qa.map((x, i) => ({ userId, entryDate: date, position: i, ...x }))),
             ])
           : await db.batch([upsert, deleteQa]);
       return c.json<Entry>(entry);

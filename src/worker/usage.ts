@@ -18,11 +18,16 @@ export function todayIn(timeZone: string, now = new Date()): string {
  * 今日の AI 呼び出し回数を 1 増やし、上限を超えていたら DailyLimitError を投げる。
  * 無料枠を使い切らないよう、AI を呼ぶ前に必ず通す。
  */
-export async function consumeAiQuota(db: DrizzleD1Database, date: string, limit: number): Promise<number> {
+export async function consumeAiQuota(
+  db: DrizzleD1Database,
+  userId: number,
+  date: string,
+  limit: number,
+): Promise<number> {
   const [row] = await db
     .insert(aiUsage)
-    .values({ date, count: 1 })
-    .onConflictDoUpdate({ target: aiUsage.date, set: { count: sql`${aiUsage.count} + 1` } })
+    .values({ userId, date, count: 1 })
+    .onConflictDoUpdate({ target: [aiUsage.userId, aiUsage.date], set: { count: sql`${aiUsage.count} + 1` } })
     .returning({ count: aiUsage.count });
   if (row.count > limit) throw new DailyLimitError(limit);
   return row.count;

@@ -24,7 +24,7 @@ export const chatRoutes = new Hono<AppEnv>()
     if (qa.length >= MAX_QUESTIONS) return c.json<NextResponse>({ done: true });
 
     const db = c.get("db");
-    await consumeAiQuota(db, todayIn(c.env.TIMEZONE), Number(c.env.AI_DAILY_LIMIT));
+    await consumeAiQuota(db, c.get("userId"), todayIn(c.env.TIMEZONE), Number(c.env.AI_DAILY_LIMIT));
 
     // 最初の質問だけ、直近の日記を文脈に入れてパーソナライズする
     const recent =
@@ -46,7 +46,7 @@ export const chatRoutes = new Hono<AppEnv>()
   .post("/compose", zValidator("json", composeRequestSchema, validationHook), async (c) => {
     const { date, qa } = c.req.valid("json");
     const db = c.get("db");
-    await consumeAiQuota(db, todayIn(c.env.TIMEZONE), Number(c.env.AI_DAILY_LIMIT));
+    await consumeAiQuota(db, c.get("userId"), todayIn(c.env.TIMEZONE), Number(c.env.AI_DAILY_LIMIT));
     const notes = (await listNotes(db, date)).map((n) => n.body);
     const body = await c.get("ai").composeDiary({ date, qa, notes });
     return c.json<ComposeResponse>({ body });
