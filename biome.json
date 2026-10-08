@@ -93,7 +93,8 @@
         "useNumberNamespace": "error",
         "noSubstr": "error",
         "useSingleVarDeclarator": "error",
-        "useConsistentBuiltinInstantiation": "error"
+        "useConsistentBuiltinInstantiation": "error",
+        "noNestedTernary": "error"
       },
       "complexity": {
         "noForEach": "error",

@@ -4,6 +4,13 @@ import { formatDate, WEEKDAYS } from "../../shared/date";
 import type { EntrySummary } from "../../shared/schemas";
 import { calendarDays, today } from "../lib/date";
 
+/** 曜日の見出しの文字色（日曜は赤、土曜は青） */
+function weekdayColor(index: number): string {
+  if (index === 0) return "text-red-600 dark:text-red-400";
+  if (index === 6) return "text-sky-600 dark:text-sky-400";
+  return "text-stone-500";
+}
+
 /** 月のカレンダー。日記のある日には気分の絵文字を出し、押すと詳細画面に移る */
 export function MonthCalendar({ month, entries }: { month: string; entries: EntrySummary[] }) {
   const byDate = new Map(entries.map((e) => [e.date, e]));
@@ -12,10 +19,7 @@ export function MonthCalendar({ month, entries }: { month: string; entries: Entr
   return (
     <div className="grid grid-cols-7 gap-1 text-center">
       {WEEKDAYS.map((w, i) => (
-        <div
-          key={w}
-          className={`pb-1 text-xs ${i === 0 ? "text-red-600 dark:text-red-400" : i === 6 ? "text-sky-600 dark:text-sky-400" : "text-stone-500"}`}
-        >
+        <div key={w} className={`pb-1 text-xs ${weekdayColor(i)}`}>
           {w}
         </div>
       ))}

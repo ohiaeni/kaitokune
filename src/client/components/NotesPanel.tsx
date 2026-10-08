@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { MAX_NOTES, NOTE_MAX_LENGTH } from "../../shared/constants";
 import { useAddNote, useDeleteNote, useNotes } from "../lib/queries";
-import { Button, Card, ErrorMessage, Spinner, TextInput } from "./ui";
+import { Button, Card, ErrorMessage, QueryResult, TextInput } from "./ui";
 
 /** 日中に思ったことをメモしておく欄。メモは「日記にまとめる」ときに AI に渡す */
 export function NotesPanel({ date }: { date: string }) {
@@ -23,31 +23,29 @@ export function NotesPanel({ date }: { date: string }) {
         <p className="text-xs text-stone-500">思いついたことを書いておくと、AI が質問や日記に使います</p>
       </div>
 
-      {notes.isPending ? (
-        <Spinner />
-      ) : notes.isError ? (
-        <ErrorMessage error={notes.error} onRetry={() => notes.refetch()} />
-      ) : (
-        notes.data.length > 0 && (
-          <ul className="flex flex-col gap-1.5">
-            {notes.data.map((n) => (
-              <li key={n.id} className="flex items-start gap-2 text-sm">
-                <span className="mt-2 size-1.5 shrink-0 rounded-full bg-amber-500" aria-hidden />
-                <span className="flex-1 whitespace-pre-wrap py-0.5">{n.body}</span>
-                <button
-                  type="button"
-                  aria-label={`メモ「${n.body}」を削除`}
-                  disabled={remove.isPending}
-                  onClick={() => remove.mutate(n.id)}
-                  className="rounded-full px-2 text-stone-400 hover:bg-stone-200/60 hover:text-stone-700 disabled:opacity-50 dark:hover:bg-stone-800 dark:hover:text-stone-200"
-                >
-                  ×
-                </button>
-              </li>
-            ))}
-          </ul>
-        )
-      )}
+      <QueryResult query={notes}>
+        {(data) =>
+          data.length > 0 && (
+            <ul className="flex flex-col gap-1.5">
+              {data.map((n) => (
+                <li key={n.id} className="flex items-start gap-2 text-sm">
+                  <span className="mt-2 size-1.5 shrink-0 rounded-full bg-amber-500" aria-hidden />
+                  <span className="flex-1 whitespace-pre-wrap py-0.5">{n.body}</span>
+                  <button
+                    type="button"
+                    aria-label={`メモ「${n.body}」を削除`}
+                    disabled={remove.isPending}
+                    onClick={() => remove.mutate(n.id)}
+                    className="rounded-full px-2 text-stone-400 hover:bg-stone-200/60 hover:text-stone-700 disabled:opacity-50 dark:hover:bg-stone-800 dark:hover:text-stone-200"
+                  >
+                    ×
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </QueryResult>
 
       <form
         className="flex gap-2"
