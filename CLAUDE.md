@@ -19,9 +19,9 @@ issue と PR を作るときは、次の情報を作成と同時に付ける（�
 
 ```sh
 gh issue create --title "..." --label enhancement --assignee @me \
-  --milestone v0.1 --project "kaitokune開発プロジェクト" --body "..."
+  --milestone v0.1.0 --project "kaitokune開発プロジェクト" --body "..."
 gh pr create --base main --title "..." --label enhancement --assignee @me \
-  --milestone v0.1 --project "kaitokune開発プロジェクト" --body "..."
+  --milestone v0.1.0 --project "kaitokune開発プロジェクト" --body "..."
 ```
 
 作成後に `gh issue view` / `gh pr view` でラベル・担当者・マイルストーン・Project が付いていることを確認する。
@@ -30,7 +30,14 @@ gh pr create --base main --title "..." --label enhancement --assignee @me \
 
 ### マイルストーン
 
-マイルストーンはバージョン単位（`v0.1`、`v0.2` …）で、「ここまでできたら一区切り」という目標ごとにまとめる。
+マイルストーンはバージョン単位で、「ここまでできたら一区切り」という目標ごとにまとめる。
+
+バージョンは[セマンティックバージョニング](https://semver.org/lang/ja/)に従い、`v<MAJOR>.<MINOR>.<PATCH>`（例: `v0.1.0`）と書く。
+
+- MAJOR: 保存済みの日記が読めなくなる、使い方が大きく変わるなど、後方互換性のない変更
+- MINOR: 機能の追加・改善
+- PATCH: 不具合の修正だけ
+- 1.0.0 になるまで（`v0.x.y`）は、後方互換性のない変更も MINOR を上げて扱う
 
 - 開いているマイルストーンは `gh api repos/ohiaeni/kaitokune/milestones --jq '.[] | "\(.title): \(.description)"'` で確認し、内容が合うものを選ぶ
 - どのマイルストーンにも合わない、または新しいバージョンを切るべきだと思ったら、勝手に作らずユーザーに確認する
