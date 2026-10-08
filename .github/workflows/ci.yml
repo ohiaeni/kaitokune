@@ -36,6 +36,10 @@ jobs:
       - name: Lint / Format
         run: npm run check
 
+      # 未使用のファイル・export・依存関係を検出する
+      - name: Knip
+        run: npm run knip
+
       # tsc -b（型チェック）+ vite build
       - name: Build
         run: npm run build

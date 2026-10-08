@@ -6,7 +6,7 @@ export * from "./constants";
 export const dateSchema = z.string().regex(DATE_PATTERN, "YYYY-MM-DD 形式で指定してください");
 export const monthSchema = z.string().regex(MONTH_PATTERN, "YYYY-MM 形式で指定してください");
 
-export const qaSchema = z.object({
+const qaSchema = z.object({
   question: z.string().trim().min(1).max(500),
   answer: z.string().trim().min(1).max(1000),
 });
@@ -16,17 +16,15 @@ export const nextRequestSchema = z.object({
   date: dateSchema,
   qa: z.array(qaSchema).max(MAX_QUESTIONS),
 });
-export type NextRequest = z.infer<typeof nextRequestSchema>;
 export type NextResponse = { question: string } | { done: true };
 
 export const composeRequestSchema = z.object({
   date: dateSchema,
   qa: z.array(qaSchema).min(1).max(MAX_QUESTIONS),
 });
-export type ComposeRequest = z.infer<typeof composeRequestSchema>;
 export type ComposeResponse = { body: string };
 
-export const moodSchema = z.number().int().min(1).max(5);
+const moodSchema = z.number().int().min(1).max(5);
 
 export const saveEntryRequestSchema = z.object({
   body: z.string().trim().min(1).max(10000),
