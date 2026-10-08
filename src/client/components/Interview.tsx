@@ -1,8 +1,8 @@
-import { useQueryClient } from "@tanstack/react-query";
 import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { MIN_QUESTIONS } from "../../shared/constants";
 import type { QA } from "../../shared/schemas";
-import { api, queryKeys } from "../lib/api";
+import { api } from "../lib/api";
+import { useSaveEntry } from "../lib/queries";
 import { loadJson, removeItem, saveJson } from "../lib/storage";
 import { DiaryEditor } from "./DiaryEditor";
 import { Button, ErrorMessage } from "./ui";
@@ -24,7 +24,7 @@ export const draftKey = (date: string) => `kaitokune:draft:${date}`;
 type Busy = "next" | "compose" | "save" | null;
 
 export function Interview({ date }: { date: string }) {
-  const queryClient = useQueryClient();
+  const saveEntry = useSaveEntry();
   const [draft, setDraft] = useState<Draft>(() => loadJson<Draft>(draftKey(date)) ?? EMPTY_DRAFT);
   const [answer, setAnswer] = useState("");
   const [busy, setBusy] = useState<Busy>(null);
@@ -89,9 +89,8 @@ export function Interview({ date }: { date: string }) {
 
   const save = (body: string, mood: number | null) =>
     run("save", async () => {
-      await api.saveEntry(date, { body, mood, qa: draft.qa });
+      await saveEntry.mutateAsync({ date, payload: { body, mood, qa: draft.qa } });
       removeItem(draftKey(date));
-      await queryClient.invalidateQueries({ queryKey: queryKeys.entries });
     });
 
   const restart = () => {
