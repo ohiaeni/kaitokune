@@ -1,7 +1,10 @@
 name: Release
 
-# v<MAJOR>.<MINOR>.<PATCH> のタグを push したら、ノートを自動生成して GitHub Release を作る。
-# ノートの分類は .github/release.yml（PR のラベルごと）
+# バージョンのタグを push したら、ノートを自動生成して GitHub Release を作る。
+# ノートの分類は .github/release.yml（PR のラベルごと）。タグの作成は /release スキルで行う
+#
+# - 本番版 v<MAJOR>.<MINOR>.<PATCH>（例: v0.2.0）: Release を公開する（デプロイは deploy.yml）
+# - ベータ版 v<MAJOR>.<MINOR>.<PATCH>-beta.<N>（例: v0.2.0-beta.1）: 下書き（draft の pre-release）を作る
 on:
   push:
     tags: ["v*.*.*"]
@@ -21,9 +24,32 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
         run: |
-          # トリガーの v*.*.* はワイルドカードなので、セマンティックバージョニングの形かをここで確かめる
-          if [[ ! "$TAG" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
-            echo "::error::タグ $TAG は v<MAJOR>.<MINOR>.<PATCH> の形式ではないため、Release を作りません"
+          stable='^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'
+          beta='^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)-beta\.(0|[1-9][0-9]*)$'
+          # トリガーの v*.*.* はワイルドカードなので、正しい形かをここで確かめる
+          if [[ "$TAG" =~ $stable ]]; then
+            kind=production
+          elif [[ "$TAG" =~ $beta ]]; then
+            kind=beta
+          else
+            echo "::error::タグ $TAG は v<MAJOR>.<MINOR>.<PATCH> または v<MAJOR>.<MINOR>.<PATCH>-beta.<N> の形式ではないため、Release を作りません"
             exit 1
           fi
-          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "$TAG" --generate-notes --verify-tag
+
+          # ノートは直前の本番版からの変更をまとめる（ベータ版も、次の本番版に入る予定の変更を一覧にする）
+          base="${TAG%%-*}"
+          prev=$(
+            { gh api "repos/$GITHUB_REPOSITORY/tags" --paginate --jq '.[].name' | grep -E "$stable" || true; echo "$base"; } \
+              | sort -uV | grep -x -B1 "$base" | grep -vx "$base" || true
+          )
+
+          args=(--repo "$GITHUB_REPOSITORY" --title "$TAG" --generate-notes --verify-tag)
+          if [ -n "$prev" ]; then
+            args+=(--notes-start-tag "$prev")
+          fi
+          if [ "$kind" = beta ]; then
+            args+=(--draft --prerelease)
+          fi
+
+          echo "種類: $kind / 直前の本番版: ${prev:-なし}"
+          gh release create "$TAG" "${args[@]}"

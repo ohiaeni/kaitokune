@@ -1,10 +1,11 @@
 name: Deploy
 
-# リリースのタグ（v<MAJOR>.<MINOR>.<PATCH>）を push したら、本番の Cloudflare Workers にデプロイする。
-# 手動でも実行できる（Actions タブの「Run workflow」。main かリリースのタグを選ぶ）
+# 本番版のタグ（v<MAJOR>.<MINOR>.<PATCH>）を push したら、本番の Cloudflare Workers にデプロイする。
+# 手動でも実行できる（Actions タブの「Run workflow」。main か本番版のタグを選ぶ）
 on:
   push:
-    tags: ["v*.*.*"]
+    # v*.*.* はベータ版のタグ（v0.2.0-beta.1）にも一致するので、ハイフンを含むタグを除外する
+    tags: ["v*.*.*", "!v*.*.*-*"]
   workflow_dispatch:
 
 permissions: {}

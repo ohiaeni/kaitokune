@@ -80,19 +80,18 @@ gh pr create --base main --title "..." --label enhancement --assignee @me \
 
 ### リリース
 
-マイルストーンの issue がすべて閉じたら、マイルストーンと同じ名前のタグを main に付けてリリースする。タグを push すると `.github/workflows/release.yml` が GitHub Release を作り、ノートを PR のラベルごと（`.github/release.yml`）に分類して自動生成する。
+リリースは `/release` スキル（`.claude/skills/release/SKILL.md`）で行う。main の CI が通っていることを確かめ、タグ名と対象のコミットをユーザーに確認してから、タグを作って push する。本番環境に影響するので、ユーザーが `/release` で呼んだときだけ行う。
 
-```sh
-git switch main && git pull
-git tag v0.1.0
-git push origin v0.1.0
-gh api -X PATCH repos/ohiaeni/kaitokune/milestones/<番号> -f state=closed
-```
+| 種類 | タグ | タグを push すると |
+| --- | --- | --- |
+| ベータ版（`/release beta`） | `v<MAJOR>.<MINOR>.<PATCH>-beta.<N>`（例: `v0.2.0-beta.1`） | `release.yml` がリリースノートの下書き（draft の pre-release）を作る。デプロイはしない |
+| 本番版（`/release production`） | `v<MAJOR>.<MINOR>.<PATCH>`（例: `v0.2.0`） | `release.yml` がリリースノートを公開し、`deploy.yml` が本番にデプロイする（D1 のマイグレーションも適用する） |
 
-- `v<MAJOR>.<MINOR>.<PATCH>` 以外の形のタグでは Release を作らない
+- バージョンはマイルストーンと同じ名前にする。本番版を出したらマイルストーンを閉じる
+- リリースノートは直前の本番版からの PR を、ラベルごと（`.github/release.yml`）に分類して自動生成する
+- 上の 2 つ以外の形のタグでは Release を作らず、ベータ版のタグではデプロイしない
 - `v*` のタグはルールセットで保護されていて、作成・削除・付け替えは管理者だけができる
-- タグの push で `.github/workflows/deploy.yml` が本番にデプロイする（D1 のマイグレーションも適用する）。Secrets は production の Environment にあり、未登録ならデプロイは飛ばされる
-- リリースはユーザーに頼まれたときだけ行う
+- デプロイ用の Secrets は production の Environment にあり、未登録ならデプロイは飛ばされる
 
 ### ラベル
 
