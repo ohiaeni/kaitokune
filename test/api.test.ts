@@ -185,6 +185,39 @@ describe("/api/entries", () => {
     expect(count).toBe(0);
   });
 
+  it("changes the date of an entry together with its conversation", async () => {
+    const { request } = setup();
+    await request("/api/entries/2026-10-08", { method: "PUT", json: { body: "本文", mood: 3, qa: qa(2) } });
+
+    const res = await request("/api/entries/2026-10-08", { method: "PATCH", json: { date: "2026-10-07" } });
+    expect(res.status).toBe(200);
+    expect(await res.json<Entry>()).toMatchObject({ date: "2026-10-07", body: "本文", mood: 3 });
+
+    expect((await request("/api/entries/2026-10-08")).status).toBe(404);
+    const detail = await (await request("/api/entries/2026-10-07")).json<EntryDetail>();
+    expect(detail.entry.body).toBe("本文");
+    expect(detail.qa).toEqual(qa(2));
+  });
+
+  it("refuses to change the date onto an existing entry, a future date, or a missing entry", async () => {
+    const { request } = setup();
+    await request("/api/entries/2026-10-07", { method: "PUT", json: { body: "前日", qa: qa(1) } });
+    await request("/api/entries/2026-10-08", { method: "PUT", json: { body: "当日" } });
+    const patch = (from: string, to: string) =>
+      request(`/api/entries/${from}`, { method: "PATCH", json: { date: to } });
+
+    const conflict = await patch("2026-10-08", "2026-10-07");
+    expect(conflict.status).toBe(409);
+    expect((await conflict.json<ApiErrorBody>()).error).toBe("conflict");
+    const kept = await (await request("/api/entries/2026-10-07")).json<EntryDetail>();
+    expect(kept.entry.body).toBe("前日");
+    expect(kept.qa).toEqual(qa(1));
+
+    expect((await patch("2026-10-08", "2999-01-01")).status).toBe(400);
+    expect((await patch("2026-10-01", "2026-09-30")).status).toBe(404);
+    expect((await patch("2026-10-08", "2026/10/06")).status).toBe(400);
+  });
+
   it("rejects an invalid date or mood", async () => {
     const { request } = setup();
     expect((await request("/api/entries/not-a-date")).status).toBe(400);

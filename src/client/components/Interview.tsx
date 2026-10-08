@@ -19,7 +19,7 @@ type Draft = {
 };
 
 const EMPTY_DRAFT: Draft = { qa: [], pending: null, done: false, composed: null };
-const draftKey = (date: string) => `kaitokune:draft:${date}`;
+export const draftKey = (date: string) => `kaitokune:draft:${date}`;
 
 type Busy = "next" | "compose" | "save" | null;
 

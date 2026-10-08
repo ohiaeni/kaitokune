@@ -4,6 +4,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 import {
   type ApiErrorBody,
+  changeDateRequestSchema,
   dateSchema,
   type Entry,
   type EntryDetail,
@@ -13,6 +14,7 @@ import {
 } from "../../shared/schemas";
 import { entries, qaLogs } from "../db/schema";
 import type { AppEnv } from "../types";
+import { todayIn } from "../usage";
 import { validationHook } from "../validation";
 
 const EXCERPT_LENGTH = 80;
@@ -74,6 +76,33 @@ export const entryRoutes = new Hono<AppEnv>()
 
     const [entry] = await upsert;
     return c.json<Entry>(entry);
+  })
+  .patch("/:date", dateParam, zValidator("json", changeDateRequestSchema, validationHook), async (c) => {
+    const { date } = c.req.valid("param");
+    const { date: newDate } = c.req.valid("json");
+    const db = c.get("db");
+
+    if (newDate > todayIn(c.env.TIMEZONE)) {
+      return c.json<ApiErrorBody>({ error: "invalid_request", message: "未来の日付には変更できません" }, 400);
+    }
+    const [entry] = await db.select().from(entries).where(eq(entries.date, date));
+    if (!entry) return c.json<ApiErrorBody>({ error: "not_found", message: `${date} の日記はありません` }, 404);
+    if (newDate === date) return c.json<Entry>(entry);
+    const [existing] = await db.select({ date: entries.date }).from(entries).where(eq(entries.date, newDate));
+    if (existing) {
+      return c.json<ApiErrorBody>({ error: "conflict", message: `${newDate} にはすでに日記があります` }, 409);
+    }
+
+    // date は主キーで qa_logs から参照されているため、新しい日付の行を作って会話ログを付け替えてから古い行を消す
+    const [[moved]] = await db.batch([
+      db
+        .insert(entries)
+        .values({ ...entry, date: newDate, updatedAt: Date.now() })
+        .returning(),
+      db.update(qaLogs).set({ entryDate: newDate }).where(eq(qaLogs.entryDate, date)),
+      db.delete(entries).where(eq(entries.date, date)),
+    ]);
+    return c.json<Entry>(moved);
   })
   .delete("/:date", dateParam, async (c) => {
     const { date } = c.req.valid("param");
