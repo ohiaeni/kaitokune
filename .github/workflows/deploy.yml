@@ -1,0 +1,72 @@
+name: Deploy
+
+# リリースのタグ（v<MAJOR>.<MINOR>.<PATCH>）を push したら、本番の Cloudflare Workers にデプロイする。
+# 手動でも実行できる（Actions タブの「Run workflow」。main かリリースのタグを選ぶ）
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+
+permissions: {}
+
+# デプロイが重ならないようにする。途中で止めると D1 とコードがずれるおそれがあるので、実行中のものは止めない
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    # Secrets は production の Environment に置き、v*.*.* のタグと main からだけ使えるようにしている
+    environment: production
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      # Secrets を登録するまでは、失敗させずにデプロイを飛ばす（登録手順は docs/setup.md）
+      - name: Check secrets
+        id: secrets
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::warning::production の Environment に CLOUDFLARE_API_TOKEN が登録されていないため、デプロイを飛ばします。登録手順は docs/setup.md を参照してください"
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.secrets.outputs.configured == 'true'
+        with:
+          persist-credentials: false
+
+      # デプロイではキャッシュを使わない（キャッシュ経由で改ざんされた依存が本番に入るのを防ぐ）
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        if: steps.secrets.outputs.configured == 'true'
+        with:
+          node-version-file: .node-version
+          # setup-node は指定しなくてもキャッシュを有効にするので、明示的に止める
+          package-manager-cache: false
+
+      - name: Install dependencies
+        if: steps.secrets.outputs.configured == 'true'
+        run: npm ci
+
+      # タグは CI を通った main のコミットに付けるが、本番に出す前にもう一度確かめる
+      - name: Check / Build / Test
+        if: steps.secrets.outputs.configured == 'true'
+        run: |
+          npm run check
+          npm run build
+          npm test
+
+      # 新しいコードが新しいテーブル・カラムを使えるよう、デプロイより先にマイグレーションを適用する
+      - name: Apply D1 migrations
+        if: steps.secrets.outputs.configured == 'true'
+        run: npx wrangler d1 migrations apply kaitokune --remote
+
+      - name: Deploy
+        if: steps.secrets.outputs.configured == 'true'
+        run: npx wrangler deploy
