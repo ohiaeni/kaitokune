@@ -15,5 +15,13 @@ export default defineConfig({
   test: {
     include: ["test/**/*.test.ts"],
     setupFiles: ["./test/apply-migrations.ts"],
+    // npm run test:coverage で計測する。@cloudflare/vitest-pool-workers は istanbul にだけ対応している
+    coverage: {
+      provider: "istanbul",
+      // テストから読み込まれないファイル（フロントエンドなど）も 0% として表に出す
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: ["src/client/routeTree.gen.ts", "**/*.d.ts"],
+      reporter: ["text", "json-summary", "html"],
+    },
   },
 });

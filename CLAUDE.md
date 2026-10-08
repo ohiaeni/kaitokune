@@ -29,6 +29,7 @@ AI の質問に答えるだけで日記が書ける、自分 1 人で使うア�
 | `npm run knip` | 未使用のファイル・export・依存関係の検出（設定は `knip.json`） |
 | `npm run build` | 型チェック（`tsc -b`）とビルド |
 | `npm test` | テスト（AI はモックするので無料枠を消費しない） |
+| `npm run test:coverage` | カバレッジ付きでテスト（結果は `coverage/index.html`） |
 | `npm run db:generate` | スキーマの変更からマイグレーションを生成 |
 | `npm run db:migrate:local` | ローカルの D1 にマイグレーションを適用 |
 | `npm run cf-typegen` | `wrangler.jsonc` から `worker-configuration.d.ts` を生成 |

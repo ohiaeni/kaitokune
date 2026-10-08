@@ -45,7 +45,27 @@ jobs:
         run: npm run build
 
       - name: Test
-        run: npm test
+        run: npm run test:coverage
+
+      # カバレッジの合計をジョブのサマリーに出す（閾値はまだ設けず、現状の把握に使う）
+      - name: Coverage summary
+        if: ${{ !cancelled() }}
+        run: |
+          {
+            echo "## カバレッジ"
+            echo
+            echo "| 指標 | 割合 | 件数 |"
+            echo "| --- | ---: | ---: |"
+            jq -r '.total | to_entries[] | select(.key != "branchesTrue") | "| \(.key) | \(.value.pct)% | \(.value.covered) / \(.value.total) |"' coverage/coverage-summary.json
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload coverage report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 7
 
       # 生成ファイルを手元で更新し忘れていないかを確認する（routeTree.gen.ts は上の Build で再生成される）
       - name: Check generated files
