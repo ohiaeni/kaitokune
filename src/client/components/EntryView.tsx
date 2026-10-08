@@ -1,10 +1,9 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { findMood } from "../../shared/constants";
 import { formatDate } from "../../shared/date";
 import type { EntryDetail } from "../../shared/schemas";
-import { api, queryKeys } from "../lib/api";
 import { today } from "../lib/date";
+import { useChangeEntryDate, useDeleteEntry, useSaveEntry } from "../lib/queries";
 import { loadJson, removeItem } from "../lib/storage";
 import { DiaryEditor } from "./DiaryEditor";
 import { draftKey } from "./Interview";
@@ -19,18 +18,14 @@ function DateChanger({
   onChanged: (newDate: string) => void;
   onCancel: () => void;
 }) {
-  const queryClient = useQueryClient();
   const [newDate, setNewDate] = useState(date);
   const max = today();
 
-  const change = useMutation({
-    mutationFn: () => api.changeEntryDate(date, newDate),
-    onSuccess: async () => {
+  const change = useChangeEntryDate({
+    onSuccess: (_, variables) => {
       // 変更先の日付の書きかけの会話は、日記ができたことで使われなくなるので消す
-      removeItem(draftKey(newDate));
-      queryClient.removeQueries({ queryKey: queryKeys.entry(date) });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.entries });
-      onChanged(newDate);
+      removeItem(draftKey(variables.newDate));
+      onChanged(variables.newDate);
     },
   });
 
@@ -42,7 +37,7 @@ function DateChanger({
         if (!newDate || newDate === date || newDate > max) return;
         const hasDraft = loadJson(draftKey(newDate)) !== null;
         if (hasDraft && !confirm(`${formatDate(newDate)}の書きかけの会話は削除されます。日付を変更しますか？`)) return;
-        change.mutate();
+        change.mutate({ date, newDate });
       }}
     >
       <label className="flex flex-col gap-1">
@@ -79,28 +74,12 @@ export function EntryView({
   onDateChanged: (newDate: string) => void;
 }) {
   const { entry, qa } = detail;
-  const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [changingDate, setChangingDate] = useState(false);
   const mood = findMood(entry.mood);
 
-  const save = useMutation({
-    mutationFn: ({ body, mood }: { body: string; mood: number | null }) => api.saveEntry(entry.date, { body, mood }),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.entries });
-      setEditing(false);
-    },
-  });
-
-  const remove = useMutation({
-    mutationFn: () => api.deleteEntry(entry.date),
-    onSuccess: async () => {
-      // 一覧に戻る前に詳細のキャッシュを消し、削除済みの日記が一瞬表示されるのを防ぐ
-      queryClient.removeQueries({ queryKey: queryKeys.entry(entry.date) });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.entries });
-      onDeleted?.();
-    },
-  });
+  const save = useSaveEntry({ onSuccess: () => setEditing(false) });
+  const remove = useDeleteEntry({ onSuccess: () => onDeleted?.() });
 
   if (editing) {
     return (
@@ -109,7 +88,7 @@ export function EntryView({
           initialBody={entry.body}
           initialMood={entry.mood}
           saving={save.isPending}
-          onSave={(body, mood) => save.mutate({ body, mood })}
+          onSave={(body, mood) => save.mutate({ date: entry.date, payload: { body, mood } })}
         >
           <Button variant="ghost" disabled={save.isPending} onClick={() => setEditing(false)}>
             キャンセル
@@ -168,7 +147,7 @@ export function EntryView({
           variant="danger"
           disabled={remove.isPending}
           onClick={() => {
-            if (confirm("この日記を削除しますか？元に戻せません。")) remove.mutate();
+            if (confirm("この日記を削除しますか？元に戻せません。")) remove.mutate(entry.date);
           }}
         >
           {remove.isPending ? "削除中…" : "削除"}

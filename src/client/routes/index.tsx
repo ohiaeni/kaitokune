@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { formatDate } from "../../shared/date";
@@ -6,15 +5,15 @@ import { EntryView } from "../components/EntryView";
 import { Interview } from "../components/Interview";
 import { NotesPanel } from "../components/NotesPanel";
 import { ErrorMessage, Spinner } from "../components/ui";
-import { api, queryKeys } from "../lib/api";
 import { today } from "../lib/date";
+import { useEntry } from "../lib/queries";
 
 export const Route = createFileRoute("/")({ component: TodayPage });
 
 function TodayPage() {
   // 開いたときの日付で固定する（日付をまたいでも書きかけの会話が別の日に移らないように）
   const [date] = useState(today);
-  const entry = useQuery({ queryKey: queryKeys.entry(date), queryFn: () => api.getEntry(date) });
+  const entry = useEntry(date);
   const navigate = useNavigate();
 
   return (

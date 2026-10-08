@@ -1,29 +1,19 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { MAX_NOTES, NOTE_MAX_LENGTH } from "../../shared/constants";
-import { api, queryKeys } from "../lib/api";
+import { useAddNote, useDeleteNote, useNotes } from "../lib/queries";
 import { Button, Card, ErrorMessage, Spinner } from "./ui";
 
 /** 日中に思ったことをメモしておく欄。メモは「日記にまとめる」ときに AI に渡す */
 export function NotesPanel({ date }: { date: string }) {
-  const queryClient = useQueryClient();
-  const notes = useQuery({ queryKey: queryKeys.notes(date), queryFn: () => api.listNotes(date) });
+  const notes = useNotes(date);
   const [text, setText] = useState("");
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: queryKeys.notes(date) });
-
-  const add = useMutation({
-    mutationFn: (body: string) => api.addNote(date, body),
-    onSuccess: async () => {
-      setText("");
-      await invalidate();
-    },
-  });
-  const remove = useMutation({ mutationFn: api.deleteNote, onSuccess: invalidate });
+  const add = useAddNote(date);
+  const remove = useDeleteNote(date);
 
   const isFull = (notes.data?.length ?? 0) >= MAX_NOTES;
   const submit = () => {
     const body = text.trim();
-    if (body && !add.isPending && !isFull) add.mutate(body);
+    if (body && !add.isPending && !isFull) add.mutate(body, { onSuccess: () => setText("") });
   };
 
   return (

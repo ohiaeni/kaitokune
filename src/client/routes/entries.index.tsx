@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { findMood, MONTH_PATTERN, SEARCH_QUERY_MAX_LENGTH } from "../../shared/constants";
@@ -6,8 +5,8 @@ import { formatDate } from "../../shared/date";
 import type { EntrySummary } from "../../shared/schemas";
 import { MonthCalendar } from "../components/MonthCalendar";
 import { Button, ErrorMessage, Spinner } from "../components/ui";
-import { api, queryKeys } from "../lib/api";
 import { currentMonth, formatMonth, shiftMonth } from "../lib/date";
+import { useEntryList, useEntrySearch } from "../lib/queries";
 import { loadJson, saveJson } from "../lib/storage";
 
 export const Route = createFileRoute("/entries/")({
@@ -81,7 +80,7 @@ function SearchForm({ initial, onSearch }: { initial: string; onSearch: (q: stri
 }
 
 function SearchResults({ q }: { q: string }) {
-  const results = useQuery({ queryKey: queryKeys.entrySearch(q), queryFn: () => api.searchEntries(q) });
+  const results = useEntrySearch(q);
 
   if (results.isPending) return <Spinner label="検索中…" />;
   if (results.isError) return <ErrorMessage error={results.error} onRetry={() => results.refetch()} />;
@@ -100,7 +99,7 @@ function SearchResults({ q }: { q: string }) {
 
 function MonthEntries({ month }: { month: string }) {
   const navigate = Route.useNavigate();
-  const list = useQuery({ queryKey: queryKeys.entryList(month), queryFn: () => api.listEntries(month) });
+  const list = useEntryList(month);
   const isCurrent = month >= currentMonth();
   const [view, setView] = useState<View>(() => (loadJson<View>(VIEW_KEY) === "calendar" ? "calendar" : "list"));
   const changeView = (next: View) => {

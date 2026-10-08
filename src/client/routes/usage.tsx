@@ -1,9 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { formatDate } from "../../shared/date";
 import type { CloudflareUsage, UsageMeter } from "../../shared/schemas";
 import { Button, Card, ErrorMessage, Spinner } from "../components/ui";
-import { api, queryKeys } from "../lib/api";
+import { useUsage } from "../lib/queries";
 
 export const Route = createFileRoute("/usage")({ component: UsagePage });
 
@@ -87,7 +86,7 @@ function CloudflareSection({ usage }: { usage: CloudflareUsage }) {
 }
 
 function UsagePage() {
-  const usage = useQuery({ queryKey: queryKeys.usage, queryFn: api.getUsage, staleTime: 60_000 });
+  const usage = useUsage();
 
   return (
     <div className="flex flex-col gap-4">

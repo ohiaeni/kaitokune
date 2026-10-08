@@ -79,12 +79,3 @@ export const api = {
 
   getUsage: () => request<UsageResponse>("/usage"),
 };
-
-export const queryKeys = {
-  entries: ["entries"] as const,
-  entryList: (month?: string) => ["entries", "list", month ?? "all"] as const,
-  entrySearch: (q: string) => ["entries", "search", q] as const,
-  entry: (date: string) => ["entries", "detail", date] as const,
-  notes: (date: string) => ["notes", date] as const,
-  usage: ["usage"] as const,
-};
