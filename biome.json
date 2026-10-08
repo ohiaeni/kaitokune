@@ -111,7 +111,8 @@
       },
       "performance": {
         "noDelete": "error",
-        "noNamespaceImport": "error"
+        "noNamespaceImport": "error",
+        "useTopLevelRegex": "error"
       }
     }
   },

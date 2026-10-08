@@ -99,12 +99,12 @@ export function buildComposePrompt(input: { date: string; qa: QA[]; notes: strin
   return { system, user, json: false };
 }
 
+/** AI が日記をコードブロックで囲んで返したときの、前後の ``` */
+const CODE_FENCE_START = /^```[a-z]*\n?/i;
+const CODE_FENCE_END = /\n?```$/;
+
 export function parseDiary(text: string): string {
-  const body = text
-    .trim()
-    .replace(/^```[a-z]*\n?/i, "")
-    .replace(/\n?```$/, "")
-    .trim();
+  const body = text.trim().replace(CODE_FENCE_START, "").replace(CODE_FENCE_END, "").trim();
   if (body.length < 10) throw new Error(`AI output is too short: ${body}`);
   return body;
 }

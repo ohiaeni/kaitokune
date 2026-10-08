@@ -22,9 +22,12 @@ type Jwk = JsonWebKey & { kid?: string };
 /** 公開鍵を取り直すまでの時間。Access は鍵を定期的に入れ替えるので、知らない kid が来たら期限前でも取り直す */
 const KEYS_TTL_MS = 60 * 60 * 1000;
 
+const SCHEME = /^https?:\/\//;
+const TRAILING_SLASHES = /\/+$/;
+
 /** "<team>.cloudflareaccess.com" と "https://<team>.cloudflareaccess.com/" のどちらで設定されていても同じ形にする */
 export function normalizeTeamDomain(teamDomain: string): string {
-  return `https://${teamDomain.replace(/^https?:\/\//, "").replace(/\/+$/, "")}`;
+  return `https://${teamDomain.replace(SCHEME, "").replace(TRAILING_SLASHES, "")}`;
 }
 
 function base64UrlDecode(input: string): Uint8Array<ArrayBuffer> {

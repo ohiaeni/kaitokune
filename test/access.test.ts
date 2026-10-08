@@ -9,12 +9,13 @@ import type { Bindings } from "../src/worker/env";
 const TEAM = "https://example.cloudflareaccess.com";
 const AUD = "test-aud";
 const KID = "key-1";
+const BASE64_PADDING = /=+$/;
 
 function base64Url(bytes: ArrayBuffer | Uint8Array): string {
   return btoa(String.fromCharCode(...new Uint8Array(bytes)))
     .replace(/\+/g, "-")
     .replace(/\//g, "_")
-    .replace(/=+$/, "");
+    .replace(BASE64_PADDING, "");
 }
 
 const encodeJson = (value: unknown) => base64Url(new TextEncoder().encode(JSON.stringify(value)));
