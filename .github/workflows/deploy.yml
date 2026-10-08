@@ -47,6 +47,8 @@ jobs:
         if: steps.secrets.outputs.configured == 'true'
         with:
           node-version-file: .node-version
+          # setup-node は指定しなくてもキャッシュを有効にするので、明示的に止める
+          package-manager-cache: false
 
       - name: Install dependencies
         if: steps.secrets.outputs.configured == 'true'
