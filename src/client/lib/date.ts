@@ -1,4 +1,4 @@
-const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
+export const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
 
 function pad(n: number): string {
   return String(n).padStart(2, "0");
@@ -23,6 +23,20 @@ export function formatDate(date: string): string {
 export function formatMonth(month: string): string {
   const [y, m] = month.split("-").map(Number);
   return `${y}年${m}月`;
+}
+
+/**
+ * 月のカレンダーのマス目（日曜始まり）。月の前後の空きマスは null で埋め、7 の倍数にそろえる
+ * "2026-10" → [null, null, null, null, "2026-10-01", …, "2026-10-31"]
+ */
+export function calendarDays(month: string): (string | null)[] {
+  const [y, m] = month.split("-").map(Number);
+  const leading = new Date(y, m - 1, 1).getDay();
+  const days = new Date(y, m, 0).getDate();
+  const cells: (string | null)[] = Array.from({ length: leading }, () => null);
+  for (let d = 1; d <= days; d++) cells.push(`${month}-${pad(d)}`);
+  while (cells.length % 7 !== 0) cells.push(null);
+  return cells;
 }
 
 export function shiftMonth(month: string, delta: number): string {
