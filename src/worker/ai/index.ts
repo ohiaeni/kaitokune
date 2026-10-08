@@ -7,8 +7,15 @@ import type { TextGenerator } from "./provider";
 import { createWorkersAI } from "./workers-ai";
 
 export interface DiaryAI {
-  nextQuestion(input: { date: string; qa: QA[]; recent: string[]; allowDone: boolean }): Promise<NextResponse>;
-  composeDiary(input: { date: string; qa: QA[] }): Promise<string>;
+  nextQuestion(input: {
+    date: string;
+    qa: QA[];
+    /** その日のメモ */
+    notes: string[];
+    recent: string[];
+    allowDone: boolean;
+  }): Promise<NextResponse>;
+  composeDiary(input: { date: string; qa: QA[]; notes: string[] }): Promise<string>;
 }
 
 export function createDiaryAI(generators: TextGenerator[]): DiaryAI {

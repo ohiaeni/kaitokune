@@ -13,6 +13,7 @@ import { entries } from "../db/schema";
 import type { AppEnv } from "../types";
 import { consumeAiQuota, todayIn } from "../usage";
 import { validationHook } from "../validation";
+import { listNotes } from "./notes";
 
 const RECENT_ENTRIES = 3;
 const RECENT_EXCERPT_LENGTH = 150;
@@ -38,12 +39,15 @@ export const chatRoutes = new Hono<AppEnv>()
           ).map((e) => `${e.date}: ${e.body.slice(0, RECENT_EXCERPT_LENGTH)}`)
         : [];
 
-    const result = await c.get("ai").nextQuestion({ date, qa, recent, allowDone: qa.length >= MIN_QUESTIONS });
+    const notes = (await listNotes(db, date)).map((n) => n.body);
+    const result = await c.get("ai").nextQuestion({ date, qa, notes, recent, allowDone: qa.length >= MIN_QUESTIONS });
     return c.json<NextResponse>(result);
   })
   .post("/compose", zValidator("json", composeRequestSchema, validationHook), async (c) => {
     const { date, qa } = c.req.valid("json");
-    await consumeAiQuota(c.get("db"), todayIn(c.env.TIMEZONE), Number(c.env.AI_DAILY_LIMIT));
-    const body = await c.get("ai").composeDiary({ date, qa });
+    const db = c.get("db");
+    await consumeAiQuota(db, todayIn(c.env.TIMEZONE), Number(c.env.AI_DAILY_LIMIT));
+    const notes = (await listNotes(db, date)).map((n) => n.body);
+    const body = await c.get("ai").composeDiary({ date, qa, notes });
     return c.json<ComposeResponse>({ body });
   });

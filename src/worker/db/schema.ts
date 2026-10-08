@@ -26,3 +26,15 @@ export const aiUsage = sqliteTable("ai_usage", {
   date: text("date").primaryKey(),
   count: integer("count").notNull().default(0),
 });
+
+/** 日記を書く前にメモしておいた、その日の出来事や思ったこと。日記の生成で AI に渡す */
+export const notes = sqliteTable(
+  "notes",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    date: text("date").notNull(),
+    body: text("body").notNull(),
+    createdAt: integer("created_at").notNull(),
+  },
+  (t) => [index("notes_date_idx").on(t.date)],
+);

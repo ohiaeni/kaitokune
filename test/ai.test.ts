@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { AllProvidersFailedError, generateWithFallback } from "../src/worker/ai/fallback";
 import { createGemini } from "../src/worker/ai/gemini";
-import { parseDiary, parseNextQuestion } from "../src/worker/ai/prompts";
+import { buildComposePrompt, buildNextQuestionPrompt, parseDiary, parseNextQuestion } from "../src/worker/ai/prompts";
 import { type Prompt, ProviderError, type TextGenerator } from "../src/worker/ai/provider";
 import { extractText } from "../src/worker/ai/workers-ai";
 
@@ -48,6 +48,19 @@ describe("generateWithFallback", () => {
       throw new Error("down");
     });
     await expect(generateWithFallback([a], prompt, (t) => t)).rejects.toBeInstanceOf(AllProvidersFailedError);
+  });
+});
+
+describe("prompts", () => {
+  it("include the day's notes only when there are any", () => {
+    const next = { date: "2026-10-08", qa: [], recent: [], allowDone: false };
+    expect(buildNextQuestionPrompt({ ...next, notes: ["昼にラーメン"] }).user).toContain("# 今日のメモ");
+    expect(buildNextQuestionPrompt({ ...next, notes: ["昼にラーメン"] }).user).toContain("- 昼にラーメン");
+    expect(buildNextQuestionPrompt({ ...next, notes: [] }).user).not.toContain("今日のメモ");
+
+    const compose = { date: "2026-10-08", qa: [{ question: "Q", answer: "A" }] };
+    expect(buildComposePrompt({ ...compose, notes: ["夕方に雨"] }).user).toContain("- 夕方に雨");
+    expect(buildComposePrompt({ ...compose, notes: [] }).user).not.toContain("今日のメモ");
   });
 });
 
