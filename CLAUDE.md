@@ -115,6 +115,14 @@ gh pr create --base main --title "..." --label enhancement --assignee @me \
 - PR を作る前に `npm run check` / `npm run spell` / `npm run build` / `npm test` を実行し、通ったことを PR テンプレートのチェック項目に反映する
 - コミット時に lefthook の pre-commit フックが Biome と Prettier（Markdown・YAML）、cspell を実行し、整形は自動で直す。lint エラーやスペルミスで止まったらコード（正しい単語なら `cspell.config.yaml`）を直してからコミットし直す（`--no-verify` で飛ばさない）
 
+### git worktree
+
+複数のブランチを並行して作業するときは、worktree を `.claude/worktree/` の下に作る。ほかの場所（リポジトリの外や一時ディレクトリ）には作らない。`.claude/worktree/` は `.gitignore` に入れてあり、Biome・Prettier・cspell・knip の対象外になる。
+
+- 作成: `git worktree add .claude/worktree/<ブランチ名の / を - にしたもの> -b <ブランチ名>`（例: `git worktree add .claude/worktree/chore-worktree-dir -b chore/worktree-dir`）。作ったら中で `npm install` する
+- 片付け: PR がマージされたら `git worktree remove .claude/worktree/<名前>` で消し、`git branch -D <ブランチ名>` でローカルのブランチも消す
+- 消し忘れは `ls .claude/worktree` か `git worktree list` で確かめる。ディレクトリを直接消してしまったときは `git worktree prune` で記録を整理する
+
 ## GitHub Actions
 
 - Action はタグではなくコミット SHA で指定し、末尾にバージョンをコメントで書く（例: `actions/checkout@<40 桁の SHA> # v7.0.1`）
