@@ -48,6 +48,19 @@ function decodeJson(input: string): Record<string, unknown> {
   throw new AccessError("malformed token");
 }
 
+/** 署名を確かめたあとのペイロードの中身（宛先・発行元・有効期限・メールアドレス）を確かめ、メールアドレスを返す */
+function checkClaims(payload: Record<string, unknown>, config: AccessConfig, teamDomain: string, now: number): string {
+  const audiences = Array.isArray(payload.aud) ? payload.aud : [payload.aud];
+  if (!audiences.includes(config.aud)) throw new AccessError("invalid audience");
+  if (payload.iss !== teamDomain) throw new AccessError("invalid issuer");
+  const nowSec = now / 1000;
+  if (typeof payload.exp !== "number" || payload.exp <= nowSec) throw new AccessError("token expired");
+  if (typeof payload.nbf === "number" && payload.nbf > nowSec) throw new AccessError("token not yet valid");
+  // サービストークンなど、メールアドレスを持たないトークンは日記の持ち主にできない
+  if (typeof payload.email !== "string" || payload.email === "") throw new AccessError("token has no email");
+  return payload.email;
+}
+
 /** チームドメインごとに公開鍵をキャッシュし、JWT を検証する関数を作る */
 export function createAccessVerifier(fetcher: typeof fetch) {
   const cache = new Map<string, { keys: Map<string, CryptoKey>; expiresAt: number }>();
@@ -77,9 +90,8 @@ export function createAccessVerifier(fetcher: typeof fetch) {
     return (await loadKeys(teamDomain)).get(kid);
   }
 
-  /** 検証できたらメールアドレスを返す。検証できなければ AccessError を投げる */
-  return async function verify(token: string, config: AccessConfig, now = Date.now()): Promise<string> {
-    const teamDomain = normalizeTeamDomain(config.teamDomain);
+  /** JWT の署名を確かめ、ペイロードを返す */
+  async function verifySignature(token: string, teamDomain: string): Promise<Record<string, unknown>> {
     const parts = token.split(".");
     if (parts.length !== 3) throw new AccessError("malformed token");
     const [headerPart, payloadPart, signaturePart] = parts;
@@ -96,17 +108,14 @@ export function createAccessVerifier(fetcher: typeof fetch) {
       new TextEncoder().encode(`${headerPart}.${payloadPart}`),
     );
     if (!valid) throw new AccessError("invalid signature");
+    return decodeJson(payloadPart);
+  }
 
-    const payload = decodeJson(payloadPart);
-    const audiences = Array.isArray(payload.aud) ? payload.aud : [payload.aud];
-    if (!audiences.includes(config.aud)) throw new AccessError("invalid audience");
-    if (payload.iss !== teamDomain) throw new AccessError("invalid issuer");
-    const nowSec = now / 1000;
-    if (typeof payload.exp !== "number" || payload.exp <= nowSec) throw new AccessError("token expired");
-    if (typeof payload.nbf === "number" && payload.nbf > nowSec) throw new AccessError("token not yet valid");
-    // サービストークンなど、メールアドレスを持たないトークンは日記の持ち主にできない
-    if (typeof payload.email !== "string" || payload.email === "") throw new AccessError("token has no email");
-    return payload.email;
+  /** 検証できたらメールアドレスを返す。検証できなければ AccessError を投げる */
+  return async function verify(token: string, config: AccessConfig, now = Date.now()): Promise<string> {
+    const teamDomain = normalizeTeamDomain(config.teamDomain);
+    const payload = await verifySignature(token, teamDomain);
+    return checkClaims(payload, config, teamDomain, now);
   };
 }
 
