@@ -3,10 +3,9 @@ import { findMood } from "../../shared/constants";
 import { formatDate } from "../../shared/date";
 import type { EntryDetail } from "../../shared/schemas";
 import { today } from "../lib/date";
+import { loadDraft, removeDraft } from "../lib/draft";
 import { useChangeEntryDate, useDeleteEntry, useSaveEntry } from "../lib/queries";
-import { loadJson, removeItem } from "../lib/storage";
 import { DiaryEditor } from "./DiaryEditor";
-import { draftKey } from "./Interview";
 import { Button, Card, ErrorMessage } from "./ui";
 
 function DateChanger({
@@ -24,7 +23,7 @@ function DateChanger({
   const change = useChangeEntryDate({
     onSuccess: (_, variables) => {
       // 変更先の日付の書きかけの会話は、日記ができたことで使われなくなるので消す
-      removeItem(draftKey(variables.newDate));
+      removeDraft(variables.newDate);
       onChanged(variables.newDate);
     },
   });
@@ -35,7 +34,7 @@ function DateChanger({
       onSubmit={(e) => {
         e.preventDefault();
         if (!newDate || newDate === date || newDate > max) return;
-        const hasDraft = loadJson(draftKey(newDate)) !== null;
+        const hasDraft = loadDraft(newDate) !== null;
         if (hasDraft && !confirm(`${formatDate(newDate)}の書きかけの会話は削除されます。日付を変更しますか？`)) return;
         change.mutate({ date, newDate });
       }}

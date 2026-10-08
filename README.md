@@ -83,7 +83,8 @@ kaitokune/
 │   └── client/               # React SPA
 │       ├── routes/           # / （今日の日記）, /entries（一覧）, /entries/$date（詳細）, /usage（使用量）
 │       ├── components/       # Interview（会話）, DiaryEditor, EntryView など
-│       └── lib/              # API クライアント、日付、localStorage
+│       ├── hooks/            # 画面の状態と操作（useInterview など）
+│       └── lib/              # API クライアント、TanStack Query のフック（queries.ts）、日付、localStorage
 ├── test/                     # Vitest（Workers ランタイム上で実行）
 ├── migrations/               # drizzle-kit が生成する D1 マイグレーション
 └── wrangler.jsonc            # バインディング（D1 / AI）と設定値
