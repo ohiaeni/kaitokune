@@ -13,3 +13,6 @@ pre-commit:
       glob: "*.{md,yml,yaml}"
       run: npx --no prettier --write {staged_files}
       stage_fixed: true
+    cspell:
+      # -- がないと、cspell に渡すオプションを npx が自分のものとして受け取ってしまう
+      run: npx --no -- cspell --no-progress --no-summary --no-must-find-files {staged_files}

@@ -4,5 +4,5 @@
 
 ## 確認したこと
 
-- [ ] `npm run check` / `npm run build` / `npm test` が通る
+- [ ] `npm run check` / `npm run spell` / `npm run build` / `npm test` が通る
 - [ ] 無料枠を超える構成（有料プラン・従量課金の API など）を追加していない
