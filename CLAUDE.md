@@ -91,6 +91,7 @@ gh api -X PATCH repos/ohiaeni/kaitokune/milestones/<番号> -f state=closed
 
 - `v<MAJOR>.<MINOR>.<PATCH>` 以外の形のタグでは Release を作らない
 - `v*` のタグはルールセットで保護されていて、作成・削除・付け替えは管理者だけができる
+- タグの push で `.github/workflows/deploy.yml` が本番にデプロイする（D1 のマイグレーションも適用する）。Secrets は production の Environment にあり、未登録ならデプロイは飛ばされる
 - リリースはユーザーに頼まれたときだけ行う
 
 ### ラベル

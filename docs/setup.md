@@ -238,6 +238,29 @@ Zero Trust の初回設定（9-1）で、Free プランでも支払い方法の�
 
 ## 更新したときのデプロイ
 
+### GitHub Actions でデプロイする（おすすめ）
+
+リリースのタグ（`v0.1.0` など）を push すると、`.github/workflows/deploy.yml` がチェック・ビルド・テストを実行し、本番の D1 にマイグレーションを適用してからデプロイします。Actions タブの「Deploy」→「Run workflow」で、main を手動でデプロイすることもできます。
+
+初回だけ、Cloudflare の API トークンを GitHub に登録します。登録するまでは、ワークフローは警告を出してデプロイを飛ばします。
+
+1. [Cloudflare のダッシュボード](https://dash.cloudflare.com/profile/api-tokens) の「My Profile」→「API Tokens」→「Create Token」を開く
+2. 「Edit Cloudflare Workers」テンプレートの「Use template」を選ぶ
+3. 「Permissions」に「Account」→「D1」→「Edit」を追加する（マイグレーションの適用に必要）
+4. 「Account Resources」を自分のアカウントだけ、「Zone Resources」を「All zones from an account」→ 自分のアカウントにする
+5. 「Continue to summary」→「Create Token」で発行し、表示されたトークンをコピーする（この画面を閉じると二度と表示されません）
+6. アカウント ID を確認する（ダッシュボードの「Workers & Pages」の右側、または `npx wrangler whoami`）
+7. GitHub の production の Environment に Secrets として登録する
+
+```sh
+gh secret set CLOUDFLARE_API_TOKEN --env production   # 5 でコピーしたトークンを貼り付ける
+gh secret set CLOUDFLARE_ACCOUNT_ID --env production  # 6 のアカウント ID を貼り付ける
+```
+
+production の Environment は、`v*.*.*` のタグと main ブランチからしか使えないように設定しています。
+
+### 手元からデプロイする
+
 ```sh
 # DB スキーマ（src/worker/db/schema.ts）を変えた場合だけ
 npm run db:generate          # migrations/ に SQL が生成される
