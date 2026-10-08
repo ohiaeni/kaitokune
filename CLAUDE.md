@@ -95,6 +95,7 @@ gh pr create --base main --title "..." --label enhancement --assignee @me \
 - コミットメッセージと PR タイトル: `<型>: <日本語の要約>`（例: `fix: Workers AI の提供終了モデルを Gemma 4 に変更`）
 - マージは squash だけで、PR のタイトルがそのまま main のコミットメッセージになる。マージ後のブランチは自動で削除される
 - PR を作る前に `npm run check` / `npm run build` / `npm test` を実行し、通ったことを PR テンプレートのチェック項目に反映する
+- コミット時に lefthook の pre-commit フックが Biome を実行し、整形は自動で直す。lint エラーで止まったらコードを直してからコミットし直す（`--no-verify` で飛ばさない）
 
 ## GitHub Actions
 

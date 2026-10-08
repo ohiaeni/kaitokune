@@ -105,6 +105,7 @@ npm run dev                       # http://localhost:5173
 
 - Workers AI は開発中もリモート（自分のアカウントの無料枠）で動く。そのため `npm run dev` には Cloudflare へのログインが必要。
 - ログインせずに試すときは `npm run dev:local` を使う。この場合 Workers AI は使えず、`.dev.vars` に設定した Gemini だけで動く。
+- `npm install` で Git フック（[lefthook](https://lefthook.dev/)）が入り、コミット前に変更したファイルへ Biome の lint・フォーマットがかかる。設定は `lefthook.yml`。
 
 ### 主なコマンド
 

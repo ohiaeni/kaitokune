@@ -1,0 +1,9 @@
+# Git フック。npm install（prepare）で .git/hooks に入る
+# 重い処理（build・test）は CI に任せ、コミット前は変更したファイルの lint・format だけにする
+pre-commit:
+  commands:
+    biome:
+      glob: "*.{js,ts,tsx,json,jsonc,css}"
+      run: npx biome check --write --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+      # 自動修正した内容もそのコミットに含める
+      stage_fixed: true
