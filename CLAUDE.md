@@ -53,3 +53,8 @@ gh pr create --base main --title "..." --label enhancement --assignee @me \
 - ブランチ名: `<型>/<内容を表す英語の kebab-case>`（例: `chore/dependabot-labels`）
 - コミットメッセージと PR タイトル: `<型>: <日本語の要約>`（例: `fix: Workers AI の提供終了モデルを Gemma 4 に変更`）
 - PR を作る前に `npm run check` / `npm run build` / `npm test` を実行し、通ったことを PR テンプレートのチェック項目に反映する
+
+## GitHub Actions
+
+- Action はタグではなくコミット SHA で指定し、末尾にバージョンをコメントで書く（例: `actions/checkout@<40 桁の SHA> # v7.0.1`）
+- SHA は `gh api repos/<owner>/<repo>/commits/<タグ> --jq .sha` で調べる。更新は Dependabot に任せる
