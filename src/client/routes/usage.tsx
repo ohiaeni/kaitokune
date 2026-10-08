@@ -1,57 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { formatDate } from "../../shared/date";
-import type { CloudflareUsage, UsageMeter } from "../../shared/schemas";
-import { Button, Card, ErrorMessage, Spinner } from "../components/ui";
+import type { CloudflareUsage } from "../../shared/schemas";
+import { Button, Card, ErrorMessage, Meter, Spinner } from "../components/ui";
 import { useUsage } from "../lib/queries";
 
 export const Route = createFileRoute("/usage")({ component: UsagePage });
-
-/** これ以上使ったら、残りが少ないことを色で知らせる */
-const WARN_RATIO = 0.8;
-
-const formatCount = (n: number) => n.toLocaleString("ja-JP");
 
 function formatBytes(n: number): string {
   if (n >= 1e9) return `${(n / 1e9).toFixed(2)} GB`;
   if (n >= 1e6) return `${(n / 1e6).toFixed(1)} MB`;
   return `${Math.ceil(n / 1e3)} KB`;
-}
-
-function Meter({
-  label,
-  meter,
-  format = formatCount,
-}: {
-  label: string;
-  meter: UsageMeter;
-  format?: (n: number) => string;
-}) {
-  const ratio = meter.limit > 0 ? meter.used / meter.limit : 0;
-  const percent = Math.min(100, ratio * 100);
-  return (
-    <div className="flex flex-col gap-1">
-      <div className="flex items-baseline justify-between gap-2 text-sm">
-        <span>{label}</span>
-        <span className="text-stone-600 tabular-nums dark:text-stone-400">
-          {format(meter.used)} / {format(meter.limit)}
-          <span className="ml-1 text-xs">（{percent < 1 && meter.used > 0 ? "<1" : Math.round(percent)}%）</span>
-        </span>
-      </div>
-      <div
-        role="progressbar"
-        aria-label={label}
-        aria-valuemin={0}
-        aria-valuemax={meter.limit}
-        aria-valuenow={meter.used}
-        className="h-2 overflow-hidden rounded-full bg-stone-200 dark:bg-stone-800"
-      >
-        <div
-          className={`h-full rounded-full ${ratio >= WARN_RATIO ? "bg-red-500" : "bg-amber-500"}`}
-          style={{ width: `${percent}%` }}
-        />
-      </div>
-    </div>
-  );
 }
 
 /** 00:00 UTC が端末の時刻で何時か（日本なら "9:00"） */

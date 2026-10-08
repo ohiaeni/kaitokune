@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button } from "../ui";
+import { Button, TextArea } from "../ui";
 
 /** 質問への回答欄。canFinish なら「質問はここまでにする」も出す */
 export function AnswerForm({
@@ -27,7 +27,7 @@ export function AnswerForm({
         submit();
       }}
     >
-      <textarea
+      <TextArea
         value={answer}
         onChange={(e) => setAnswer(e.target.value)}
         onKeyDown={(e) => {
@@ -41,7 +41,6 @@ export function AnswerForm({
         maxLength={1000}
         placeholder="気軽に答えてください"
         aria-label="回答"
-        className="w-full resize-y rounded-xl border border-stone-300 bg-white p-3 leading-relaxed outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30 dark:border-stone-700 dark:bg-stone-900"
       />
       <div className="flex flex-wrap items-center gap-2">
         <Button type="submit" disabled={!answer.trim() || disabled}>
