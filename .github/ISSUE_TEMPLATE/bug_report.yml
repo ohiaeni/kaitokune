@@ -1,0 +1,42 @@
+name: バグ報告
+description: 動作がおかしい・エラーになる
+labels: [bug]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 何が起きたか
+      description: 期待していた動作と、実際に起きたことを書いてください
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 再現手順
+      placeholder: |
+        1. トップ画面で質問に答える
+        2. 「日記にまとめる」を押す
+        3. ...
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: 発生した環境
+      options:
+        - 本番（Cloudflare）
+        - ローカル（npm run dev）
+        - ローカル（npm run dev:local）
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: 端末・ブラウザ
+      placeholder: iPhone / Safari、Mac / Chrome など
+  - type: textarea
+    id: logs
+    attributes:
+      label: エラーメッセージ・ログ
+      description: ブラウザのコンソールや `wrangler tail` の出力など。API キーなどの秘密情報は消してから貼ってください
+      render: text

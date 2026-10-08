@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      # npm 11 以降（Node.js 24 に付属）でないと package.json の allowScripts が効かない
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint / Format
+        run: npm run check
+
+      # tsc -b（型チェック）+ vite build
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test

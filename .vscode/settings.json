@@ -1,0 +1,32 @@
+{
+  "editor.defaultFormatter": "biomejs.biome",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.biome": "explicit",
+    "source.organizeImports.biome": "explicit"
+  },
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "files.readonlyInclude": {
+    "src/client/routeTree.gen.ts": true,
+    "worker-configuration.d.ts": true
+  },
+  "files.exclude": {
+    "**/.tanstack": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/.wrangler": true,
+    "**/.tanstack": true,
+    "src/client/routeTree.gen.ts": true,
+    "worker-configuration.d.ts": true,
+    "package-lock.json": true
+  },
+  "files.watcherExclude": {
+    "**/.wrangler/**": true,
+    "**/.tanstack/**": true,
+    "**/dist/**": true
+  }
+}
