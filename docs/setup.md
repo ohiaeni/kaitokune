@@ -25,7 +25,7 @@ Cloudflare や Google のダッシュボードは画面構成や項目名がよ�
 
 ## 1. 必要なもの
 
-- **Node.js 22 以上**（`node -v` で確認）。npm は Node.js に付属のもので構いません
+- **Node.js 24 以上**（`node -v` で確認）。npm は Node.js に付属のもの（11 以上）を使います。npm 10 以下では `package.json` の `allowScripts` が効かず、`engines` の確認で `npm install` が止まります。nvm・fnm・mise などのバージョン管理ツールを使う場合は、リポジトリの `.node-version` を読み込めます
 - **Git**
 - **メールアドレス**（Cloudflare アカウント用）
 - （任意）**Google アカウント**（Gemini API キーを発行する場合）
