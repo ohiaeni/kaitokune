@@ -1,68 +1,13 @@
 import { useState } from "react";
-import { findMood } from "../../shared/constants";
-import { formatDate } from "../../shared/date";
 import type { EntryDetail } from "../../shared/schemas";
-import { today } from "../lib/date";
-import { loadDraft, removeDraft } from "../lib/draft";
-import { useChangeEntryDate, useDeleteEntry, useSaveEntry } from "../lib/queries";
+import { useDeleteEntry, useSaveEntry } from "../lib/queries";
 import { DiaryEditor } from "./DiaryEditor";
+import { DateChanger } from "./entry/DateChanger";
+import { EntryBody } from "./entry/EntryBody";
+import { QaLog } from "./entry/QaLog";
 import { Button, Card, ErrorMessage } from "./ui";
 
-function DateChanger({
-  date,
-  onChanged,
-  onCancel,
-}: {
-  date: string;
-  onChanged: (newDate: string) => void;
-  onCancel: () => void;
-}) {
-  const [newDate, setNewDate] = useState(date);
-  const max = today();
-
-  const change = useChangeEntryDate({
-    onSuccess: (_, variables) => {
-      // 変更先の日付の書きかけの会話は、日記ができたことで使われなくなるので消す
-      removeDraft(variables.newDate);
-      onChanged(variables.newDate);
-    },
-  });
-
-  return (
-    <form
-      className="flex flex-col gap-3"
-      onSubmit={(e) => {
-        e.preventDefault();
-        if (!newDate || newDate === date || newDate > max) return;
-        const hasDraft = loadDraft(newDate) !== null;
-        if (hasDraft && !confirm(`${formatDate(newDate)}の書きかけの会話は削除されます。日付を変更しますか？`)) return;
-        change.mutate({ date, newDate });
-      }}
-    >
-      <label className="flex flex-col gap-1">
-        <span className="text-sm text-stone-600 dark:text-stone-400">新しい日付</span>
-        <input
-          type="date"
-          value={newDate}
-          max={max}
-          required
-          onChange={(e) => setNewDate(e.target.value)}
-          className="self-start rounded-xl border border-stone-300 bg-white px-3 py-2 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30 dark:border-stone-700 dark:bg-stone-900"
-        />
-      </label>
-      <div className="flex flex-wrap gap-2">
-        <Button type="submit" disabled={change.isPending || !newDate || newDate === date || newDate > max}>
-          {change.isPending ? "変更中…" : "日付を変更する"}
-        </Button>
-        <Button variant="ghost" disabled={change.isPending} onClick={onCancel}>
-          キャンセル
-        </Button>
-      </div>
-      {change.error && <ErrorMessage error={change.error} />}
-    </form>
-  );
-}
-
+/** 保存済みの日記。表示 / 編集 / 日付変更を切り替え、削除もできる */
 export function EntryView({
   detail,
   onDeleted,
@@ -75,7 +20,6 @@ export function EntryView({
   const { entry, qa } = detail;
   const [editing, setEditing] = useState(false);
   const [changingDate, setChangingDate] = useState(false);
-  const mood = findMood(entry.mood);
 
   const save = useSaveEntry({ onSuccess: () => setEditing(false) });
   const remove = useDeleteEntry({ onSuccess: () => onDeleted?.() });
@@ -100,32 +44,8 @@ export function EntryView({
 
   return (
     <section className="flex flex-col gap-4">
-      <Card>
-        {mood && (
-          <p className="mb-3 text-sm text-stone-600 dark:text-stone-400">
-            <span className="mr-1 text-xl" aria-hidden>
-              {mood.emoji}
-            </span>
-            {mood.label}
-          </p>
-        )}
-        <p className="whitespace-pre-wrap leading-loose">{entry.body}</p>
-      </Card>
-
-      {qa.length > 0 && (
-        <details className="rounded-2xl border border-stone-200 px-4 py-3 text-sm dark:border-stone-800">
-          <summary className="cursor-pointer text-stone-600 dark:text-stone-400">AI との会話を見る</summary>
-          <dl className="mt-3 flex flex-col gap-3">
-            {qa.map((x, i) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: 並び順が固定の読み取り専用リスト
-              <div key={i}>
-                <dt className="font-medium">Q. {x.question}</dt>
-                <dd className="mt-1 whitespace-pre-wrap text-stone-700 dark:text-stone-300">A. {x.answer}</dd>
-              </div>
-            ))}
-          </dl>
-        </details>
-      )}
+      <EntryBody entry={entry} />
+      <QaLog qa={qa} />
 
       {changingDate && (
         <Card>
