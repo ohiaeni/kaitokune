@@ -12,15 +12,28 @@ issue と PR を作るときは、次の情報を作成と同時に付ける（�
 | --- | --- | --- |
 | ラベル | 種類ラベルを 1 つ必須。該当すれば `free-tier` も付ける | issue と同じラベル |
 | 担当者 | `@me` | `@me` |
+| マイルストーン | 対応するバージョン（下記） | issue と同じマイルストーン |
+| Project | `kaitokune開発プロジェクト` | `kaitokune開発プロジェクト` |
 | 本文 | `.github/ISSUE_TEMPLATE/` のテンプレートの見出しに沿って書く | `.github/pull_request_template.md` に沿って書く |
 | issue との紐付け | - | 本文に `Closes #<issue 番号>` を書く |
 
 ```sh
-gh issue create --title "..." --label enhancement --assignee @me --body "..."
-gh pr create --base main --title "..." --label enhancement --assignee @me --body "..."
+gh issue create --title "..." --label enhancement --assignee @me \
+  --milestone v0.1 --project "kaitokune開発プロジェクト" --body "..."
+gh pr create --base main --title "..." --label enhancement --assignee @me \
+  --milestone v0.1 --project "kaitokune開発プロジェクト" --body "..."
 ```
 
-作成後に `gh issue view` / `gh pr view` でラベル・担当者が付いていることを確認する。
+作成後に `gh issue view` / `gh pr view` でラベル・担当者・マイルストーン・Project が付いていることを確認する。
+
+ラベル・担当者・マイルストーン・Project（PR では `Closes #` も）が欠けた `gh issue create` / `gh pr create` は、`.claude/hooks/check-gh-metadata.sh` の hook が実行前に止める。
+
+### マイルストーン
+
+マイルストーンはバージョン単位（`v0.1`、`v0.2` …）で、「ここまでできたら一区切り」という目標ごとにまとめる。
+
+- 開いているマイルストーンは `gh api repos/ohiaeni/kaitokune/milestones --jq '.[] | "\(.title): \(.description)"'` で確認し、内容が合うものを選ぶ
+- どのマイルストーンにも合わない、または新しいバージョンを切るべきだと思ったら、勝手に作らずユーザーに確認する
 
 ### ラベル
 
