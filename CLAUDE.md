@@ -1,5 +1,39 @@
 # CLAUDE.md
 
+## プロジェクトの概要
+
+AI の質問に答えるだけで日記が書ける、自分 1 人で使うアプリ。詳しい構成・データモデル・設定値は [README.md](README.md)、Cloudflare のセットアップは [docs/setup.md](docs/setup.md) を参照する。
+
+- `src/client/`: React SPA（Vite・TanStack Router / Query・Tailwind CSS）
+- `src/worker/`: Cloudflare Worker（Hono）。`/api/*` を処理し、それ以外は静的アセットを返す
+  - `ai/`: Workers AI（メイン）と Gemini（予備）のプロバイダ、フォールバック、プロンプト
+  - `db/schema.ts`: Drizzle のスキーマ（D1）
+- `src/shared/`: クライアントと Worker で共有する Zod スキーマ・定数・型
+- `test/`: Vitest。`@cloudflare/vitest-pool-workers` で Workers ランタイムとローカル D1 を使い、AI はモックする
+
+### 守るべき制約
+
+- **完全無料で運用する**: 有料プラン・従量課金のサービスや API を追加しない。AI の呼び出しは `AI_DAILY_LIMIT` で日ごとに制限している。無料枠に関わる変更には `free-tier` ラベルを付ける
+- **生成ファイルは手で編集しない**: `src/client/routeTree.gen.ts`（TanStack Router）、`worker-configuration.d.ts`（`npm run cf-typegen`）、`migrations/`（`npm run db:generate`）
+- **スキーマを変えたらマイグレーションを生成する**: `src/worker/db/schema.ts` を変えたら `npm run db:generate` を実行し、生成された SQL もコミットする
+- **`wrangler.jsonc` を変えたら型を更新する**: `npm run cf-typegen` を実行する
+- 利用者は自分 1 人で、アプリにログイン機能はない（本番は Cloudflare Access で保護する）
+
+### よく使うコマンド
+
+| コマンド | 内容 |
+| --- | --- |
+| `npm run dev` | 開発サーバー（Workers AI はリモートで動くので `npx wrangler login` が必要） |
+| `npm run dev:local` | Cloudflare に接続しない開発サーバー（AI は `.dev.vars` の Gemini だけ） |
+| `npm run check` | Biome の lint・フォーマットのチェック（`npm run format` で自動修正） |
+| `npm run build` | 型チェック（`tsc -b`）とビルド |
+| `npm test` | テスト（AI はモックするので無料枠を消費しない） |
+| `npm run db:generate` | スキーマの変更からマイグレーションを生成 |
+| `npm run db:migrate:local` | ローカルの D1 にマイグレーションを適用 |
+| `npm run cf-typegen` | `wrangler.jsonc` から `worker-configuration.d.ts` を生成 |
+
+本番への反映（`npm run deploy`、`npm run db:migrate:remote`）は本番環境を変えるので、ユーザーに頼まれたときだけ実行する。
+
 ## issue・PR の運用
 
 main ブランチは保護されていて直接 push できない。変更は必ず「issue を作る → ブランチを切る → PR を作る」の順で進める。
@@ -51,7 +85,7 @@ gh pr create --base main --title "..." --label enhancement --assignee @me \
 | `bug` | ○ | 不具合・期待どおりに動かない | `fix` |
 | `enhancement` | ○ | 新機能・既存機能の改善 | `feat`, `refactor` |
 | `documentation` | ○ | README・docs などのドキュメント | `docs` |
-| `chore` | ○ | CI・ツール・設定などコード以外の雑務 | `chore`, `style`, `ci` |
+| `chore` | ○ | CI・ツール・テスト・設定などの雑務 | `chore`, `style`, `ci`, `test` |
 | `dependencies` | ○ | 依存関係の更新（基本は Dependabot が付ける） | `chore(deps)` |
 | `free-tier` | - | 無料枠・課金に関わる（完全無料運用の維持）。種類ラベルと併用する | - |
 
@@ -59,9 +93,11 @@ gh pr create --base main --title "..." --label enhancement --assignee @me \
 
 - ブランチ名: `<型>/<内容を表す英語の kebab-case>`（例: `chore/dependabot-labels`）
 - コミットメッセージと PR タイトル: `<型>: <日本語の要約>`（例: `fix: Workers AI の提供終了モデルを Gemma 4 に変更`）
+- マージは squash だけで、PR のタイトルがそのまま main のコミットメッセージになる。マージ後のブランチは自動で削除される
 - PR を作る前に `npm run check` / `npm run build` / `npm test` を実行し、通ったことを PR テンプレートのチェック項目に反映する
 
 ## GitHub Actions
 
 - Action はタグではなくコミット SHA で指定し、末尾にバージョンをコメントで書く（例: `actions/checkout@<40 桁の SHA> # v7.0.1`）
 - SHA は `gh api repos/<owner>/<repo>/commits/<タグ> --jq .sha` で調べる。更新は Dependabot に任せる
+- リポジトリの設定で SHA 指定が必須になっているので、タグ指定の Action はワークフローの実行時にエラーになる
