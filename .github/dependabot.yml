@@ -5,6 +5,8 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    # 既定ではエコシステム名のラベル（javascript など）も自動で作られるため、dependencies だけにする
+    labels: [dependencies]
     groups:
       # マイナー・パッチは 1 つの PR にまとめる。メジャーは個別に確認する
       minor-and-patch:
@@ -14,6 +16,7 @@ updates:
     directory: /
     schedule:
       interval: monthly
+    labels: [dependencies]
     groups:
       actions:
         patterns: ["*"]
