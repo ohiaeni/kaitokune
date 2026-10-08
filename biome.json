@@ -42,7 +42,8 @@
         },
         "noMisusedPromises": "error",
         "useExhaustiveSwitchCases": "error",
-        "noFloatingPromises": "error"
+        "noFloatingPromises": "error",
+        "useSortedClasses": "error"
       },
       "correctness": {
         "noUndeclaredDependencies": "error",

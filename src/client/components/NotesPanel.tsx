@@ -20,7 +20,7 @@ export function NotesPanel({ date }: { date: string }) {
     <Card className="flex flex-col gap-3">
       <div>
         <h2 className="font-medium">今日のメモ</h2>
-        <p className="text-xs text-stone-500">思いついたことを書いておくと、AI が質問や日記に使います</p>
+        <p className="text-stone-500 text-xs">思いついたことを書いておくと、AI が質問や日記に使います</p>
       </div>
 
       <QueryResult query={notes}>

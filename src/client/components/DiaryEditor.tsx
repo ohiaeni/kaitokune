@@ -60,7 +60,7 @@ export function DiaryEditor({
       <label className="flex flex-col gap-1">
         <span className="text-sm text-stone-600 dark:text-stone-400">日記（自由に直せます）</span>
         <TextArea value={body} onChange={(e) => setBody(e.target.value)} rows={12} maxLength={10000} />
-        <span className="self-end text-xs text-stone-500">{body.length} 文字</span>
+        <span className="self-end text-stone-500 text-xs">{body.length} 文字</span>
       </label>
       <MoodPicker value={mood} onChange={setMood} />
       <div className="flex flex-wrap items-center gap-2">

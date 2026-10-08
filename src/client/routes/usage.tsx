@@ -31,7 +31,7 @@ function CloudflareSection({ usage }: { usage: CloudflareUsage }) {
   if (usage.status === "error") return <ErrorMessage error={new Error(usage.message)} />;
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-xs text-stone-500 dark:text-stone-400">
+      <p className="text-stone-500 text-xs dark:text-stone-400">
         {usage.date}（UTC）の値です。容量以外は毎日 {utcMidnightLocal()} にリセットされます。反映まで数分かかります。
       </p>
       <Meter label="Workers のリクエスト" meter={usage.workersRequests} />
@@ -49,7 +49,7 @@ function UsagePage() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">使用量</h1>
+        <h1 className="font-bold text-2xl">使用量</h1>
         <Button variant="ghost" disabled={usage.isFetching} onClick={() => usage.refetch()}>
           {usage.isFetching ? "更新中…" : "更新"}
         </Button>

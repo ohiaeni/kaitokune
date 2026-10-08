@@ -26,7 +26,7 @@ function EntryPage() {
       >
         ← 一覧に戻る
       </Link>
-      <h1 className="text-2xl font-bold">{formatDate(date)}</h1>
+      <h1 className="font-bold text-2xl">{formatDate(date)}</h1>
       <QueryResult query={entry}>
         {(detail) =>
           detail ? (

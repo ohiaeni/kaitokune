@@ -18,9 +18,9 @@ function TodayPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-bold">
+      <h1 className="font-bold text-2xl">
         {formatDate(date)}
-        <span className="ml-2 text-base font-normal text-stone-500">今日の日記</span>
+        <span className="ml-2 font-normal text-base text-stone-500">今日の日記</span>
       </h1>
       <QueryResult query={entry}>
         {(detail) =>
