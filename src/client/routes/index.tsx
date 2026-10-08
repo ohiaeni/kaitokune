@@ -4,7 +4,7 @@ import { formatDate } from "../../shared/date";
 import { EntryView } from "../components/EntryView";
 import { Interview } from "../components/Interview";
 import { NotesPanel } from "../components/NotesPanel";
-import { QueryResult } from "../components/ui";
+import { QueryResult } from "../components/QueryResult";
 import { today } from "../lib/date";
 import { useEntry } from "../lib/queries";
 
@@ -20,7 +20,7 @@ function TodayPage() {
     <div className="flex flex-col gap-4">
       <h1 className="font-bold text-2xl">
         {formatDate(date)}
-        <span className="ml-2 font-normal text-base text-stone-500">今日の日記</span>
+        <span className="ml-2 font-normal text-base text-muted-foreground">今日の日記</span>
       </h1>
       <QueryResult query={entry}>
         {(detail) =>

@@ -1,12 +1,14 @@
 import { useEntrySearch } from "../../lib/queries";
-import { EmptyState, ErrorMessage, Spinner } from "../ui";
+import { EmptyState } from "../EmptyState";
+import { ErrorMessage } from "../ErrorMessage";
+import { Loading } from "../Loading";
 import { EntryList } from "./EntryList";
 
 export function SearchResults({ q }: { q: string }) {
   const results = useEntrySearch(q);
 
   if (results.isPending) {
-    return <Spinner label="検索中…" />;
+    return <Loading label="検索中…" />;
   }
   if (results.isError) {
     return <ErrorMessage error={results.error} onRetry={() => results.refetch()} />;
@@ -16,7 +18,7 @@ export function SearchResults({ q }: { q: string }) {
   }
   return (
     <>
-      <p className="text-sm text-stone-500">
+      <p className="text-muted-foreground text-sm">
         「{q}」を含む日記 {results.data.length} 件
       </p>
       <EntryList entries={results.data} highlight={q} />

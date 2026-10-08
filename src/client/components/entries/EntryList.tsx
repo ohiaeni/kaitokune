@@ -13,7 +13,7 @@ export function EntryList({ entries, highlight }: { entries: EntrySummary[]; hig
           <Link
             to="/entries/$date"
             params={{ date: e.date }}
-            className="block rounded-2xl border border-stone-200 bg-white p-4 transition hover:border-amber-400 dark:border-stone-800 dark:bg-stone-900 dark:hover:border-amber-600"
+            className="block rounded-xl border bg-card p-4 text-card-foreground shadow-sm transition hover:border-primary/60"
           >
             <div className="flex items-center justify-between">
               <span className="font-medium">{formatDate(e.date)}</span>
@@ -21,7 +21,7 @@ export function EntryList({ entries, highlight }: { entries: EntrySummary[]; hig
                 {findMood(e.mood)?.emoji}
               </span>
             </div>
-            <p className="mt-1 line-clamp-2 text-sm text-stone-600 dark:text-stone-400">
+            <p className="mt-1 line-clamp-2 text-muted-foreground text-sm">
               {highlight ? <Highlight text={e.excerpt} q={highlight} /> : e.excerpt}
             </p>
           </Link>

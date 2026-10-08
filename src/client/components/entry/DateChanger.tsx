@@ -3,7 +3,9 @@ import { formatDate } from "../../../shared/date";
 import { today } from "../../lib/date";
 import { loadDraft, removeDraft } from "../../lib/draft";
 import { useChangeEntryDate } from "../../lib/queries";
-import { Button, ErrorMessage, TextInput } from "../ui";
+import { ErrorMessage } from "../ErrorMessage";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 
 /** 日記の日付を変えるフォーム。変更先に書きかけの会話があれば、消してよいか確かめる */
 export function DateChanger({
@@ -42,14 +44,14 @@ export function DateChanger({
       }}
     >
       <label className="flex flex-col gap-1">
-        <span className="text-sm text-stone-600 dark:text-stone-400">新しい日付</span>
-        <TextInput
+        <span className="text-muted-foreground text-sm">新しい日付</span>
+        <Input
           type="date"
           value={newDate}
           max={max}
           required
           onChange={(e) => setNewDate(e.target.value)}
-          className="self-start"
+          className="h-10 w-auto self-start"
         />
       </label>
       <div className="flex flex-wrap gap-2">

@@ -1,8 +1,9 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { DATE_PATTERN } from "../../shared/constants";
 import { formatDate } from "../../shared/date";
+import { EmptyState } from "../components/EmptyState";
 import { EntryView } from "../components/EntryView";
-import { EmptyState, QueryResult } from "../components/ui";
+import { QueryResult } from "../components/QueryResult";
 import { useEntry } from "../lib/queries";
 
 export const Route = createFileRoute("/entries/$date")({
@@ -24,7 +25,7 @@ function EntryPage() {
       <Link
         to="/entries"
         search={{ month: date.slice(0, 7) }}
-        className="self-start text-sm text-stone-500 hover:underline"
+        className="self-start text-muted-foreground text-sm hover:underline"
       >
         ← 一覧に戻る
       </Link>

@@ -1,4 +1,5 @@
 import type { UsageMeter } from "../../../shared/schemas";
+import { Progress } from "../ui/progress";
 
 /** これ以上使ったら、残りが少ないことを色で知らせる */
 const WARN_RATIO = 0.8;
@@ -21,24 +22,16 @@ export function Meter({
     <div className="flex flex-col gap-1">
       <div className="flex items-baseline justify-between gap-2 text-sm">
         <span>{label}</span>
-        <span className="text-stone-600 tabular-nums dark:text-stone-400">
+        <span className="text-muted-foreground tabular-nums">
           {format(meter.used)} / {format(meter.limit)}
           <span className="ml-1 text-xs">（{percent < 1 && meter.used > 0 ? "<1" : Math.round(percent)}%）</span>
         </span>
       </div>
-      <div
-        role="progressbar"
+      <Progress
+        value={percent}
         aria-label={label}
-        aria-valuemin={0}
-        aria-valuemax={meter.limit}
-        aria-valuenow={meter.used}
-        className="h-2 overflow-hidden rounded-full bg-stone-200 dark:bg-stone-800"
-      >
-        <div
-          className={`h-full rounded-full ${ratio >= WARN_RATIO ? "bg-red-500" : "bg-amber-500"}`}
-          style={{ width: `${percent}%` }}
-        />
-      </div>
+        className={`bg-secondary ${ratio >= WARN_RATIO ? "*:data-[slot=progress-indicator]:bg-red-500" : "*:data-[slot=progress-indicator]:bg-amber-500"}`}
+      />
     </div>
   );
 }

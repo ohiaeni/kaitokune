@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { SEARCH_QUERY_MAX_LENGTH } from "../../../shared/constants";
-import { Button, TextInput } from "../ui";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 
 /** 日記の検索欄。initial があれば「クリア」も出す */
 export function SearchForm({ initial, onSearch }: { initial: string; onSearch: (q: string) => void }) {
@@ -14,17 +15,16 @@ export function SearchForm({ initial, onSearch }: { initial: string; onSearch: (
           onSearch(value.trim());
         }}
       >
-        <TextInput
-          variant="pill"
+        <Input
           type="search"
           value={value}
           onChange={(e) => setValue(e.target.value)}
           maxLength={SEARCH_QUERY_MAX_LENGTH}
           placeholder="日記を検索"
           aria-label="日記を検索"
-          className="min-w-0 flex-1"
+          className="h-10 min-w-0 flex-1 rounded-full px-4"
         />
-        <Button type="submit" variant="secondary">
+        <Button type="submit" variant="outline">
           検索
         </Button>
         {initial && (

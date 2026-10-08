@@ -1,4 +1,8 @@
 {
+  // shadcn/ui の CLI はここからパスエイリアスを読む（型チェックは tsconfig.app.json の設定を使う）
+  "compilerOptions": {
+    "paths": { "@/*": ["./src/client/*"] }
+  },
   "files": [],
   "references": [
     { "path": "./tsconfig.app.json" },

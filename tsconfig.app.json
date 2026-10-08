@@ -4,7 +4,9 @@
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "jsx": "react-jsx",
-    "types": ["vite/client"]
+    "types": ["vite/client"],
+    // shadcn/ui の部品が使うパスエイリアス（vite.config.ts の resolve.alias と合わせる）
+    "paths": { "@/*": ["./src/client/*"] }
   },
   "include": ["src/client", "src/shared"]
 }

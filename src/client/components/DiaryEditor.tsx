@@ -1,34 +1,37 @@
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useId, useState } from "react";
 import { MOODS } from "../../shared/constants";
-import { Button, TextArea } from "./ui";
+import { Button } from "./ui/button";
+import { Textarea } from "./ui/textarea";
+import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 
+/** 気分を 1 つ選ぶ。選んでいるものをもう一度押すと未選択に戻る */
 function MoodPicker({ value, onChange }: { value: number | null; onChange: (mood: number | null) => void }) {
+  const labelId = useId();
   return (
-    <fieldset className="flex flex-col gap-2">
-      <legend className="mb-2 text-sm text-stone-600 dark:text-stone-400">今日の気分</legend>
-      <div className="flex gap-2">
-        {MOODS.map((m) => {
-          const selected = value === m.value;
-          return (
-            <button
-              key={m.value}
-              type="button"
-              aria-pressed={selected}
-              title={m.label}
-              onClick={() => onChange(selected ? null : m.value)}
-              className={`flex size-11 items-center justify-center rounded-full text-2xl transition ${
-                selected
-                  ? "bg-amber-100 ring-2 ring-amber-500 dark:bg-amber-900/40"
-                  : "bg-stone-100 opacity-60 hover:opacity-100 dark:bg-stone-800"
-              }`}
-            >
-              <span aria-hidden>{m.emoji}</span>
-              <span className="sr-only">{m.label}</span>
-            </button>
-          );
-        })}
-      </div>
-    </fieldset>
+    <div className="flex flex-col gap-2">
+      <span id={labelId} className="text-muted-foreground text-sm">
+        今日の気分
+      </span>
+      <ToggleGroup
+        type="single"
+        spacing={2}
+        aria-labelledby={labelId}
+        value={value === null ? "" : String(value)}
+        onValueChange={(next) => onChange(next ? Number(next) : null)}
+      >
+        {MOODS.map((m) => (
+          <ToggleGroupItem
+            key={m.value}
+            value={String(m.value)}
+            title={m.label}
+            aria-label={m.label}
+            className="size-11 rounded-full bg-muted px-0 text-2xl opacity-60 hover:bg-muted hover:opacity-100 data-[state=on]:bg-amber-100 data-[state=on]:opacity-100 data-[state=on]:ring-2 data-[state=on]:ring-primary dark:data-[state=on]:bg-amber-900/40"
+          >
+            <span aria-hidden>{m.emoji}</span>
+          </ToggleGroupItem>
+        ))}
+      </ToggleGroup>
+    </div>
   );
 }
 
@@ -60,9 +63,15 @@ export function DiaryEditor({
       }}
     >
       <label className="flex flex-col gap-1">
-        <span className="text-sm text-stone-600 dark:text-stone-400">日記（自由に直せます）</span>
-        <TextArea value={body} onChange={(e) => setBody(e.target.value)} rows={12} maxLength={10000} />
-        <span className="self-end text-stone-500 text-xs">{body.length} 文字</span>
+        <span className="text-muted-foreground text-sm">日記（自由に直せます）</span>
+        <Textarea
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+          rows={12}
+          maxLength={10000}
+          className="field-sizing-fixed resize-y leading-relaxed"
+        />
+        <span className="self-end text-muted-foreground text-xs">{body.length} 文字</span>
       </label>
       <MoodPicker value={mood} onChange={setMood} />
       <div className="flex flex-wrap items-center gap-2">

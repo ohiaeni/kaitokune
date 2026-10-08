@@ -1,4 +1,4 @@
-import { Button } from "../ui";
+import { Button } from "../ui/button";
 
 /** 質問が終わったあとの「日記にまとめる」の案内 */
 export function ComposePrompt({

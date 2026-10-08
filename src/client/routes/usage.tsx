@@ -1,7 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { formatDate } from "../../shared/date";
 import type { CloudflareUsage } from "../../shared/schemas";
-import { Button, Card, ErrorMessage, Meter, QueryResult } from "../components/ui";
+import { ErrorMessage } from "../components/ErrorMessage";
+import { QueryResult } from "../components/QueryResult";
+import { Button } from "../components/ui/button";
+import { Card } from "../components/ui/card";
+import { Meter } from "../components/usage/Meter";
 import { useUsage } from "../lib/queries";
 
 export const Route = createFileRoute("/usage")({ component: UsagePage });
@@ -26,7 +30,7 @@ function utcMidnightLocal(): string {
 function CloudflareSection({ usage }: { usage: CloudflareUsage }) {
   if (usage.status === "unconfigured") {
     return (
-      <p className="text-sm text-stone-600 dark:text-stone-400">
+      <p className="text-muted-foreground text-sm">
         Analytics の API トークンが未設定のため表示できません。設定方法は docs/setup.md
         の「アプリで確認する」を参照してください。
       </p>
@@ -37,7 +41,7 @@ function CloudflareSection({ usage }: { usage: CloudflareUsage }) {
   }
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-stone-500 text-xs dark:text-stone-400">
+      <p className="text-muted-foreground text-xs">
         {usage.date}（UTC）の値です。容量以外は毎日 {utcMidnightLocal()} にリセットされます。反映まで数分かかります。
       </p>
       <Meter label="Workers のリクエスト" meter={usage.workersRequests} />
@@ -63,11 +67,11 @@ function UsagePage() {
       <QueryResult query={usage}>
         {(data) => (
           <>
-            <Card className="flex flex-col gap-4">
+            <Card className="gap-4 p-4">
               <h2 className="font-bold">AI の利用回数（あなたの 1 日の上限）</h2>
               <Meter label={`今日（${formatDate(data.ai.date)}）`} meter={data.ai.today} />
               {data.ai.history.length > 0 && (
-                <ul className="flex flex-col gap-1 text-sm text-stone-600 dark:text-stone-400">
+                <ul className="flex flex-col gap-1 text-muted-foreground text-sm">
                   {data.ai.history.map((h) => (
                     <li key={h.date} className="flex justify-between tabular-nums">
                       <span>{formatDate(h.date)}</span>
@@ -77,7 +81,7 @@ function UsagePage() {
                 </ul>
               )}
             </Card>
-            <Card className="flex flex-col gap-4">
+            <Card className="gap-4 p-4">
               <h2 className="font-bold">Cloudflare の無料枠</h2>
               <CloudflareSection usage={data.cloudflare} />
             </Card>

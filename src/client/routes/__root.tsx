@@ -1,18 +1,20 @@
 import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
+import { EmptyState } from "../components/EmptyState";
+import { buttonVariants } from "../components/ui/button";
+import { cn } from "../lib/utils";
 
 export const Route = createRootRoute({
   component: RootLayout,
-  notFoundComponent: () => <p className="py-10 text-center text-stone-500">ページが見つかりません</p>,
+  notFoundComponent: () => <EmptyState>ページが見つかりません</EmptyState>,
 });
 
-const navLink =
-  "rounded-full px-3 py-1.5 text-sm text-stone-600 hover:bg-stone-200/60 dark:text-stone-300 dark:hover:bg-stone-800";
-const navLinkActive = "bg-stone-200/80 font-medium text-stone-900 dark:bg-stone-800 dark:text-stone-50";
+const navLink = cn(buttonVariants({ variant: "ghost", size: "sm" }), "font-normal text-muted-foreground");
+const navLinkActive = "bg-accent font-medium text-accent-foreground";
 
 function RootLayout() {
   return (
     <div className="mx-auto flex min-h-dvh max-w-xl flex-col px-4">
-      <header className="sticky top-0 z-10 -mx-4 flex items-center justify-between bg-stone-50/90 px-4 py-3 backdrop-blur dark:bg-stone-950/90">
+      <header className="sticky top-0 z-10 -mx-4 flex items-center justify-between bg-background/90 px-4 py-3 backdrop-blur">
         <Link to="/" className="font-bold text-lg tracking-tight">
           kaitokune
         </Link>
@@ -31,17 +33,13 @@ function RootLayout() {
       <main className="flex-1 pt-2 pb-16">
         <Outlet />
       </main>
-      <footer className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-stone-200 border-t py-4 text-stone-500 text-xs dark:border-stone-800">
+      <footer className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-t py-4 text-muted-foreground text-xs">
         <span>日記をエクスポート</span>
         {/* API がファイル名付きで返すので、ルーターを通さず普通のリンクでダウンロードする */}
-        <a href="/api/export?format=json" download className="underline hover:text-stone-800 dark:hover:text-stone-200">
+        <a href="/api/export?format=json" download className="underline hover:text-foreground">
           JSON
         </a>
-        <a
-          href="/api/export?format=markdown"
-          download
-          className="underline hover:text-stone-800 dark:hover:text-stone-200"
-        >
+        <a href="/api/export?format=markdown" download className="underline hover:text-foreground">
           Markdown
         </a>
       </footer>

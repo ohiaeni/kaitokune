@@ -47,7 +47,7 @@ AI からの質問に答えるだけで、毎日の日記がかんたんに書�
 | レイヤー                  | 採用技術                                                                        | 無料である理由 / 選定理由                                                                       |
 | ------------------------- | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | フロントエンド            | React 19 + Vite + TypeScript                                                    | OSS。`@cloudflare/vite-plugin` で Worker と 1 つのプロジェクトとして開発・デプロイできる        |
-| UI                        | Tailwind CSS v4                                                                 | OSS。スマホファーストのチャット風 UI                                                            |
+| UI                        | Tailwind CSS v4 + shadcn/ui（Radix UI）                                         | OSS。スマホファーストのチャット風 UI。部品は `src/client/components/ui/` に CLI で追加する      |
 | ルーティング / データ取得 | TanStack Router（ファイルベース）+ TanStack Query                               | 型安全なルーティングとキャッシュ                                                                |
 | API                       | Hono on Cloudflare Workers                                                      | Workers の無料枠（1 日 10 万リクエスト程度）で個人利用には十分                                  |
 | 静的ホスティング          | Workers Static Assets                                                           | 無料・帯域無制限                                                                                |
