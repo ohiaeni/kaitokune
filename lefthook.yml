@@ -3,7 +3,13 @@
 pre-commit:
   commands:
     biome:
-      glob: "*.{js,ts,tsx,json,jsonc,css}"
-      run: npx biome check --write --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+      glob: "*.{js,ts,tsx,json,jsonc,css,html}"
+      # --no: node_modules に Biome がないときに、npm から同名の別パッケージ（biome）を取ってきて実行しないようにする
+      run: npx --no biome check --write --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
       # 自動修正した内容もそのコミットに含める
+      stage_fixed: true
+    prettier:
+      # Biome が対応していない Markdown・YAML は Prettier で整形する
+      glob: "*.{md,yml,yaml}"
+      run: npx --no prettier --write {staged_files}
       stage_fixed: true
