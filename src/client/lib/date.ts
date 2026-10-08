@@ -1,5 +1,3 @@
-export const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
-
 function pad(n: number): string {
   return String(n).padStart(2, "0");
 }
@@ -11,12 +9,6 @@ export function today(now = new Date()): string {
 
 export function currentMonth(now = new Date()): string {
   return today(now).slice(0, 7);
-}
-
-/** "2026-10-08" → "10月8日（木）" */
-export function formatDate(date: string): string {
-  const [y, m, d] = date.split("-").map(Number);
-  return `${m}月${d}日（${WEEKDAYS[new Date(y, m - 1, d).getDay()]}）`;
 }
 
 /** "2026-10" → "2026年10月" */

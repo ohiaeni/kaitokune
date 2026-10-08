@@ -9,11 +9,6 @@ export class DailyLimitError extends Error {
   }
 }
 
-/** 指定タイムゾーンでの今日の日付（YYYY-MM-DD） */
-export function todayIn(timeZone: string, now = new Date()): string {
-  return new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
-}
-
 /**
  * 今日の AI 呼び出し回数を 1 増やし、上限を超えていたら DailyLimitError を投げる。
  * 無料枠を使い切らないよう、AI を呼ぶ前に必ず通す。

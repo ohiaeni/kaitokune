@@ -1,12 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { formatDate } from "../../shared/date";
 import { EntryView } from "../components/EntryView";
 import { Interview } from "../components/Interview";
 import { NotesPanel } from "../components/NotesPanel";
 import { ErrorMessage, Spinner } from "../components/ui";
 import { api, queryKeys } from "../lib/api";
-import { formatDate, today } from "../lib/date";
+import { today } from "../lib/date";
 
 export const Route = createFileRoute("/")({ component: TodayPage });
 

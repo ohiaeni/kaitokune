@@ -75,9 +75,10 @@ kaitokune/
 │   │   ├── routes/           # chat.ts（質問・日記生成）, entries.ts（CRUD）, usage.ts（消費状況）
 │   │   ├── ai/               # プロバイダ（workers-ai / gemini）、フォールバック、プロンプト
 │   │   ├── db/schema.ts      # Drizzle スキーマ
+│   │   ├── export/           # エクスポートの Markdown の生成
 │   │   ├── usage.ts          # 1 日の AI 呼び出し上限
 │   │   └── cloudflare-usage.ts # GraphQL Analytics API から無料枠の消費状況を取得
-│   ├── shared/               # クライアントと Worker で共有する Zod スキーマ・定数・型
+│   ├── shared/               # クライアントと Worker で共有する Zod スキーマ・定数・型・日付の表示
 │   └── client/               # React SPA
 │       ├── routes/           # / （今日の日記）, /entries（一覧）, /entries/$date（詳細）, /usage（使用量）
 │       ├── components/       # Interview（会話）, DiaryEditor, EntryView など

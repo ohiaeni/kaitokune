@@ -1,5 +1,5 @@
 import { type ReactNode, useState } from "react";
-import { MOODS } from "../lib/mood";
+import { MOODS } from "../../shared/constants";
 import { Button } from "./ui";
 
 function MoodPicker({ value, onChange }: { value: number | null; onChange: (mood: number | null) => void }) {

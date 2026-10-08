@@ -1,10 +1,10 @@
 import { desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
+import { todayIn } from "../../shared/date";
 import type { CloudflareUsage, UsageResponse } from "../../shared/schemas";
 import { fetchCloudflareUsage } from "../cloudflare-usage";
 import { aiUsage } from "../db/schema";
 import type { AppEnv } from "../types";
-import { todayIn } from "../usage";
 
 const HISTORY_DAYS = 7;
 

@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { MONTH_PATTERN, SEARCH_QUERY_MAX_LENGTH } from "../../shared/constants";
+import { findMood, MONTH_PATTERN, SEARCH_QUERY_MAX_LENGTH } from "../../shared/constants";
+import { formatDate } from "../../shared/date";
 import type { EntrySummary } from "../../shared/schemas";
 import { MonthCalendar } from "../components/MonthCalendar";
 import { Button, ErrorMessage, Spinner } from "../components/ui";
 import { api, queryKeys } from "../lib/api";
-import { currentMonth, formatDate, formatMonth, shiftMonth } from "../lib/date";
-import { moodEmoji } from "../lib/mood";
+import { currentMonth, formatMonth, shiftMonth } from "../lib/date";
 import { loadJson, saveJson } from "../lib/storage";
 
 export const Route = createFileRoute("/entries/")({
@@ -176,7 +176,7 @@ function EntryList({ entries, highlight }: { entries: EntrySummary[]; highlight?
             <div className="flex items-center justify-between">
               <span className="font-medium">{formatDate(e.date)}</span>
               <span className="text-xl" aria-hidden>
-                {moodEmoji(e.mood)}
+                {findMood(e.mood)?.emoji}
               </span>
             </div>
             <p className="mt-1 line-clamp-2 text-sm text-stone-600 dark:text-stone-400">
