@@ -20,6 +20,9 @@ jobs:
       # Action はタグの付け替えによる改ざんを防ぐためコミット SHA で固定する。
       # 末尾のバージョンコメントは Dependabot が SHA と一緒に更新する
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # 後続のステップに GitHub のトークンを残さない
+          persist-credentials: false
 
       # npm 11 以降（Node.js 24 に付属）でないと package.json の allowScripts が効かない。
       # バージョンは .node-version で手元と揃える
@@ -39,3 +42,34 @@ jobs:
 
       - name: Test
         run: npm test
+
+  # ワークフローの構文・式・シェルスクリプト（shellcheck）を確認する
+  actionlint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # 公式のダウンロードスクリプトをコミット SHA で固定して取得する
+      - name: Install actionlint
+        run: bash <(curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/914e7df21a07ef503a81201c76d2b11c789d3fca/scripts/download-actionlint.bash) 1.7.12
+
+      - name: Run actionlint
+        run: ./actionlint -color
+
+  # ワークフローのセキュリティ上の問題（権限の付けすぎ、スクリプトインジェクションなど）を確認する
+  zizmor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: zizmorcore/zizmor-action@cc914d7f3750a2d13d75c7f184a1060aa0e9d482 # v0.6.4
+        with:
+          version: 1.30.1
+          # 結果は Security タブ（code scanning）ではなくログに出し、指摘があればジョブを失敗させる
+          advanced-security: false
