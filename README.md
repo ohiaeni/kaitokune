@@ -70,13 +70,14 @@ AI からの質問に答えるだけで、毎日の日記がかんたんに書�
 kaitokune/
 ├── src/
 │   ├── worker/               # Cloudflare Worker（Hono）
-│   │   ├── app.ts            # アプリ本体（認証・DB・AI の注入、エラーハンドリング）
+│   │   ├── app.ts            # アプリ本体（ミドルウェアとルートをつなぐ）
+│   │   ├── middleware/       # 認証（auth.ts）、DB などの注入（context.ts）、1 日の AI 呼び出し上限（ai-quota.ts）
+│   │   ├── errors.ts         # エラーを API のエラー（ステータスと本文）に変換
 │   │   ├── access.ts         # Cloudflare Access の JWT の検証
 │   │   ├── routes/           # chat.ts（質問・日記生成）, entries.ts（CRUD）, usage.ts（消費状況）。入力の検証とレスポンスだけ
 │   │   ├── ai/               # プロバイダ（workers-ai / gemini）、フォールバック、プロンプト
 │   │   ├── db/               # Drizzle スキーマ（schema.ts）と、テーブルごとのデータアクセス（ユーザーで絞り込む）
 │   │   ├── export/           # エクスポートの Markdown の生成
-│   │   ├── usage.ts          # 1 日の AI 呼び出し上限
 │   │   └── cloudflare-usage.ts # GraphQL Analytics API から無料枠の消費状況を取得
 │   ├── shared/               # クライアントと Worker で共有する Zod スキーマ・定数・型・日付の表示
 │   └── client/               # React SPA

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import type { ApiErrorBody, NextResponse } from "../../src/shared/schemas";
+import type { ApiErrorBody, NextResponse, UsageResponse } from "../../src/shared/schemas";
 import { qa, resetDb, setup } from "../helpers";
 
 beforeEach(resetDb);
@@ -53,6 +53,15 @@ describe("POST /api/chat/next", () => {
     expect(limited.status).toBe(429);
     expect((await limited.json<ApiErrorBody>()).error).toBe("daily_limit");
     expect(calls.next).toHaveLength(2);
+  });
+
+  it("does not count requests that do not call the AI against the daily limit", async () => {
+    const { request } = setup();
+    await request("/api/chat/next", { method: "POST", json: { date: "2026-10-08", qa: qa(5) } });
+    await request("/api/chat/next", { method: "POST", json: { date: "2026/10/08", qa: [] } });
+    await request("/api/chat/compose", { method: "POST", json: { date: "2026-10-08", qa: [] } });
+    const usage = await (await request("/api/usage")).json<UsageResponse>();
+    expect(usage.ai.today.used).toBe(0);
   });
 
   it("returns 502 when every AI provider fails", async () => {
