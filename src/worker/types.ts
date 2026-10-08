@@ -9,5 +9,7 @@ export type AppEnv = {
     ai: DiaryAI;
     /** 外部 API（Cloudflare の GraphQL Analytics API）の呼び出しに使う。テストではモックを差し込む */
     fetcher: typeof fetch;
+    /** Access で確かめた、ログインしているユーザーのメールアドレス（小文字） */
+    userEmail: string;
   };
 };

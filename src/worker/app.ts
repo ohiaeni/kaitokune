@@ -1,6 +1,7 @@
 import { drizzle } from "drizzle-orm/d1";
 import { Hono } from "hono";
 import type { ApiErrorBody } from "../shared/schemas";
+import { AccessError, type AccessVerifier, createAccessVerifier } from "./access";
 import { createDiaryAI, createGeneratorsFromEnv, type DiaryAI } from "./ai";
 import { AllProvidersFailedError } from "./ai/fallback";
 import type { Bindings } from "./env";
@@ -19,13 +20,30 @@ export type AppOptions = {
   fetcher?: typeof fetch;
 };
 
+/**
+ * リクエストしたユーザーのメールアドレスを決める。
+ * 本番では Access の JWT を検証し、ローカル開発では DEV_USER_EMAIL を使う。どちらもなければ誰も通さない
+ */
+async function authenticate(env: Bindings, token: string | undefined, verify: AccessVerifier): Promise<string> {
+  const { ACCESS_TEAM_DOMAIN: teamDomain, ACCESS_AUD: aud, DEV_USER_EMAIL: devEmail } = env;
+  if (teamDomain || aud) {
+    if (!teamDomain || !aud) throw new AccessError("ACCESS_TEAM_DOMAIN and ACCESS_AUD must be set together");
+    if (!token) throw new AccessError("missing Cf-Access-Jwt-Assertion header");
+    return (await verify(token, { teamDomain, aud })).toLowerCase();
+  }
+  if (devEmail) return devEmail.toLowerCase();
+  throw new AccessError("ACCESS_TEAM_DOMAIN / ACCESS_AUD (or DEV_USER_EMAIL for local development) is not set");
+}
+
 export function createApp({
   createAI = (env) => createDiaryAI(createGeneratorsFromEnv(env)),
   fetcher = fetch,
 }: AppOptions = {}) {
+  const verifyAccess = createAccessVerifier(fetcher);
   return new Hono<AppEnv>()
     .basePath("/api")
     .use(async (c, next) => {
+      c.set("userEmail", await authenticate(c.env, c.req.header("cf-access-jwt-assertion"), verifyAccess));
       c.set("db", drizzle(c.env.DB));
       c.set("ai", createAI(c.env));
       c.set("fetcher", fetcher);
@@ -38,6 +56,10 @@ export function createApp({
     .route("/usage", usageRoutes)
     .notFound((c) => c.json<ApiErrorBody>({ error: "not_found", message: "Not Found" }, 404))
     .onError((err, c) => {
+      if (err instanceof AccessError) {
+        console.warn(`access denied: ${err.message}`);
+        return c.json<ApiErrorBody>({ error: "unauthorized", message: "ログインを確認できませんでした" }, 401);
+      }
       if (err instanceof DailyLimitError) {
         return c.json<ApiErrorBody>(
           { error: "daily_limit", message: `今日の AI 利用上限（${err.limit} 回）に達しました` },

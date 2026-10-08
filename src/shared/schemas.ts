@@ -64,7 +64,15 @@ export const createNoteRequestSchema = z.object({
 });
 export type Note = { id: number; date: string; body: string; createdAt: number };
 
-export type ApiErrorCode = "daily_limit" | "ai_unavailable" | "not_found" | "conflict" | "invalid_request" | "internal";
+export type ApiErrorCode =
+  | "unauthorized"
+  | "forbidden"
+  | "daily_limit"
+  | "ai_unavailable"
+  | "not_found"
+  | "conflict"
+  | "invalid_request"
+  | "internal";
 export type ApiErrorBody = { error: ApiErrorCode; message: string };
 
 export type UsageMeter = { used: number; limit: number };
