@@ -22,16 +22,104 @@
       "a11y": {
         "noLabelWithoutControl": {
           "level": "error",
-          "options": { "inputComponents": ["TextInput", "TextArea"] }
+          "options": {
+            "inputComponents": ["TextInput", "TextArea"]
+          }
         }
+      },
+      "nursery": {
+        "noDrizzleDeleteWithoutWhere": {
+          "level": "error",
+          "options": {
+            "drizzleObjectName": ["db"]
+          }
+        },
+        "noDrizzleUpdateWithoutWhere": {
+          "level": "error",
+          "options": {
+            "drizzleObjectName": ["db"]
+          }
+        },
+        "noMisusedPromises": "error",
+        "useExhaustiveSwitchCases": "error"
+      },
+      "correctness": {
+        "noUndeclaredDependencies": "error",
+        "noNestedComponentDefinitions": "error",
+        "noUnusedInstantiation": "error"
+      },
+      "suspicious": {
+        "noConsole": {
+          "level": "error",
+          "options": {
+            "allow": ["warn", "error"]
+          }
+        },
+        "noImportCycles": "error",
+        "noSkippedTests": "error",
+        "noEmptyBlockStatements": "error",
+        "noShadow": "error",
+        "noEvolvingTypes": "error",
+        "useErrorMessage": "error",
+        "noUnusedExpressions": "error",
+        "noBitwiseOperators": "error",
+        "noNestedPromises": "error",
+        "useArraySortCompare": "error",
+        "noEqualsToNull": "error",
+        "noForIn": "error"
+      },
+      "style": {
+        "useThrowOnlyError": "error",
+        "useThrowNewError": "error",
+        "noUselessElse": "error",
+        "useCollapsedElseIf": "error",
+        "useCollapsedIf": "error",
+        "useAtIndex": "error",
+        "useConsistentArrayType": "error",
+        "noInferrableTypes": "error",
+        "noParameterAssign": "error",
+        "useDefaultParameterLast": "error",
+        "useForOf": "error",
+        "noNegationElse": "error",
+        "noEnum": "error",
+        "useSelfClosingElements": "error",
+        "useFragmentSyntax": "error",
+        "noYodaExpression": "error",
+        "useConsistentCurlyBraces": "error",
+        "useShorthandAssign": "error",
+        "useTrimStartEnd": "error",
+        "noCommonJs": "error",
+        "useNumberNamespace": "error",
+        "noSubstr": "error",
+        "useSingleVarDeclarator": "error",
+        "useConsistentBuiltinInstantiation": "error"
+      },
+      "complexity": {
+        "noForEach": "error",
+        "noUselessStringConcat": "error",
+        "noUselessUndefined": "error",
+        "noUselessCatchBinding": "error",
+        "noUselessReturn": "error",
+        "noImplicitCoercions": "error",
+        "noVoid": "error",
+        "useArrayFind": "error",
+        "useWhile": "error"
+      },
+      "performance": {
+        "noDelete": "error",
+        "noNamespaceImport": "error"
       }
     }
   },
   "css": {
-    "parser": { "tailwindDirectives": true }
+    "parser": {
+      "tailwindDirectives": true
+    }
   },
   "html": {
-    "formatter": { "enabled": true }
+    "formatter": {
+      "enabled": true
+    }
   },
   "javascript": {
     "formatter": {
