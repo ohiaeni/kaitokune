@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UsageRouteImport } from './routes/usage'
 import { Route as EntriesIndexRouteImport } from './routes/entries.index'
 import { Route as EntriesDateRouteImport } from './routes/entries.$date'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UsageRoute = UsageRouteImport.update({
+  id: '/usage',
+  path: '/usage',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EntriesIndexRoute = EntriesIndexRouteImport.update({
@@ -31,30 +37,34 @@ const EntriesDateRoute = EntriesDateRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/usage': typeof UsageRoute
   '/entries/$date': typeof EntriesDateRoute
   '/entries/': typeof EntriesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/usage': typeof UsageRoute
   '/entries/$date': typeof EntriesDateRoute
   '/entries': typeof EntriesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/usage': typeof UsageRoute
   '/entries/$date': typeof EntriesDateRoute
   '/entries/': typeof EntriesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/entries/$date' | '/entries/'
+  fullPaths: '/' | '/usage' | '/entries/$date' | '/entries/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/entries/$date' | '/entries'
-  id: '__root__' | '/' | '/entries/$date' | '/entries/'
+  to: '/' | '/usage' | '/entries/$date' | '/entries'
+  id: '__root__' | '/' | '/usage' | '/entries/$date' | '/entries/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  UsageRoute: typeof UsageRoute
   EntriesDateRoute: typeof EntriesDateRoute
   EntriesIndexRoute: typeof EntriesIndexRoute
 }
@@ -66,6 +76,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/usage': {
+      id: '/usage'
+      path: '/usage'
+      fullPath: '/usage'
+      preLoaderRoute: typeof UsageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/entries/': {
@@ -87,6 +104,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  UsageRoute: UsageRoute,
   EntriesDateRoute: EntriesDateRoute,
   EntriesIndexRoute: EntriesIndexRoute,
 }

@@ -7,5 +7,7 @@ export type AppEnv = {
   Variables: {
     db: DrizzleD1Database;
     ai: DiaryAI;
+    /** 外部 API（Cloudflare の GraphQL Analytics API）の呼び出しに使う。テストではモックを差し込む */
+    fetcher: typeof fetch;
   };
 };

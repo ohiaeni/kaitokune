@@ -6,24 +6,32 @@ import { AllProvidersFailedError } from "./ai/fallback";
 import type { Bindings } from "./env";
 import { chatRoutes } from "./routes/chat";
 import { entryRoutes } from "./routes/entries";
+import { usageRoutes } from "./routes/usage";
 import type { AppEnv } from "./types";
 import { DailyLimitError } from "./usage";
 
 export type AppOptions = {
   /** テストではモックの AI を差し込む */
   createAI?: (env: Bindings) => DiaryAI;
+  /** テストではモックの fetch を差し込む */
+  fetcher?: typeof fetch;
 };
 
-export function createApp({ createAI = (env) => createDiaryAI(createGeneratorsFromEnv(env)) }: AppOptions = {}) {
+export function createApp({
+  createAI = (env) => createDiaryAI(createGeneratorsFromEnv(env)),
+  fetcher = fetch,
+}: AppOptions = {}) {
   return new Hono<AppEnv>()
     .basePath("/api")
     .use(async (c, next) => {
       c.set("db", drizzle(c.env.DB));
       c.set("ai", createAI(c.env));
+      c.set("fetcher", fetcher);
       await next();
     })
     .route("/chat", chatRoutes)
     .route("/entries", entryRoutes)
+    .route("/usage", usageRoutes)
     .notFound((c) => c.json<ApiErrorBody>({ error: "not_found", message: "Not Found" }, 404))
     .onError((err, c) => {
       if (err instanceof DailyLimitError) {

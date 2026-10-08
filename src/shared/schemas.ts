@@ -45,3 +45,23 @@ export type EntryDetail = { entry: Entry; qa: QA[] };
 
 export type ApiErrorCode = "daily_limit" | "ai_unavailable" | "not_found" | "invalid_request" | "internal";
 export type ApiErrorBody = { error: ApiErrorCode; message: string };
+
+export type UsageMeter = { used: number; limit: number };
+export type CloudflareUsage =
+  | { status: "unconfigured" }
+  | { status: "error"; message: string }
+  | {
+      status: "ok";
+      /** 集計した日（UTC。Cloudflare の無料枠は 00:00 UTC にリセットされる） */
+      date: string;
+      workersRequests: UsageMeter;
+      workersAiNeurons: UsageMeter;
+      d1RowsRead: UsageMeter;
+      d1RowsWritten: UsageMeter;
+      d1StorageBytes: UsageMeter;
+    };
+export type UsageResponse = {
+  /** アプリ内で数えている AI の呼び出し回数（AI_DAILY_LIMIT による上限） */
+  ai: { date: string; today: UsageMeter; history: { date: string; count: number }[] };
+  cloudflare: CloudflareUsage;
+};

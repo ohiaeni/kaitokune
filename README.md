@@ -29,7 +29,8 @@ AI からの質問に答えるだけで、毎日の日記がかんたんに書�
 │  Cloudflare Workers (Hono)                    │
 │   ├─ /api/chat/next     … 次の質問を生成        │
 │   ├─ /api/chat/compose  … 回答 → 日記本文を生成 │
-│   └─ /api/entries       … 日記の CRUD          │
+│   ├─ /api/entries       … 日記の CRUD          │
+│   └─ /api/usage         … 無料枠の消費状況     │
 │   ※ それ以外のパスは静的アセット（SPA）を返す     │
 └───────┬─────────────────────────┬────────────┘
         │                         │
@@ -67,13 +68,14 @@ kaitokune/
 ├── src/
 │   ├── worker/               # Cloudflare Worker（Hono）
 │   │   ├── app.ts            # アプリ本体（DB・AI の注入、エラーハンドリング）
-│   │   ├── routes/           # chat.ts（質問・日記生成）, entries.ts（CRUD）
+│   │   ├── routes/           # chat.ts（質問・日記生成）, entries.ts（CRUD）, usage.ts（消費状況）
 │   │   ├── ai/               # プロバイダ（workers-ai / gemini）、フォールバック、プロンプト
 │   │   ├── db/schema.ts      # Drizzle スキーマ
-│   │   └── usage.ts          # 1 日の AI 呼び出し上限
+│   │   ├── usage.ts          # 1 日の AI 呼び出し上限
+│   │   └── cloudflare-usage.ts # GraphQL Analytics API から無料枠の消費状況を取得
 │   ├── shared/               # クライアントと Worker で共有する Zod スキーマ・定数・型
 │   └── client/               # React SPA
-│       ├── routes/           # / （今日の日記）, /entries（一覧）, /entries/$date（詳細）
+│       ├── routes/           # / （今日の日記）, /entries（一覧）, /entries/$date（詳細）, /usage（使用量）
 │       ├── components/       # Interview（会話）, DiaryEditor, EntryView など
 │       └── lib/              # API クライアント、日付、localStorage
 ├── test/                     # Vitest（Workers ランタイム上で実行）
@@ -126,7 +128,7 @@ npm run dev                       # http://localhost:5173
 | `AI_DAILY_LIMIT` | `50` | 1 日あたりの AI 呼び出し上限 |
 | `TIMEZONE` | `Asia/Tokyo` | 利用上限を数える「1 日」の区切り |
 
-シークレットの `GEMINI_API_KEY` は、ローカルでは `.dev.vars`、本番では `npx wrangler secret put GEMINI_API_KEY` で設定する。
+シークレットの `GEMINI_API_KEY` は、ローカルでは `.dev.vars`、本番では `npx wrangler secret put GEMINI_API_KEY` で設定する。使用量の画面に Cloudflare の無料枠の消費状況を出す場合は、`CF_ANALYTICS_TOKEN`（Account Analytics: Read の API トークン）と `CF_ACCOUNT_ID` も同じ方法で設定する（[docs/setup.md の手順 10](docs/setup.md#アプリで確認する)）。
 
 ## デプロイ
 

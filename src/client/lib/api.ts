@@ -8,6 +8,7 @@ import type {
   NextResponse,
   QA,
   SaveEntryRequest,
+  UsageResponse,
 } from "../../shared/schemas";
 
 export class ApiError extends Error {
@@ -62,10 +63,13 @@ export const api = {
     request<Entry>(`/entries/${date}`, { method: "PUT", body: JSON.stringify(payload) }),
 
   deleteEntry: (date: string) => request<void>(`/entries/${date}`, { method: "DELETE" }),
+
+  getUsage: () => request<UsageResponse>("/usage"),
 };
 
 export const queryKeys = {
   entries: ["entries"] as const,
   entryList: (month?: string) => ["entries", "list", month ?? "all"] as const,
   entry: (date: string) => ["entries", "detail", date] as const,
+  usage: ["usage"] as const,
 };

@@ -234,6 +234,23 @@ Zero Trust の初回設定（9-1）で、Free プランでも支払い方法の�
 
 アプリ側でも、AI の呼び出しを 1 日 `AI_DAILY_LIMIT` 回（初期値 50 回）までに制限しています。日記 1 日分で使うのは最大 6 回程度です。変える場合は `wrangler.jsonc` の `vars` を編集して、もう一度デプロイしてください。
 
+### アプリで確認する
+
+アプリの「使用量」画面（`/usage`）で、今日の AI の呼び出し回数と、Cloudflare の無料枠（Workers のリクエスト数・Workers AI の Neurons・D1 の読み書き行数と容量）の消費状況を確認できます。Cloudflare の値は [GraphQL Analytics API](https://developers.cloudflare.com/analytics/graphql-api/)（無料）から取得するので、初回だけ読み取り専用の API トークンを Worker に登録します。登録しなければ、AI の呼び出し回数だけが表示されます。
+
+1. [Cloudflare のダッシュボード](https://dash.cloudflare.com/profile/api-tokens) の「My Profile」→「API Tokens」→「Create Token」→「Create Custom Token」を開く
+2. 「Permissions」を「Account」→「Account Analytics」→「Read」だけにする（デプロイ用のトークンとは分け、ほかの権限は付けない）
+3. 「Account Resources」を自分のアカウントだけにする
+4. 「Continue to summary」→「Create Token」で発行し、表示されたトークンをコピーする
+5. Worker のシークレットに登録する（アカウント ID は `npx wrangler whoami` で確認できます）
+
+```sh
+npx wrangler secret put CF_ANALYTICS_TOKEN   # 4 でコピーしたトークンを貼り付ける
+npx wrangler secret put CF_ACCOUNT_ID        # アカウント ID を貼り付ける
+```
+
+シークレットは Worker に保存されるので、デプロイのたびに登録し直す必要はありません。ローカルで試すときは `.dev.vars` に同じ名前で書きます。
+
 ---
 
 ## 更新したときのデプロイ
