@@ -49,6 +49,8 @@ export const api = {
   listEntries: (month?: string) =>
     request<EntrySummary[]>(`/entries${month ? `?month=${encodeURIComponent(month)}` : ""}`),
 
+  searchEntries: (q: string) => request<EntrySummary[]>(`/entries?q=${encodeURIComponent(q)}`),
+
   /** 日記がなければ null を返す */
   getEntry: async (date: string) => {
     try {
@@ -73,6 +75,7 @@ export const api = {
 export const queryKeys = {
   entries: ["entries"] as const,
   entryList: (month?: string) => ["entries", "list", month ?? "all"] as const,
+  entrySearch: (q: string) => ["entries", "search", q] as const,
   entry: (date: string) => ["entries", "detail", date] as const,
   usage: ["usage"] as const,
 };

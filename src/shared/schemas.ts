@@ -1,10 +1,12 @@
 import { z } from "zod";
-import { DATE_PATTERN, MAX_QUESTIONS, MONTH_PATTERN } from "./constants";
+import { DATE_PATTERN, MAX_QUESTIONS, MONTH_PATTERN, SEARCH_QUERY_MAX_LENGTH } from "./constants";
 
 export * from "./constants";
 
 export const dateSchema = z.string().regex(DATE_PATTERN, "YYYY-MM-DD 形式で指定してください");
 export const monthSchema = z.string().regex(MONTH_PATTERN, "YYYY-MM 形式で指定してください");
+
+export const searchQuerySchema = z.string().trim().min(1).max(SEARCH_QUERY_MAX_LENGTH);
 
 const qaSchema = z.object({
   question: z.string().trim().min(1).max(500),

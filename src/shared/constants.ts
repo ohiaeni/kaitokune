@@ -7,3 +7,6 @@ export const MAX_QUESTIONS = 5;
 
 export const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 export const MONTH_PATTERN = /^\d{4}-\d{2}$/;
+
+/** 日記の検索語の最大文字数 */
+export const SEARCH_QUERY_MAX_LENGTH = 50;
