@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import { cloudflare } from "@cloudflare/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
@@ -5,6 +6,10 @@ import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
 export default defineConfig({
+  resolve: {
+    // shadcn/ui の部品が使うパスエイリアス（tsconfig.app.json の paths と合わせる）
+    alias: { "@": fileURLToPath(new URL("./src/client", import.meta.url)) },
+  },
   plugins: [
     // react プラグインより前に置く必要がある
     tanstackRouter({

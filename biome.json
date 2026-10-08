@@ -22,7 +22,7 @@
       "a11y": {
         "noLabelWithoutControl": {
           "level": "error",
-          "options": { "inputComponents": ["TextInput", "TextArea"] }
+          "options": { "inputComponents": ["Input", "Textarea"] }
         }
       }
     }

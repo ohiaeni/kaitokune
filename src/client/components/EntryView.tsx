@@ -2,10 +2,12 @@ import { useState } from "react";
 import type { EntryDetail } from "../../shared/schemas";
 import { useDeleteEntry, useSaveEntry } from "../lib/queries";
 import { DiaryEditor } from "./DiaryEditor";
+import { ErrorMessage } from "./ErrorMessage";
 import { DateChanger } from "./entry/DateChanger";
 import { EntryBody } from "./entry/EntryBody";
 import { QaLog } from "./entry/QaLog";
-import { Button, Card, ErrorMessage } from "./ui";
+import { Button } from "./ui/button";
+import { Card } from "./ui/card";
 
 /** 保存済みの日記。表示 / 編集 / 日付変更を切り替え、削除もできる */
 export function EntryView({
@@ -48,13 +50,13 @@ export function EntryView({
       <QaLog qa={qa} />
 
       {changingDate && (
-        <Card>
+        <Card className="p-4">
           <DateChanger date={entry.date} onChanged={onDateChanged} onCancel={() => setChangingDate(false)} />
         </Card>
       )}
 
       <div className="flex flex-wrap gap-2">
-        <Button variant="secondary" onClick={() => setEditing(true)}>
+        <Button variant="outline" onClick={() => setEditing(true)}>
           編集する
         </Button>
         {!changingDate && (
@@ -63,7 +65,7 @@ export function EntryView({
           </Button>
         )}
         <Button
-          variant="danger"
+          variant="ghost-destructive"
           disabled={remove.isPending}
           onClick={() => {
             if (confirm("この日記を削除しますか？元に戻せません。")) remove.mutate(entry.date);

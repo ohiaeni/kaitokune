@@ -1,8 +1,10 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { DATE_PATTERN } from "../../shared/constants";
 import { formatDate } from "../../shared/date";
+import { EmptyState } from "../components/EmptyState";
 import { EntryView } from "../components/EntryView";
-import { EmptyState, ErrorMessage, Spinner } from "../components/ui";
+import { ErrorMessage } from "../components/ErrorMessage";
+import { Loading } from "../components/Loading";
 import { useEntry } from "../lib/queries";
 
 export const Route = createFileRoute("/entries/$date")({
@@ -22,13 +24,13 @@ function EntryPage() {
       <Link
         to="/entries"
         search={{ month: date.slice(0, 7) }}
-        className="self-start text-sm text-stone-500 hover:underline"
+        className="self-start text-sm text-muted-foreground hover:underline"
       >
         ← 一覧に戻る
       </Link>
       <h1 className="text-2xl font-bold">{formatDate(date)}</h1>
       {entry.isPending ? (
-        <Spinner />
+        <Loading />
       ) : entry.isError ? (
         <ErrorMessage error={entry.error} onRetry={() => entry.refetch()} />
       ) : entry.data ? (

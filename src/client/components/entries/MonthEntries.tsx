@@ -1,7 +1,10 @@
 import { type EntriesView, useEntriesView } from "../../hooks/useEntriesView";
 import { useEntryList } from "../../lib/queries";
+import { EmptyState } from "../EmptyState";
+import { ErrorMessage } from "../ErrorMessage";
+import { Loading } from "../Loading";
 import { MonthCalendar } from "../MonthCalendar";
-import { EmptyState, ErrorMessage, SegmentedControl, Spinner } from "../ui";
+import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
 import { EntryList } from "./EntryList";
 import { MonthNav } from "./MonthNav";
 
@@ -19,10 +22,29 @@ export function MonthEntries({ month, onMonthChange }: { month: string; onMonthC
     <>
       <MonthNav month={month} onChange={onMonthChange} />
 
-      <SegmentedControl legend="表示" options={VIEWS} value={view} onChange={setView} />
+      <ToggleGroup
+        type="single"
+        spacing={1}
+        aria-label="表示"
+        value={view}
+        // 選んでいるものをもう一度押すと空文字になるので、そのときは切り替えない
+        onValueChange={(next) => next && setView(next as EntriesView)}
+        className="self-center rounded-full bg-secondary p-1"
+      >
+        {VIEWS.map((v) => (
+          <ToggleGroupItem
+            key={v.value}
+            value={v.value}
+            size="sm"
+            className="rounded-full px-4 font-normal text-muted-foreground hover:bg-transparent hover:text-foreground data-[state=on]:bg-background data-[state=on]:font-medium data-[state=on]:text-foreground data-[state=on]:shadow-sm"
+          >
+            {v.label}
+          </ToggleGroupItem>
+        ))}
+      </ToggleGroup>
 
       {list.isPending ? (
-        <Spinner />
+        <Loading />
       ) : list.isError ? (
         <ErrorMessage error={list.error} onRetry={() => list.refetch()} />
       ) : view === "calendar" ? (

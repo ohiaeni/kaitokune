@@ -1,11 +1,12 @@
 import { useEffect, useRef } from "react";
 import { MIN_QUESTIONS } from "../../shared/constants";
 import { useInterview } from "../hooks/useInterview";
+import { ErrorMessage } from "./ErrorMessage";
 import { AnswerForm } from "./interview/AnswerForm";
 import { ChatLog } from "./interview/ChatLog";
 import { ComposedEditor } from "./interview/ComposedEditor";
 import { ComposePrompt } from "./interview/ComposePrompt";
-import { Button, ErrorMessage } from "./ui";
+import { Button } from "./ui/button";
 
 export function Interview({ date }: { date: string }) {
   const { draft, busy, error, submitAnswer, finishQuestions, compose, save, restart, backToChat } = useInterview(date);
@@ -43,7 +44,8 @@ export function Interview({ date }: { date: string }) {
       {draft.qa.length > 0 && (
         <Button
           variant="ghost"
-          className="self-start text-xs"
+          size="sm"
+          className="self-start text-xs text-muted-foreground"
           disabled={busy !== null}
           onClick={() => {
             if (confirm("会話を最初からやり直しますか？")) restart();

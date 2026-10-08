@@ -5,6 +5,7 @@
 AI の質問に答えるだけで日記が書ける、少人数（今は 2 人）で使うアプリ。詳しい構成・データモデル・設定値は [README.md](README.md)、Cloudflare のセットアップは [docs/setup.md](docs/setup.md) を参照する。
 
 - `src/client/`: React SPA（Vite・TanStack Router / Query・Tailwind CSS）
+  - `components/ui/`: shadcn/ui の部品。`npx shadcn@latest add <部品名>` で追加し、色は `index.css` のテーマ変数（stone・amber）で決める
 - `src/worker/`: Cloudflare Worker（Hono）。`/api/*` を処理し、それ以外は静的アセットを返す
   - `ai/`: Workers AI（メイン）と Gemini（予備）のプロバイダ、フォールバック、プロンプト
   - `db/`: Drizzle のスキーマ（`schema.ts`）と、テーブルごとのデータアクセス（`entries.ts`・`notes.ts` など）。クエリはここにだけ書き、`routes/` からは `drizzle-orm` を使わない

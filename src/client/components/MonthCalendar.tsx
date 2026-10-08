@@ -14,7 +14,7 @@ export function MonthCalendar({ month, entries }: { month: string; entries: Entr
       {WEEKDAYS.map((w, i) => (
         <div
           key={w}
-          className={`pb-1 text-xs ${i === 0 ? "text-red-600 dark:text-red-400" : i === 6 ? "text-sky-600 dark:text-sky-400" : "text-stone-500"}`}
+          className={`pb-1 text-xs ${i === 0 ? "text-red-600 dark:text-red-400" : i === 6 ? "text-sky-600 dark:text-sky-400" : "text-muted-foreground"}`}
         >
           {w}
         </div>
@@ -30,7 +30,7 @@ export function MonthCalendar({ month, entries }: { month: string; entries: Entr
         const dayLabel = (
           <span
             className={`flex size-6 items-center justify-center rounded-full text-xs ${
-              isToday ? "bg-amber-600 font-bold text-white dark:bg-amber-500 dark:text-stone-950" : ""
+              isToday ? "bg-primary font-bold text-primary-foreground" : ""
             }`}
           >
             {day}
@@ -41,7 +41,7 @@ export function MonthCalendar({ month, entries }: { month: string; entries: Entr
           return (
             <div
               key={date}
-              className={`flex aspect-square flex-col items-center gap-0.5 rounded-xl p-1 ${date > todayDate ? "text-stone-300 dark:text-stone-700" : "text-stone-500"}`}
+              className={`flex aspect-square flex-col items-center gap-0.5 rounded-xl p-1 ${date > todayDate ? "text-muted-foreground/40" : "text-muted-foreground"}`}
             >
               {dayLabel}
             </div>
@@ -55,7 +55,7 @@ export function MonthCalendar({ month, entries }: { month: string; entries: Entr
             to="/entries/$date"
             params={{ date }}
             aria-label={`${formatDate(date)}の日記${mood ? `（気分: ${mood.label}）` : ""}`}
-            className="flex aspect-square flex-col items-center gap-0.5 rounded-xl border border-stone-200 bg-white p-1 transition hover:border-amber-400 dark:border-stone-800 dark:bg-stone-900 dark:hover:border-amber-600"
+            className="flex aspect-square flex-col items-center gap-0.5 rounded-xl border bg-card p-1 text-card-foreground transition hover:border-primary/60"
           >
             {dayLabel}
             <span className="text-lg leading-none sm:text-xl" aria-hidden>

@@ -28,6 +28,7 @@ words:
   - oneline
   - Qwen
   - refetches
+  - shadcn
   - shellcheck
   - Supabase
   - typegen
