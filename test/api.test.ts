@@ -176,6 +176,46 @@ describe("/api/entries", () => {
     expect(list[0].excerpt).toBe("2026-10-15 の日記");
   });
 
+  it("searches entries by keyword in the body and the conversation, newest first", async () => {
+    const { request } = setup();
+    const long = `${"あ".repeat(40)}カフェに行った${"い".repeat(100)}`;
+    await request("/api/entries/2026-09-01", { method: "PUT", json: { body: long } });
+    await request("/api/entries/2026-10-01", {
+      method: "PUT",
+      json: { body: "家で過ごした", qa: [{ question: "どこへ？", answer: "駅前のカフェ" }] },
+    });
+    await request("/api/entries/2026-10-02", { method: "PUT", json: { body: "関係ない日" } });
+    const search = async (q: string) =>
+      (await request(`/api/entries?q=${encodeURIComponent(q)}`)).json<EntrySummary[]>();
+
+    const results = await search("カフェ");
+    expect(results.map((e) => e.date)).toEqual(["2026-10-01", "2026-09-01"]);
+    // 本文に一致しなければ問答から、本文が長ければ一致した箇所の前後を抜粋する
+    expect(results[0].excerpt).toBe("駅前のカフェ");
+    expect(results[1].excerpt).toBe(`…${"あ".repeat(20)}カフェに行った${"い".repeat(53)}…`);
+
+    expect(await search("見つからない")).toEqual([]);
+  });
+
+  it("treats LIKE wildcards in the keyword literally", async () => {
+    const { request } = setup();
+    await request("/api/entries/2026-10-01", { method: "PUT", json: { body: "達成率は 100% だった" } });
+    await request("/api/entries/2026-10-02", { method: "PUT", json: { body: "snake_case と書いた" } });
+    await request("/api/entries/2026-10-03", { method: "PUT", json: { body: "10 回 snakeXcase" } });
+    const search = async (q: string) =>
+      (await (await request(`/api/entries?q=${encodeURIComponent(q)}`)).json<EntrySummary[]>()).map((e) => e.date);
+
+    expect(await search("%")).toEqual(["2026-10-01"]);
+    expect(await search("e_c")).toEqual(["2026-10-02"]);
+    expect(await search("\\")).toEqual([]);
+  });
+
+  it("rejects an empty or too long keyword", async () => {
+    const { request } = setup();
+    expect((await request("/api/entries?q=")).status).toBe(400);
+    expect((await request(`/api/entries?q=${"a".repeat(51)}`)).status).toBe(400);
+  });
+
   it("deletes an entry and its conversation", async () => {
     const { request } = setup();
     await request("/api/entries/2026-10-08", { method: "PUT", json: { body: "本文", qa: qa(2) } });
