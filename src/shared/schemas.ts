@@ -90,7 +90,7 @@ export type CloudflareUsage =
       d1StorageBytes: UsageMeter;
     };
 export type UsageResponse = {
-  /** アプリ内で数えている AI の呼び出し回数（AI_DAILY_LIMIT による上限） */
+  /** アプリ内で数えている、ログインしているユーザーの AI の呼び出し回数（AI_DAILY_LIMIT による 1 人あたりの上限） */
   ai: { date: string; today: UsageMeter; history: { date: string; count: number }[] };
   cloudflare: CloudflareUsage;
 };

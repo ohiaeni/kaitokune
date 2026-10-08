@@ -30,8 +30,8 @@
     "WORKERS_AI_MODEL": "@cf/google/gemma-4-26b-a4b-it",
     // Gemini のモデル（GEMINI_API_KEY を設定したときだけ使う予備）
     "GEMINI_MODEL": "gemini-flash-latest",
-    // 無料枠を守るための、1 日あたりの AI 呼び出し上限
-    "AI_DAILY_LIMIT": "50",
+    // 無料枠を守るための、1 人 1 日あたりの AI 呼び出し上限（ユーザーごとに数える。合計がユーザー数 × この値になる）
+    "AI_DAILY_LIMIT": "25",
     // 利用上限を数える「1 日」の区切りに使うタイムゾーン
     "TIMEZONE": "Asia/Tokyo"
   }

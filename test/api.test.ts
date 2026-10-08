@@ -546,6 +546,23 @@ describe("user isolation", () => {
     expect(other.calls.compose[0]).toMatchObject({ notes: [] });
   });
 
+  it("counts the daily AI limit per user", async () => {
+    const owner = setup({}, { AI_DAILY_LIMIT: "1" });
+    const other = setup({}, { AI_DAILY_LIMIT: "1", DEV_USER_EMAIL: OTHER });
+    const next = (user: typeof owner) =>
+      user.request("/api/chat/next", { method: "POST", json: { date: "2026-10-08", qa: [] } });
+
+    expect((await next(owner)).status).toBe(200);
+    expect((await next(owner)).status).toBe(429);
+    // 自分が上限に達しても、相手はまだ使える
+    expect((await next(other)).status).toBe(200);
+    expect((await next(other)).status).toBe(429);
+
+    const usage = await (await other.request("/api/usage")).json<UsageResponse>();
+    expect(usage.ai.today).toEqual({ used: 1, limit: 1 });
+    expect(usage.ai.history).toHaveLength(1);
+  });
+
   it("does not include the user id in responses", async () => {
     const { owner, note } = await seedOwner();
     const detail = await (await owner.request("/api/entries/2026-10-07")).json<EntryDetail>();
