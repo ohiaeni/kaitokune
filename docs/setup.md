@@ -1,6 +1,6 @@
 # セットアップ手順
 
-kaitokune をローカルで動かし、Cloudflare にデプロイして自分だけが使える状態にするまでの手順です。すべて無料の範囲で完結します。
+kaitokune をローカルで動かし、Cloudflare にデプロイして、登録した人だけが使える状態にするまでの手順です。すべて無料の範囲で完結します。
 
 Cloudflare や Google のダッシュボードは画面構成や項目名がよく変わります。この手順書の項目名が見当たらない場合は、近い名前のメニューを探してください。
 
@@ -14,7 +14,7 @@ Cloudflare や Google のダッシュボードは画面構成や項目名がよ�
 | [6](#6-ローカルで動かす) | ローカルで動かす | 3 分 |
 | [7](#7-本番用の-d1-データベースを作成する) | 本番用の D1 データベースを作成する | 2 分 |
 | [8](#8-デプロイする) | デプロイする | 2 分 |
-| [9](#9-cloudflare-access-で自分だけに制限する) | **Cloudflare Access で自分だけに制限する（必須）** | 5 分 |
+| [9](#9-cloudflare-access-で使える人を制限する) | **Cloudflare Access で使える人を制限し、ユーザーを登録する（必須）** | 10 分 |
 | [10](#10-無料枠の使用量を確認する) | 無料枠の使用量を確認する | – |
 
 > [!IMPORTANT]
@@ -110,9 +110,12 @@ GEMINI_API_KEY=発行したキー
 ## 6. ローカルで動かす
 
 ```sh
-npm run db:migrate:local   # ローカルの D1（.wrangler/ 内の SQLite）にテーブルを作る
-npm run dev                # http://localhost:5173 で起動
+cp .dev.vars.example .dev.vars   # 手順 5 で作っていれば不要
+npm run db:migrate:local         # ローカルの D1（.wrangler/ 内の SQLite）にテーブルを作る
+npm run dev                      # http://localhost:5173 で起動
 ```
+
+ローカルでは Cloudflare Access を通らないので、`.dev.vars` の `DEV_USER_EMAIL` に書いたメールアドレスのユーザーとして動きます。初期値の `owner@example.invalid` はマイグレーションで作られるユーザーなので、そのままで使えます。`DEV_USER_EMAIL` がないと、API はすべて 401（ログインを確認できませんでした）になります。
 
 ブラウザで <http://localhost:5173> を開き、AI から最初の質問が表示されれば成功です。
 
@@ -185,11 +188,17 @@ https://kaitokune.<サブドメイン>.workers.dev
 ```
 
 > [!CAUTION]
-> **この時点では、URL を知っている人なら誰でも日記を読み書きできます。** アプリ自体にはログイン機能がないので、続けて手順 9 を必ず行ってください。
+> **この時点ではまだ使えません。** Worker は Access の設定がないと、API へのリクエストをすべて 401 で断ります（日記が誰かに読まれることはありません）。続けて手順 9 を必ず行ってください。
 
-## 9. Cloudflare Access で自分だけに制限する
+## 9. Cloudflare Access で使える人を制限する
 
 Cloudflare Access（Zero Trust の機能）を使うと、アプリの前にログイン画面が挟まり、許可したメールアドレスの人しかアクセスできなくなります。Free プランは 50 ユーザーまで無料です。
+
+Worker は Access が付ける JWT を検証してメールアドレスを確かめ、さらに D1 の `users` テーブルに登録された人だけを通します。日記はユーザーごとに分かれていて、ほかの人の日記は読めません。使えるようにするには、次の 3 つがすべて必要です。
+
+- Access のポリシーでメールアドレスを許可する（9-3）
+- Worker に Access の設定を登録する（9-5）
+- `users` テーブルにメールアドレスを登録する（9-6）
 
 ### 9-1. Zero Trust を初期設定する（初回のみ）
 
@@ -203,10 +212,10 @@ Cloudflare Access（Zero Trust の機能）を使うと、アプリの前にロ�
 2. `workers.dev` の行のメニュー（`⋯`）から **Cloudflare Access** を有効にする
 3. 有効にすると Access アプリケーションが自動で作成されます。表示されるリンク（**Manage Cloudflare Access**）からその設定を開く
 
-### 9-3. 自分のメールアドレスだけを許可する
+### 9-3. 使う人のメールアドレスだけを許可する
 
 1. 作成された Access アプリケーションの **Policies** を開き、ポリシーを編集する
-2. **Include** のルールを **Emails** にし、自分のメールアドレスだけを入力する
+2. **Include** のルールを **Emails** にし、使う人（自分ともう 1 人など）のメールアドレスだけを入力する
 3. 保存する
 
 ログイン方法は、デフォルトの **One-time PIN**（メールに届くコードで認証する方式）のままで構いません。
@@ -217,6 +226,49 @@ Cloudflare Access（Zero Trust の機能）を使うと、アプリの前にロ�
 2. アプリではなく Cloudflare Access のログイン画面が表示されることを確認する
 3. 自分のメールアドレスを入力し、届いたコードでログインできることを確認する
 4. 別のメールアドレスではコードが届かない（ログインできない）ことも確認しておくと安心です
+
+### 9-5. Worker に Access の設定を登録する
+
+Worker が JWT を検証するために、チームドメインと Access アプリケーションの AUD タグを登録します。
+
+1. Zero Trust の **Settings** でチームドメイン（`https://<チーム名>.cloudflareaccess.com`）を確認する
+2. **Access** → **Applications** で 9-2 のアプリケーションを開き、**Application Audience (AUD) Tag** をコピーする
+3. Worker のシークレットに登録する
+
+```sh
+npx wrangler secret put ACCESS_TEAM_DOMAIN   # https://<チーム名>.cloudflareaccess.com を貼り付ける
+npx wrangler secret put ACCESS_AUD           # 2 でコピーした AUD タグを貼り付ける
+```
+
+> [!WARNING]
+> `DEV_USER_EMAIL` は本番に登録しないでください。`ACCESS_TEAM_DOMAIN` と `ACCESS_AUD` があれば無視されますが、それらを消すと JWT を検証せずにそのユーザーとして通してしまいます。
+
+### 9-6. ユーザーを登録する
+
+D1 の `users` テーブルに、使う人のメールアドレスを**小文字で**登録します。Access を通っても、ここにない人は 403（まだ登録されていません）になります。
+
+マイグレーションで、最初のユーザー（id=1）が仮のメールアドレス `owner@example.invalid` で作られています。v0.2.0 以前に書いた日記はこのユーザーのものです。まず、これを自分のメールアドレスに書き換えます。
+
+```sh
+npx wrangler d1 execute kaitokune --remote \
+  --command "UPDATE users SET email = 'you@example.com' WHERE id = 1"
+```
+
+もう 1 人を追加します（9-3 の Access のポリシーにも追加しておきます）。
+
+```sh
+npx wrangler d1 execute kaitokune --remote \
+  --command "INSERT INTO users (email, created_at) VALUES ('partner@example.com', unixepoch() * 1000)"
+```
+
+登録されている人は次のコマンドで確認できます。
+
+```sh
+npx wrangler d1 execute kaitokune --remote --command "SELECT * FROM users"
+```
+
+> [!CAUTION]
+> ユーザーを削除する（`DELETE FROM users WHERE ...`）と、その人の日記・会話ログ・メモもすべて消えます。使えなくするだけなら、Access のポリシーからメールアドレスを外してください。
 
 ### カードを登録したくない場合
 
@@ -232,7 +284,7 @@ Zero Trust の初回設定（9-1）で、Free プランでも支払い方法の�
 | Gemini の使用量 | Google AI Studio の使用量（Usage）ページ |
 | 本番のログをリアルタイムで見る | `npx wrangler tail` |
 
-アプリ側でも、AI の呼び出しを 1 日 `AI_DAILY_LIMIT` 回（初期値 50 回）までに制限しています。日記 1 日分で使うのは最大 6 回程度です。変える場合は `wrangler.jsonc` の `vars` を編集して、もう一度デプロイしてください。
+アプリ側でも、AI の呼び出しを 1 人 1 日 `AI_DAILY_LIMIT` 回（初期値 25 回）までに制限しています。ユーザーごとに数えるので、全体ではユーザー数 × `AI_DAILY_LIMIT` 回までです（2 人なら 50 回）。ユーザーを増やすときは、合計が無料枠に収まるように `AI_DAILY_LIMIT` を下げてください。日記 1 日分で使うのは最大 6 回程度です。変える場合は `wrangler.jsonc` の `vars` を編集して、もう一度デプロイしてください。
 
 ### アプリで確認する
 
@@ -276,6 +328,27 @@ gh secret set CLOUDFLARE_ACCOUNT_ID --env production  # 6 のアカウント ID 
 
 production の Environment は、`v*.*.*` のタグと main ブランチからしか使えないように設定しています。
 
+### v0.2.0 から v0.3.0 に更新するとき
+
+v0.3.0 で日記をユーザーごとに分けました。マイグレーションでテーブルを作り直し、既存の日記・会話ログ・メモはすべて id=1 のユーザーに割り当てます。次の順に進めてください。
+
+1. [手順 9-5](#9-5-worker-に-access-の設定を登録する) の `ACCESS_TEAM_DOMAIN` と `ACCESS_AUD` を登録する（今のバージョンには影響しません）
+2. 万一に備え、今の D1 に戻せる時点（bookmark）を控える。Time Travel は無料で、過去 7 日（Free プラン）まで戻せます
+
+   ```sh
+   npx wrangler d1 time-travel info kaitokune   # 表示された bookmark を控える
+   ```
+
+3. v0.3.0 をリリースする（マイグレーションの適用とデプロイ）
+4. [手順 9-6](#9-6-ユーザーを登録する) で id=1 のメールアドレスを自分のものに書き換え、もう 1 人を登録する。書き換えるまでは、自分も 403 になります
+5. 今までの日記が読めることを確かめる
+
+日記が消えた・読めないなどの問題があれば、控えた bookmark に戻してから、前のバージョンをデプロイし直します。
+
+```sh
+npx wrangler d1 time-travel restore kaitokune --bookmark=<控えた bookmark>
+```
+
 ### 手元からデプロイする
 
 ```sh
@@ -302,7 +375,9 @@ npm run deploy
 | ログに `Binding AI needs to be run remotely` と出る | `npm run dev:local` では Workers AI を使えません。Gemini のキーを設定するか、`npm run dev` を使ってください |
 | ログに `workers-ai:... failed` と `internal error; reference = ...` が出る | `WORKERS_AI_MODEL` のモデルが提供終了している可能性があります。`npx wrangler ai models list` で現在のモデルを確認し、`wrangler.jsonc` を変更してください（日本語に強い Gemma / Qwen 系がおすすめ） |
 | ログに `unexpected response` と出て、`content` が空で `reasoning` だけが入っている | 推論（thinking）モデルが思考だけで出力上限を使い切っています。思考を無効にできないモデルの場合は、別のモデルに変更してください |
-| 「今日の AI 利用上限に達しました」と出る（API は 429） | `AI_DAILY_LIMIT` に達しました。`TIMEZONE` の日付が変わるとリセットされます |
+| 「今日の AI 利用上限に達しました」と出る（API は 429） | 自分の `AI_DAILY_LIMIT`（1 人あたり）に達しました。`TIMEZONE` の日付が変わるとリセットされます |
+| 「ログインを確認できませんでした」と出る（API は 401） | 本番では `ACCESS_TEAM_DOMAIN` と `ACCESS_AUD` が未登録か間違っています（[手順 9-5](#9-5-worker-に-access-の設定を登録する)）。ローカルでは `.dev.vars` に `DEV_USER_EMAIL` がありません。原因はログに `access denied: ...` と出ます |
+| 「〜 はまだ登録されていません」と出る（API は 403） | Access は通りましたが、`users` テーブルにメールアドレスがありません。[手順 9-6](#9-6-ユーザーを登録する) で登録してください |
 | `npm run db:migrate:remote` やデプロイで `The database ... could not be found [code: 7404]` と出る | `wrangler.jsonc` の `DB` の `database_id` が実際のデータベースと一致していません。`npx wrangler d1 list` で ID を確認し、[手順 7](#7-本番用の-d1-データベースを作成する) のとおり置き換えてください |
 | `requires compatibility date "..."` で起動しない | `wrangler.jsonc` の `compatibility_date` がローカルの実行環境より新しすぎます。表示された日付以前に下げてください |
 | 本番で日記一覧などが空になる | ローカルと本番の D1 は別のデータベースです。ローカルで書いた日記は本番には反映されません |

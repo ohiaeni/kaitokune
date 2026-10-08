@@ -17,16 +17,17 @@ AI からの質問に答えるだけで、毎日の日記がかんたんに書�
 
 ## 構成
 
-利用者が 1 人（自分だけ）の前提で、アプリにはログイン機能を持たせない。公開するときは Cloudflare Access（無料）で自分のメールアドレスだけを通す。
+少人数（今は 2 人）で使う前提で、アプリにはログイン画面を持たせない。Cloudflare Access（無料）で許可したメールアドレスの人だけを通し、Worker は Access が付ける JWT を検証してユーザーを決める。日記などのデータはすべてユーザーごとに分かれていて、ほかの人のデータは読み書きできない。
 
 ```text
 ┌──────────────────────────────┐
 │  ブラウザ / スマホ             │
 │  React + Vite + Tailwind CSS │
 └──────────────┬───────────────┘
-               │ HTTPS（Cloudflare Access で本人のみ許可）
+               │ HTTPS（Cloudflare Access で許可した人のみ）
 ┌──────────────▼───────────────────────────────┐
 │  Cloudflare Workers (Hono)                    │
+│   ※ Access の JWT を検証し、users に登録した人だけ通す │
 │   ├─ /api/chat/next     … 次の質問を生成        │
 │   ├─ /api/chat/compose  … 回答 → 日記本文を生成 │
 │   ├─ /api/entries       … 日記の CRUD          │
@@ -51,7 +52,7 @@ AI からの質問に答えるだけで、毎日の日記がかんたんに書�
 | API | Hono on Cloudflare Workers | Workers の無料枠（1 日 10 万リクエスト程度）で個人利用には十分 |
 | 静的ホスティング | Workers Static Assets | 無料・帯域無制限 |
 | DB | Cloudflare D1 + Drizzle ORM | D1 の無料枠（数 GB）。テキストの日記なら事実上使い切れない |
-| 認証 | Cloudflare Access（Zero Trust 無料プラン） | アプリのコードに認証を持たずに、自分だけに制限できる |
+| 認証 | Cloudflare Access（Zero Trust 無料プラン） | 50 ユーザーまで無料。ログイン画面を作らずに利用者を制限でき、Worker は JWT を検証するだけで済む |
 | AI（メイン） | Cloudflare Workers AI | 1 日あたりの無料枠（Neurons）。API キー不要 |
 | AI（予備） | Google Gemini API 無料ティア | 日本語の品質が高い。Workers AI が失敗したときのフォールバック先 |
 | 品質 | Biome / Vitest（`@cloudflare/vitest-pool-workers`） | Workers ランタイム上でローカル D1 を使ってテストする |
@@ -59,7 +60,7 @@ AI からの質問に答えるだけで、毎日の日記がかんたんに書�
 ### 「完全無料」を守るためのガード
 
 - **カードを登録しない**: Cloudflare・Google AI Studio ともにカード未登録のまま無料枠だけを使う。カード未登録なら超過しても課金されず、エラーになるだけ。
-- **アプリ側の利用上限**: AI の呼び出し回数を D1 で日ごとに数え、`AI_DAILY_LIMIT`（初期値 50 回）を超えたら 429 を返して止める。日記 1 日分で使うのは最大 6 回程度。
+- **アプリ側の利用上限**: AI の呼び出し回数を D1 でユーザーごと・日ごとに数え、`AI_DAILY_LIMIT`（1 人あたり。初期値 25 回）を超えたら 429 を返して止める。全体ではユーザー数 × `AI_DAILY_LIMIT` 回まで（2 人なら 50 回）。日記 1 日分で使うのは最大 6 回程度。
 - **フォールバック**: Workers AI がエラー（レート制限・障害・不正な出力など）になったら、Gemini に切り替える。
 - **会話の上限**: 質問は最大 5 問。5 問に達したら AI を呼ばずに会話を終える。
 
@@ -69,7 +70,8 @@ AI からの質問に答えるだけで、毎日の日記がかんたんに書�
 kaitokune/
 ├── src/
 │   ├── worker/               # Cloudflare Worker（Hono）
-│   │   ├── app.ts            # アプリ本体（DB・AI の注入、エラーハンドリング）
+│   │   ├── app.ts            # アプリ本体（認証・DB・AI の注入、エラーハンドリング）
+│   │   ├── access.ts         # Cloudflare Access の JWT の検証
 │   │   ├── routes/           # chat.ts（質問・日記生成）, entries.ts（CRUD）, usage.ts（消費状況）
 │   │   ├── ai/               # プロバイダ（workers-ai / gemini）、フォールバック、プロンプト
 │   │   ├── db/schema.ts      # Drizzle スキーマ
@@ -89,10 +91,13 @@ kaitokune/
 
 | テーブル | 主なカラム | 説明 |
 | --- | --- | --- |
-| `entries` | `date`（PK, YYYY-MM-DD）, `body`, `mood`（1〜5, 任意）, `created_at`, `updated_at` | 1 日 1 件の日記 |
-| `qa_logs` | `entry_date`（→ entries）, `position`, `question`, `answer` | 日記のもとになった AI との会話 |
-| `notes` | `date`, `body`, `created_at` | 日記を書く前にメモしておいた、その日の出来事や思ったこと（日記の生成で AI に渡す） |
-| `ai_usage` | `date`（PK）, `count` | AI 呼び出し回数（利用上限用） |
+| `users` | `id`（PK）, `email`（一意）, `created_at` | アプリを使える人。ここに登録したメールアドレスだけが API を使える |
+| `entries` | `user_id`（→ users）, `date`（YYYY-MM-DD）, `body`, `mood`（1〜5, 任意）, `created_at`, `updated_at` | 1 人 1 日 1 件の日記（PK は `user_id` + `date`） |
+| `qa_logs` | `user_id`, `entry_date`（→ entries）, `position`, `question`, `answer` | 日記のもとになった AI との会話 |
+| `notes` | `user_id`（→ users）, `date`, `body`, `created_at` | 日記を書く前にメモしておいた、その日の出来事や思ったこと（日記の生成で AI に渡す） |
+| `ai_usage` | `user_id`（→ users）, `date`, `count` | AI 呼び出し回数（利用上限用。PK は `user_id` + `date`） |
+
+`users` 以外のテーブルはすべて `user_id` を持ち、API は必ずログインしているユーザーの `user_id` で絞り込む。ユーザーを削除すると、そのユーザーのデータもすべて消える（ON DELETE CASCADE）。
 
 ## セットアップ
 
@@ -102,7 +107,7 @@ Cloudflare アカウントの作成からデプロイ、アクセス制限まで
 
 ```sh
 npm install
-cp .dev.vars.example .dev.vars    # Gemini を使う場合は GEMINI_API_KEY を記入
+cp .dev.vars.example .dev.vars    # DEV_USER_EMAIL はそのままでよい。Gemini を使う場合は GEMINI_API_KEY を記入
 npm run db:migrate:local          # ローカル D1 にテーブルを作成
 npx wrangler login                # Workers AI を使うために必要（ブラウザでログイン）
 npm run dev                       # http://localhost:5173
@@ -110,6 +115,7 @@ npm run dev                       # http://localhost:5173
 
 - Workers AI は開発中もリモート（自分のアカウントの無料枠）で動く。そのため `npm run dev` には Cloudflare へのログインが必要。
 - ログインせずに試すときは `npm run dev:local` を使う。この場合 Workers AI は使えず、`.dev.vars` に設定した Gemini だけで動く。
+- ローカルでは Access を通らないので、`.dev.vars` の `DEV_USER_EMAIL` のユーザーとして動く。初期値の `owner@example.invalid` はマイグレーションで作られるユーザー（id=1）。
 - `npm install` で Git フック（[lefthook](https://lefthook.dev/)）が入り、コミット前に変更したファイルへ Biome の lint・フォーマットがかかる。設定は `lefthook.yml`。
 
 ### 主なコマンド
@@ -128,10 +134,12 @@ npm run dev                       # http://localhost:5173
 | --- | --- | --- |
 | `WORKERS_AI_MODEL` | `@cf/google/gemma-4-26b-a4b-it` | Workers AI のモデル。`npx wrangler ai models list` で一覧を確認できる |
 | `GEMINI_MODEL` | `gemini-flash-latest` | 予備の Gemini モデル |
-| `AI_DAILY_LIMIT` | `50` | 1 日あたりの AI 呼び出し上限 |
+| `AI_DAILY_LIMIT` | `25` | 1 人 1 日あたりの AI 呼び出し上限（ユーザーごとに数える） |
 | `TIMEZONE` | `Asia/Tokyo` | 利用上限を数える「1 日」の区切り |
 
 シークレットの `GEMINI_API_KEY` は、ローカルでは `.dev.vars`、本番では `npx wrangler secret put GEMINI_API_KEY` で設定する。使用量の画面に Cloudflare の無料枠の消費状況を出す場合は、`CF_ANALYTICS_TOKEN`（Account Analytics: Read の API トークン）と `CF_ACCOUNT_ID` も同じ方法で設定する（[docs/setup.md の手順 10](docs/setup.md#アプリで確認する)）。
+
+本番では、Access の JWT を検証するための `ACCESS_TEAM_DOMAIN`（チームドメイン）と `ACCESS_AUD`（Access アプリケーションの AUD タグ）も `npx wrangler secret put` で設定する（必須。[docs/setup.md の手順 9-5](docs/setup.md#9-5-worker-に-access-の設定を登録する)）。設定がなければ API はすべて 401 を返す。
 
 ## デプロイ
 
@@ -142,7 +150,7 @@ npx wrangler secret put GEMINI_API_KEY  # 任意
 npm run deploy                          # https://kaitokune.<サブドメイン>.workers.dev
 ```
 
-**デプロイしたら必ず Cloudflare Access で自分だけに制限する。** アプリ自体にはログイン機能がないため、URL を知っていれば誰でも日記を読めてしまう。設定手順は [docs/setup.md の手順 9](docs/setup.md#9-cloudflare-access-で自分だけに制限する) を参照。
+**デプロイしたら必ず Cloudflare Access で使える人を制限し、Worker に Access の設定とユーザーを登録する。** 設定するまで API は 401 / 403 を返すので日記は読めないが、使うこともできない。設定手順は [docs/setup.md の手順 9](docs/setup.md#9-cloudflare-access-で使える人を制限する) を参照。
 
 ## 開発ロードマップ
 
