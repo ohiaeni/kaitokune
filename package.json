@@ -22,7 +22,8 @@
     "cf-typegen": "wrangler types --strict-vars=false",
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "wrangler d1 migrations apply kaitokune --local",
-    "db:migrate:remote": "wrangler d1 migrations apply kaitokune --remote"
+    "db:migrate:remote": "wrangler d1 migrations apply kaitokune --remote",
+    "spell": "cspell --no-progress ."
   },
   "dependencies": {
     "@hono/zod-validator": "^0.9.1",
@@ -45,6 +46,7 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
     "@vitest/coverage-istanbul": "^4.1.11",
+    "cspell": "^10.3.6",
     "drizzle-kit": "^0.31.11",
     "knip": "^6.40.0",
     "lefthook": "^2.2.0",

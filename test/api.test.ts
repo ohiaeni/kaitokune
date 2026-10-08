@@ -248,6 +248,7 @@ describe("/api/entries", () => {
     const { request } = setup();
     await request("/api/entries/2026-10-01", { method: "PUT", json: { body: "達成率は 100% だった" } });
     await request("/api/entries/2026-10-02", { method: "PUT", json: { body: "snake_case と書いた" } });
+    // cspell:ignore snakeXcase -- "_" が任意の 1 文字に当たらないことを確かめるための綴り
     await request("/api/entries/2026-10-03", { method: "PUT", json: { body: "10 回 snakeXcase" } });
     const search = async (q: string) =>
       (await (await request(`/api/entries?q=${encodeURIComponent(q)}`)).json<EntrySummary[]>()).map((e) => e.date);

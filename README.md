@@ -125,6 +125,7 @@ npm run dev                       # http://localhost:5173
 | `npm run dev` / `npm run dev:local` | 開発サーバー（後者は Cloudflare に接続しない） |
 | `npm test` | テスト（AI はモックするので無料枠を消費しない） |
 | `npm run typecheck` / `npm run check` | 型チェック / Biome による lint・フォーマットのチェック |
+| `npm run spell` | cspell によるスペルチェック（辞書は `cspell.config.yaml`） |
 | `npm run db:generate` | `src/worker/db/schema.ts` の変更からマイグレーションを生成 |
 | `npm run cf-typegen` | `wrangler.jsonc` を変えたら実行し、`worker-configuration.d.ts` を更新 |
 

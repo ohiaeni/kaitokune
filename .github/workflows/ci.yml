@@ -36,6 +36,9 @@ jobs:
       - name: Lint / Format
         run: npm run check
 
+      - name: Spell check
+        run: npm run spell
+
       # 未使用のファイル・export・依存関係を検出する
       - name: Knip
         run: npm run knip

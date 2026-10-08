@@ -26,6 +26,7 @@ AI の質問に答えるだけで日記が書ける、少人数（今は 2 人�
 | `npm run dev` | 開発サーバー（Workers AI はリモートで動くので `npx wrangler login` が必要） |
 | `npm run dev:local` | Cloudflare に接続しない開発サーバー（AI は `.dev.vars` の Gemini だけ） |
 | `npm run check` | Biome の lint・フォーマットのチェック（`npm run format` で自動修正） |
+| `npm run spell` | cspell のスペルチェック（正しい単語が指摘されたら `cspell.config.yaml` の `words` に足す） |
 | `npm run knip` | 未使用のファイル・export・依存関係の検出（設定は `knip.json`） |
 | `npm run build` | 型チェック（`tsc -b`）とビルド |
 | `npm test` | テスト（AI はモックするので無料枠を消費しない） |
@@ -111,8 +112,8 @@ gh pr create --base main --title "..." --label enhancement --assignee @me \
 - ブランチ名: `<型>/<内容を表す英語の kebab-case>`（例: `chore/dependabot-labels`）
 - コミットメッセージと PR タイトル: `<型>: <日本語の要約>`（例: `fix: Workers AI の提供終了モデルを Gemma 4 に変更`）
 - マージは squash だけで、PR のタイトルがそのまま main のコミットメッセージになる。マージ後のブランチは自動で削除される
-- PR を作る前に `npm run check` / `npm run build` / `npm test` を実行し、通ったことを PR テンプレートのチェック項目に反映する
-- コミット時に lefthook の pre-commit フックが Biome を実行し、整形は自動で直す。lint エラーで止まったらコードを直してからコミットし直す（`--no-verify` で飛ばさない）
+- PR を作る前に `npm run check` / `npm run spell` / `npm run build` / `npm test` を実行し、通ったことを PR テンプレートのチェック項目に反映する
+- コミット時に lefthook の pre-commit フックが Biome と cspell を実行し、整形は自動で直す。lint エラーやスペルミスで止まったらコード（正しい単語なら `cspell.config.yaml`）を直してからコミットし直す（`--no-verify` で飛ばさない）
 
 ## GitHub Actions
 

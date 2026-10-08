@@ -1,0 +1,38 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json
+# スペルチェックの設定。npm run spell と VS Code の Code Spell Checker が読む
+version: "0.2"
+language: en
+# .github・.claude などのドットディレクトリも対象にする
+enableGlobDot: true
+# .gitignore に書いたもの（node_modules・dist など）は対象外にする
+useGitignore: true
+ignorePaths:
+  - .git
+  - package-lock.json
+  # 生成ファイル
+  - src/client/routeTree.gen.ts
+  - worker-configuration.d.ts
+  - migrations/
+# プロジェクト固有の単語。辞書にない正しい単語が指摘されたらここに足す（アルファベット順）
+words:
+  - bradlc
+  - cloudflareaccess
+  - elif
+  - Groq
+  - kaitokune
+  - knip
+  - kwargs
+  - miniflare
+  - ohiaeni
+  - oneline
+  - Qwen
+  - refetches
+  - shellcheck
+  - Supabase
+  - typegen
+  - unconfigured
+  - unixepoch
+  - vite
+  - workerd
+  - zizmor
+  - zizmorcore

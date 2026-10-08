@@ -7,3 +7,5 @@ pre-commit:
       run: npx biome check --write --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
       # 自動修正した内容もそのコミットに含める
       stage_fixed: true
+    cspell:
+      run: npx cspell --no-progress --no-summary --no-must-find-files {staged_files}

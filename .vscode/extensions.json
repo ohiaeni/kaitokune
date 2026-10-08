@@ -1,3 +1,8 @@
 {
-  "recommendations": ["biomejs.biome", "bradlc.vscode-tailwindcss", "vitest.explorer"]
+  "recommendations": [
+    "biomejs.biome",
+    "bradlc.vscode-tailwindcss",
+    "vitest.explorer",
+    "streetsidesoftware.code-spell-checker"
+  ]
 }
