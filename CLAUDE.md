@@ -51,16 +51,18 @@ issue と PR を作るときは、次の情報を作成と同時に付ける（�
 | ラベル           | 種類ラベルを 1 つ必須。該当すれば `free-tier` も付ける       | issue と同じラベル                              |
 | 担当者           | `@me`                                                        | `@me`                                           |
 | マイルストーン   | 対応するバージョン（下記）                                   | issue と同じマイルストーン                      |
-| Project          | `kaitokune開発プロジェクト`                                  | `kaitokune開発プロジェクト`                     |
+| Project          | `生活の質向上プロジェクト`                                   | `生活の質向上プロジェクト`                      |
 | 本文             | `.github/ISSUE_TEMPLATE/` のテンプレートの見出しに沿って書く | `.github/pull_request_template.md` に沿って書く |
 | issue との紐付け | -                                                            | 本文に `Closes #<issue 番号>` を書く            |
 
 ```sh
 gh issue create --title "..." --label enhancement --assignee @me \
-  --milestone v0.1.0 --project "kaitokune開発プロジェクト" --body "..."
+  --milestone v0.1.0 --project "生活の質向上プロジェクト" --body "..."
 gh pr create --base main --title "..." --label enhancement --assignee @me \
-  --milestone v0.1.0 --project "kaitokune開発プロジェクト" --body "..."
+  --milestone v0.1.0 --project "生活の質向上プロジェクト" --body "..."
 ```
+
+Project「生活の質向上プロジェクト」には kakeibou の issue・PR も入っている。
 
 作成後に `gh issue view` / `gh pr view` でラベル・担当者・マイルストーン・Project が付いていることを確認する。
 
