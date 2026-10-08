@@ -21,18 +21,18 @@ AI の質問に答えるだけで日記が書ける、少人数（今は 2 人�
 
 ### よく使うコマンド
 
-| コマンド | 内容 |
-| --- | --- |
-| `npm run dev` | 開発サーバー（Workers AI はリモートで動くので `npx wrangler login` が必要） |
-| `npm run dev:local` | Cloudflare に接続しない開発サーバー（AI は `.dev.vars` の Gemini だけ） |
-| `npm run check` | Biome の lint・フォーマットのチェック（`npm run format` で自動修正） |
-| `npm run knip` | 未使用のファイル・export・依存関係の検出（設定は `knip.json`） |
-| `npm run build` | 型チェック（`tsc -b`）とビルド |
-| `npm test` | テスト（AI はモックするので無料枠を消費しない） |
-| `npm run test:coverage` | カバレッジ付きでテスト（結果は `coverage/index.html`） |
-| `npm run db:generate` | スキーマの変更からマイグレーションを生成 |
-| `npm run db:migrate:local` | ローカルの D1 にマイグレーションを適用 |
-| `npm run cf-typegen` | `wrangler.jsonc` から `worker-configuration.d.ts` を生成 |
+| コマンド                   | 内容                                                                                               |
+| -------------------------- | -------------------------------------------------------------------------------------------------- |
+| `npm run dev`              | 開発サーバー（Workers AI はリモートで動くので `npx wrangler login` が必要）                        |
+| `npm run dev:local`        | Cloudflare に接続しない開発サーバー（AI は `.dev.vars` の Gemini だけ）                            |
+| `npm run check`            | Biome の lint・フォーマットと、Prettier（Markdown・YAML）のチェック（`npm run format` で自動修正） |
+| `npm run knip`             | 未使用のファイル・export・依存関係の検出（設定は `knip.json`）                                     |
+| `npm run build`            | 型チェック（`tsc -b`）とビルド                                                                     |
+| `npm test`                 | テスト（AI はモックするので無料枠を消費しない）                                                    |
+| `npm run test:coverage`    | カバレッジ付きでテスト（結果は `coverage/index.html`）                                             |
+| `npm run db:generate`      | スキーマの変更からマイグレーションを生成                                                           |
+| `npm run db:migrate:local` | ローカルの D1 にマイグレーションを適用                                                             |
+| `npm run cf-typegen`       | `wrangler.jsonc` から `worker-configuration.d.ts` を生成                                           |
 
 本番への反映（`npm run deploy`、`npm run db:migrate:remote`）は本番環境を変えるので、ユーザーに頼まれたときだけ実行する。
 
@@ -44,14 +44,14 @@ main ブランチは保護されていて直接 push できない。変更は必
 
 issue と PR を作るときは、次の情報を作成と同時に付ける（後から付け足さない）。
 
-| 項目 | issue | PR |
-| --- | --- | --- |
-| ラベル | 種類ラベルを 1 つ必須。該当すれば `free-tier` も付ける | issue と同じラベル |
-| 担当者 | `@me` | `@me` |
-| マイルストーン | 対応するバージョン（下記） | issue と同じマイルストーン |
-| Project | `kaitokune開発プロジェクト` | `kaitokune開発プロジェクト` |
-| 本文 | `.github/ISSUE_TEMPLATE/` のテンプレートの見出しに沿って書く | `.github/pull_request_template.md` に沿って書く |
-| issue との紐付け | - | 本文に `Closes #<issue 番号>` を書く |
+| 項目             | issue                                                        | PR                                              |
+| ---------------- | ------------------------------------------------------------ | ----------------------------------------------- |
+| ラベル           | 種類ラベルを 1 つ必須。該当すれば `free-tier` も付ける       | issue と同じラベル                              |
+| 担当者           | `@me`                                                        | `@me`                                           |
+| マイルストーン   | 対応するバージョン（下記）                                   | issue と同じマイルストーン                      |
+| Project          | `kaitokune開発プロジェクト`                                  | `kaitokune開発プロジェクト`                     |
+| 本文             | `.github/ISSUE_TEMPLATE/` のテンプレートの見出しに沿って書く | `.github/pull_request_template.md` に沿って書く |
+| issue との紐付け | -                                                            | 本文に `Closes #<issue 番号>` を書く            |
 
 ```sh
 gh issue create --title "..." --label enhancement --assignee @me \
@@ -82,10 +82,10 @@ gh pr create --base main --title "..." --label enhancement --assignee @me \
 
 リリースは `/release` スキル（`.claude/skills/release/SKILL.md`）で行う。main の CI が通っていることを確かめ、タグ名と対象のコミットをユーザーに確認してから、タグを作って push する。本番環境に影響するので、ユーザーが `/release` で呼んだときだけ行う。
 
-| 種類 | タグ | タグを push すると |
-| --- | --- | --- |
-| ベータ版（`/release beta`） | `v<MAJOR>.<MINOR>.<PATCH>-beta.<N>`（例: `v0.2.0-beta.1`） | `release.yml` がリリースノートの下書き（draft の pre-release）を作る。デプロイはしない |
-| 本番版（`/release production`） | `v<MAJOR>.<MINOR>.<PATCH>`（例: `v0.2.0`） | `release.yml` がリリースノートを公開し、`deploy.yml` が本番にデプロイする（D1 のマイグレーションも適用する） |
+| 種類                            | タグ                                                       | タグを push すると                                                                                           |
+| ------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| ベータ版（`/release beta`）     | `v<MAJOR>.<MINOR>.<PATCH>-beta.<N>`（例: `v0.2.0-beta.1`） | `release.yml` がリリースノートの下書き（draft の pre-release）を作る。デプロイはしない                       |
+| 本番版（`/release production`） | `v<MAJOR>.<MINOR>.<PATCH>`（例: `v0.2.0`）                 | `release.yml` がリリースノートを公開し、`deploy.yml` が本番にデプロイする（D1 のマイグレーションも適用する） |
 
 - バージョンはマイルストーンと同じ名前にする。本番版を出したらマイルストーンを閉じる
 - リリースノートは直前の本番版からの PR を、ラベルごと（`.github/release.yml`）に分類して自動生成する
@@ -97,14 +97,14 @@ gh pr create --base main --title "..." --label enhancement --assignee @me \
 
 ここにあるラベルだけを使う。新しいラベルが必要になったら、勝手に作らずユーザーに確認する。
 
-| ラベル | 種類ラベル | 用途 | 対応するコミットの型 |
-| --- | --- | --- | --- |
-| `bug` | ○ | 不具合・期待どおりに動かない | `fix` |
-| `enhancement` | ○ | 新機能・既存機能の改善 | `feat`, `refactor` |
-| `documentation` | ○ | README・docs などのドキュメント | `docs` |
-| `chore` | ○ | CI・ツール・テスト・設定などの雑務 | `chore`, `style`, `ci`, `test` |
-| `dependencies` | ○ | 依存関係の更新（基本は Dependabot が付ける） | `chore(deps)` |
-| `free-tier` | - | 無料枠・課金に関わる（完全無料運用の維持）。種類ラベルと併用する | - |
+| ラベル          | 種類ラベル | 用途                                                             | 対応するコミットの型           |
+| --------------- | ---------- | ---------------------------------------------------------------- | ------------------------------ |
+| `bug`           | ○          | 不具合・期待どおりに動かない                                     | `fix`                          |
+| `enhancement`   | ○          | 新機能・既存機能の改善                                           | `feat`, `refactor`             |
+| `documentation` | ○          | README・docs などのドキュメント                                  | `docs`                         |
+| `chore`         | ○          | CI・ツール・テスト・設定などの雑務                               | `chore`, `style`, `ci`, `test` |
+| `dependencies`  | ○          | 依存関係の更新（基本は Dependabot が付ける）                     | `chore(deps)`                  |
+| `free-tier`     | -          | 無料枠・課金に関わる（完全無料運用の維持）。種類ラベルと併用する | -                              |
 
 ### ブランチ・コミット・PR のタイトル
 
@@ -112,7 +112,7 @@ gh pr create --base main --title "..." --label enhancement --assignee @me \
 - コミットメッセージと PR タイトル: `<型>: <日本語の要約>`（例: `fix: Workers AI の提供終了モデルを Gemma 4 に変更`）
 - マージは squash だけで、PR のタイトルがそのまま main のコミットメッセージになる。マージ後のブランチは自動で削除される
 - PR を作る前に `npm run check` / `npm run build` / `npm test` を実行し、通ったことを PR テンプレートのチェック項目に反映する
-- コミット時に lefthook の pre-commit フックが Biome を実行し、整形は自動で直す。lint エラーで止まったらコードを直してからコミットし直す（`--no-verify` で飛ばさない）
+- コミット時に lefthook の pre-commit フックが Biome と Prettier（Markdown・YAML）を実行し、整形は自動で直す。lint エラーで止まったらコードを直してからコミットし直す（`--no-verify` で飛ばさない）
 
 ## GitHub Actions
 
