@@ -47,6 +47,17 @@ export type Entry = {
 export type EntrySummary = { date: string; excerpt: string; mood: number | null };
 export type EntryDetail = { entry: Entry; qa: QA[] };
 
+export const exportQuerySchema = z.object({ format: z.enum(["json", "markdown"]).default("json") });
+
+/** JSON でエクスポートしたファイルの中身。将来インポートに使うため、形を変えたら version を上げる */
+export type ExportFile = {
+  format: "kaitokune";
+  version: 1;
+  /** エクスポートした日時（ISO 8601） */
+  exportedAt: string;
+  entries: (Entry & { qa: QA[] })[];
+};
+
 export type ApiErrorCode = "daily_limit" | "ai_unavailable" | "not_found" | "conflict" | "invalid_request" | "internal";
 export type ApiErrorBody = { error: ApiErrorCode; message: string };
 

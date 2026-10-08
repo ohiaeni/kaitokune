@@ -31,6 +31,20 @@ function RootLayout() {
       <main className="flex-1 pt-2 pb-16">
         <Outlet />
       </main>
+      <footer className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-t border-stone-200 py-4 text-xs text-stone-500 dark:border-stone-800">
+        <span>日記をエクスポート</span>
+        {/* API がファイル名付きで返すので、ルーターを通さず普通のリンクでダウンロードする */}
+        <a href="/api/export?format=json" download className="underline hover:text-stone-800 dark:hover:text-stone-200">
+          JSON
+        </a>
+        <a
+          href="/api/export?format=markdown"
+          download
+          className="underline hover:text-stone-800 dark:hover:text-stone-200"
+        >
+          Markdown
+        </a>
+      </footer>
     </div>
   );
 }

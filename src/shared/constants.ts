@@ -10,3 +10,12 @@ export const MONTH_PATTERN = /^\d{4}-\d{2}$/;
 
 /** 日記の検索語の最大文字数 */
 export const SEARCH_QUERY_MAX_LENGTH = 50;
+
+/** 気分（entries.mood の値）の表示 */
+export const MOODS = [
+  { value: 1, emoji: "😞", label: "つらい" },
+  { value: 2, emoji: "😕", label: "いまいち" },
+  { value: 3, emoji: "😐", label: "ふつう" },
+  { value: 4, emoji: "🙂", label: "よい" },
+  { value: 5, emoji: "😄", label: "最高" },
+] as const;

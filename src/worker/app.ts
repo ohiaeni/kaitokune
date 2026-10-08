@@ -6,6 +6,7 @@ import { AllProvidersFailedError } from "./ai/fallback";
 import type { Bindings } from "./env";
 import { chatRoutes } from "./routes/chat";
 import { entryRoutes } from "./routes/entries";
+import { exportRoutes } from "./routes/export";
 import { usageRoutes } from "./routes/usage";
 import type { AppEnv } from "./types";
 import { DailyLimitError } from "./usage";
@@ -31,6 +32,7 @@ export function createApp({
     })
     .route("/chat", chatRoutes)
     .route("/entries", entryRoutes)
+    .route("/export", exportRoutes)
     .route("/usage", usageRoutes)
     .notFound((c) => c.json<ApiErrorBody>({ error: "not_found", message: "Not Found" }, 404))
     .onError((err, c) => {
