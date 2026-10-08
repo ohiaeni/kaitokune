@@ -20,6 +20,9 @@ jobs:
       # Action はタグの付け替えによる改ざんを防ぐためコミット SHA で固定する。
       # 末尾のバージョンコメントは Dependabot が SHA と一緒に更新する
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # 後続のステップに GitHub のトークンを残さない
+          persist-credentials: false
 
       # npm 11 以降（Node.js 24 に付属）でないと package.json の allowScripts が効かない。
       # バージョンは .node-version で手元と揃える

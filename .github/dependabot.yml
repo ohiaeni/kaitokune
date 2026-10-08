@@ -7,6 +7,10 @@ updates:
     open-pull-requests-limit: 5
     # 既定ではエコシステム名のラベル（javascript など）も自動で作られるため、dependencies だけにする
     labels: [dependencies]
+    # 公開直後のリリース（乗っ取られたパッケージなど）を取り込まないよう、公開から 7 日待ってから更新する。
+    # セキュリティアップデートはこの待機の対象外
+    cooldown:
+      default-days: 7
     groups:
       # マイナー・パッチは 1 つの PR にまとめる。メジャーは個別に確認する
       minor-and-patch:
@@ -17,6 +21,8 @@ updates:
     schedule:
       interval: monthly
     labels: [dependencies]
+    cooldown:
+      default-days: 7
     groups:
       actions:
         patterns: ["*"]
