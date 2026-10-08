@@ -2,14 +2,85 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import type { EntryDetail } from "../../shared/schemas";
 import { api, queryKeys } from "../lib/api";
+import { formatDate, today } from "../lib/date";
 import { MOODS } from "../lib/mood";
+import { loadJson, removeItem } from "../lib/storage";
 import { DiaryEditor } from "./DiaryEditor";
+import { draftKey } from "./Interview";
 import { Button, Card, ErrorMessage } from "./ui";
 
-export function EntryView({ detail, onDeleted }: { detail: EntryDetail; onDeleted?: () => void }) {
+function DateChanger({
+  date,
+  onChanged,
+  onCancel,
+}: {
+  date: string;
+  onChanged: (newDate: string) => void;
+  onCancel: () => void;
+}) {
+  const queryClient = useQueryClient();
+  const [newDate, setNewDate] = useState(date);
+  const max = today();
+
+  const change = useMutation({
+    mutationFn: () => api.changeEntryDate(date, newDate),
+    onSuccess: async () => {
+      // 変更先の日付の書きかけの会話は、日記ができたことで使われなくなるので消す
+      removeItem(draftKey(newDate));
+      queryClient.removeQueries({ queryKey: queryKeys.entry(date) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.entries });
+      onChanged(newDate);
+    },
+  });
+
+  return (
+    <form
+      className="flex flex-col gap-3"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!newDate || newDate === date || newDate > max) return;
+        const hasDraft = loadJson(draftKey(newDate)) !== null;
+        if (hasDraft && !confirm(`${formatDate(newDate)}の書きかけの会話は削除されます。日付を変更しますか？`)) return;
+        change.mutate();
+      }}
+    >
+      <label className="flex flex-col gap-1">
+        <span className="text-sm text-stone-600 dark:text-stone-400">新しい日付</span>
+        <input
+          type="date"
+          value={newDate}
+          max={max}
+          required
+          onChange={(e) => setNewDate(e.target.value)}
+          className="self-start rounded-xl border border-stone-300 bg-white px-3 py-2 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30 dark:border-stone-700 dark:bg-stone-900"
+        />
+      </label>
+      <div className="flex flex-wrap gap-2">
+        <Button type="submit" disabled={change.isPending || !newDate || newDate === date || newDate > max}>
+          {change.isPending ? "変更中…" : "日付を変更する"}
+        </Button>
+        <Button variant="ghost" disabled={change.isPending} onClick={onCancel}>
+          キャンセル
+        </Button>
+      </div>
+      {change.error && <ErrorMessage error={change.error} />}
+    </form>
+  );
+}
+
+export function EntryView({
+  detail,
+  onDeleted,
+  onDateChanged,
+}: {
+  detail: EntryDetail;
+  onDeleted?: () => void;
+  onDateChanged: (newDate: string) => void;
+}) {
   const { entry, qa } = detail;
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
+  const [changingDate, setChangingDate] = useState(false);
   const mood = MOODS.find((m) => m.value === entry.mood);
 
   const save = useMutation({
@@ -77,10 +148,21 @@ export function EntryView({ detail, onDeleted }: { detail: EntryDetail; onDelete
         </details>
       )}
 
-      <div className="flex gap-2">
+      {changingDate && (
+        <Card>
+          <DateChanger date={entry.date} onChanged={onDateChanged} onCancel={() => setChangingDate(false)} />
+        </Card>
+      )}
+
+      <div className="flex flex-wrap gap-2">
         <Button variant="secondary" onClick={() => setEditing(true)}>
           編集する
         </Button>
+        {!changingDate && (
+          <Button variant="ghost" onClick={() => setChangingDate(true)}>
+            日付を変更
+          </Button>
+        )}
         <Button
           variant="danger"
           disabled={remove.isPending}

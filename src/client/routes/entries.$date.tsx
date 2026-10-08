@@ -36,6 +36,7 @@ function EntryPage() {
         <EntryView
           detail={entry.data}
           onDeleted={() => navigate({ to: "/entries", search: { month: date.slice(0, 7) } })}
+          onDateChanged={(newDate) => navigate({ to: "/entries/$date", params: { date: newDate }, replace: true })}
         />
       ) : (
         <p className="py-10 text-center text-sm text-stone-500">この日の日記はありません</p>

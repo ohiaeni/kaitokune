@@ -33,6 +33,8 @@ export const saveEntryRequestSchema = z.object({
 });
 export type SaveEntryRequest = z.infer<typeof saveEntryRequestSchema>;
 
+export const changeDateRequestSchema = z.object({ date: dateSchema });
+
 export type Entry = {
   date: string;
   body: string;
@@ -43,7 +45,7 @@ export type Entry = {
 export type EntrySummary = { date: string; excerpt: string; mood: number | null };
 export type EntryDetail = { entry: Entry; qa: QA[] };
 
-export type ApiErrorCode = "daily_limit" | "ai_unavailable" | "not_found" | "invalid_request" | "internal";
+export type ApiErrorCode = "daily_limit" | "ai_unavailable" | "not_found" | "conflict" | "invalid_request" | "internal";
 export type ApiErrorBody = { error: ApiErrorCode; message: string };
 
 export type UsageMeter = { used: number; limit: number };

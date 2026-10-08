@@ -62,6 +62,9 @@ export const api = {
   saveEntry: (date: string, payload: SaveEntryRequest) =>
     request<Entry>(`/entries/${date}`, { method: "PUT", body: JSON.stringify(payload) }),
 
+  changeEntryDate: (date: string, newDate: string) =>
+    request<Entry>(`/entries/${date}`, { method: "PATCH", body: JSON.stringify({ date: newDate }) }),
+
   deleteEntry: (date: string) => request<void>(`/entries/${date}`, { method: "DELETE" }),
 
   getUsage: () => request<UsageResponse>("/usage"),
