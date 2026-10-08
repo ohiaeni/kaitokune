@@ -23,6 +23,9 @@ function RootLayout() {
           <Link to="/entries" className={navLink} activeProps={{ className: navLinkActive }}>
             これまで
           </Link>
+          <Link to="/usage" className={navLink} activeProps={{ className: navLinkActive }}>
+            使用量
+          </Link>
         </nav>
       </header>
       <main className="flex-1 pt-2 pb-16">
