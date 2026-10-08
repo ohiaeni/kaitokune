@@ -1,0 +1,22 @@
+name: 機能の提案
+description: 新しい機能や改善のアイデア
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 困っていること・やりたいこと
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 実現方法の案
+      description: 画面のイメージや使いたい技術など、決まっていれば書いてください
+  - type: checkboxes
+    id: free-tier
+    attributes:
+      label: 無料運用の確認
+      options:
+        - label: 有料プランや従量課金のサービスを使わずに実現できる
+          required: true
