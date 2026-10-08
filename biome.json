@@ -24,6 +24,9 @@
   "css": {
     "parser": { "tailwindDirectives": true }
   },
+  "html": {
+    "formatter": { "enabled": true }
+  },
   "javascript": {
     "formatter": {
       "quoteStyle": "double"

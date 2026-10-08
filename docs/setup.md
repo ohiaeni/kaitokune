@@ -4,18 +4,18 @@ kaitokune をローカルで動かし、Cloudflare にデプロイして、登�
 
 Cloudflare や Google のダッシュボードは画面構成や項目名がよく変わります。この手順書の項目名が見当たらない場合は、近い名前のメニューを探してください。
 
-| ステップ | 内容 | 所要時間の目安 |
-| --- | --- | --- |
-| [1](#1-必要なもの) | 必要なものを用意する | – |
-| [2](#2-リポジトリを取得してインストールする) | リポジトリを取得してインストールする | 3 分 |
-| [3](#3-cloudflare-アカウントを作成する) | Cloudflare アカウントを作成する | 5 分 |
-| [4](#4-wrangler-で-cloudflare-にログインする) | Wrangler で Cloudflare にログインし、workers.dev のサブドメインを登録する | 3 分 |
-| [5](#5-任意gemini-api-キーを発行する) | （任意）Gemini API キーを発行する | 3 分 |
-| [6](#6-ローカルで動かす) | ローカルで動かす | 3 分 |
-| [7](#7-本番用の-d1-データベースを作成する) | 本番用の D1 データベースを作成する | 2 分 |
-| [8](#8-デプロイする) | デプロイする | 2 分 |
-| [9](#9-cloudflare-access-で使える人を制限する) | **Cloudflare Access で使える人を制限し、ユーザーを登録する（必須）** | 10 分 |
-| [10](#10-無料枠の使用量を確認する) | 無料枠の使用量を確認する | – |
+| ステップ                                       | 内容                                                                      | 所要時間の目安 |
+| ---------------------------------------------- | ------------------------------------------------------------------------- | -------------- |
+| [1](#1-必要なもの)                             | 必要なものを用意する                                                      | –              |
+| [2](#2-リポジトリを取得してインストールする)   | リポジトリを取得してインストールする                                      | 3 分           |
+| [3](#3-cloudflare-アカウントを作成する)        | Cloudflare アカウントを作成する                                           | 5 分           |
+| [4](#4-wrangler-で-cloudflare-にログインする)  | Wrangler で Cloudflare にログインし、workers.dev のサブドメインを登録する | 3 分           |
+| [5](#5-任意gemini-api-キーを発行する)          | （任意）Gemini API キーを発行する                                         | 3 分           |
+| [6](#6-ローカルで動かす)                       | ローカルで動かす                                                          | 3 分           |
+| [7](#7-本番用の-d1-データベースを作成する)     | 本番用の D1 データベースを作成する                                        | 2 分           |
+| [8](#8-デプロイする)                           | デプロイする                                                              | 2 分           |
+| [9](#9-cloudflare-access-で使える人を制限する) | **Cloudflare Access で使える人を制限し、ユーザーを登録する（必須）**      | 10 分          |
+| [10](#10-無料枠の使用量を確認する)             | 無料枠の使用量を確認する                                                  | –              |
 
 > [!IMPORTANT]
 > どのサービスにも**クレジットカード（支払い方法）を登録しないでください。** 未登録であれば、無料枠を超えても課金されずにエラーになるだけです。
@@ -119,11 +119,11 @@ npm run dev                      # http://localhost:5173 で起動
 
 ブラウザで <http://localhost:5173> を開き、AI から最初の質問が表示されれば成功です。
 
-| こんなとき | 使うコマンド |
-| --- | --- |
-| 通常の開発（Workers AI を使う） | `npm run dev` |
+| こんなとき                          | 使うコマンド                                                            |
+| ----------------------------------- | ----------------------------------------------------------------------- |
+| 通常の開発（Workers AI を使う）     | `npm run dev`                                                           |
 | Cloudflare にログインせずに試したい | `npm run dev:local`（Workers AI は使えず、手順 5 の Gemini だけで動く） |
-| テストを実行したい | `npm test`（AI はモックするので無料枠を消費しない） |
+| テストを実行したい                  | `npm test`（AI はモックするので無料枠を消費しない）                     |
 
 ローカルのデータは `.wrangler/state/` に保存されます。消したいときはこのディレクトリを削除して、`npm run db:migrate:local` をやり直してください。
 
@@ -276,13 +276,13 @@ Zero Trust の初回設定（9-1）で、Free プランでも支払い方法の�
 
 ## 10. 無料枠の使用量を確認する
 
-| 確認したいもの | 場所 |
-| --- | --- |
-| Workers AI の使用量（Neurons） | ダッシュボード → **AI** → **Workers AI** |
-| Worker のリクエスト数・エラー | ダッシュボード → **Workers & Pages** → **kaitokune** → **Metrics** |
-| D1 の読み書き・容量 | ダッシュボード → **Storage & Databases** → **D1** → **kaitokune** |
-| Gemini の使用量 | Google AI Studio の使用量（Usage）ページ |
-| 本番のログをリアルタイムで見る | `npx wrangler tail` |
+| 確認したいもの                 | 場所                                                               |
+| ------------------------------ | ------------------------------------------------------------------ |
+| Workers AI の使用量（Neurons） | ダッシュボード → **AI** → **Workers AI**                           |
+| Worker のリクエスト数・エラー  | ダッシュボード → **Workers & Pages** → **kaitokune** → **Metrics** |
+| D1 の読み書き・容量            | ダッシュボード → **Storage & Databases** → **D1** → **kaitokune**  |
+| Gemini の使用量                | Google AI Studio の使用量（Usage）ページ                           |
+| 本番のログをリアルタイムで見る | `npx wrangler tail`                                                |
 
 アプリ側でも、AI の呼び出しを 1 人 1 日 `AI_DAILY_LIMIT` 回（初期値 25 回）までに制限しています。ユーザーごとに数えるので、全体ではユーザー数 × `AI_DAILY_LIMIT` 回までです（2 人なら 50 回）。ユーザーを増やすときは、合計が無料枠に収まるように `AI_DAILY_LIMIT` を下げてください。日記 1 日分で使うのは最大 6 回程度です。変える場合は `wrangler.jsonc` の `vars` を編集して、もう一度デプロイしてください。
 
@@ -367,17 +367,17 @@ npm run deploy
 
 ## トラブルシューティング
 
-| 症状 | 原因と対処 |
-| --- | --- |
-| `npm run dev` が `it's necessary to set a CLOUDFLARE_API_TOKEN` で止まる | Cloudflare にログインしていません。`npx wrangler login` を実行するか、`npm run dev:local` を使ってください |
-| `npm run dev` が `You need to register a workers.dev subdomain` / `Failed to start the remote proxy session` で止まる | workers.dev のサブドメインが未登録です。エラーに表示される URL か、[手順 4-2](#4-2-workersdev-のサブドメインを登録する初回のみ) の方法で登録してから、もう一度実行してください |
-| 画面に「AI に接続できませんでした」と出る（API は 502） | すべての AI プロバイダが失敗しています。ターミナル（本番では `npx wrangler tail`）に `AI provider ... failed` と原因が出ます |
-| ログに `Binding AI needs to be run remotely` と出る | `npm run dev:local` では Workers AI を使えません。Gemini のキーを設定するか、`npm run dev` を使ってください |
-| ログに `workers-ai:... failed` と `internal error; reference = ...` が出る | `WORKERS_AI_MODEL` のモデルが提供終了している可能性があります。`npx wrangler ai models list` で現在のモデルを確認し、`wrangler.jsonc` を変更してください（日本語に強い Gemma / Qwen 系がおすすめ） |
-| ログに `unexpected response` と出て、`content` が空で `reasoning` だけが入っている | 推論（thinking）モデルが思考だけで出力上限を使い切っています。思考を無効にできないモデルの場合は、別のモデルに変更してください |
-| 「今日の AI 利用上限に達しました」と出る（API は 429） | 自分の `AI_DAILY_LIMIT`（1 人あたり）に達しました。`TIMEZONE` の日付が変わるとリセットされます |
-| 「ログインを確認できませんでした」と出る（API は 401） | 本番では `ACCESS_TEAM_DOMAIN` と `ACCESS_AUD` が未登録か間違っています（[手順 9-5](#9-5-worker-に-access-の設定を登録する)）。ローカルでは `.dev.vars` に `DEV_USER_EMAIL` がありません。原因はログに `access denied: ...` と出ます |
-| 「〜 はまだ登録されていません」と出る（API は 403） | Access は通りましたが、`users` テーブルにメールアドレスがありません。[手順 9-6](#9-6-ユーザーを登録する) で登録してください |
-| `npm run db:migrate:remote` やデプロイで `The database ... could not be found [code: 7404]` と出る | `wrangler.jsonc` の `DB` の `database_id` が実際のデータベースと一致していません。`npx wrangler d1 list` で ID を確認し、[手順 7](#7-本番用の-d1-データベースを作成する) のとおり置き換えてください |
-| `requires compatibility date "..."` で起動しない | `wrangler.jsonc` の `compatibility_date` がローカルの実行環境より新しすぎます。表示された日付以前に下げてください |
-| 本番で日記一覧などが空になる | ローカルと本番の D1 は別のデータベースです。ローカルで書いた日記は本番には反映されません |
+| 症状                                                                                                                  | 原因と対処                                                                                                                                                                                                                          |
+| --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run dev` が `it's necessary to set a CLOUDFLARE_API_TOKEN` で止まる                                              | Cloudflare にログインしていません。`npx wrangler login` を実行するか、`npm run dev:local` を使ってください                                                                                                                          |
+| `npm run dev` が `You need to register a workers.dev subdomain` / `Failed to start the remote proxy session` で止まる | workers.dev のサブドメインが未登録です。エラーに表示される URL か、[手順 4-2](#4-2-workersdev-のサブドメインを登録する初回のみ) の方法で登録してから、もう一度実行してください                                                      |
+| 画面に「AI に接続できませんでした」と出る（API は 502）                                                               | すべての AI プロバイダが失敗しています。ターミナル（本番では `npx wrangler tail`）に `AI provider ... failed` と原因が出ます                                                                                                        |
+| ログに `Binding AI needs to be run remotely` と出る                                                                   | `npm run dev:local` では Workers AI を使えません。Gemini のキーを設定するか、`npm run dev` を使ってください                                                                                                                         |
+| ログに `workers-ai:... failed` と `internal error; reference = ...` が出る                                            | `WORKERS_AI_MODEL` のモデルが提供終了している可能性があります。`npx wrangler ai models list` で現在のモデルを確認し、`wrangler.jsonc` を変更してください（日本語に強い Gemma / Qwen 系がおすすめ）                                  |
+| ログに `unexpected response` と出て、`content` が空で `reasoning` だけが入っている                                    | 推論（thinking）モデルが思考だけで出力上限を使い切っています。思考を無効にできないモデルの場合は、別のモデルに変更してください                                                                                                      |
+| 「今日の AI 利用上限に達しました」と出る（API は 429）                                                                | 自分の `AI_DAILY_LIMIT`（1 人あたり）に達しました。`TIMEZONE` の日付が変わるとリセットされます                                                                                                                                      |
+| 「ログインを確認できませんでした」と出る（API は 401）                                                                | 本番では `ACCESS_TEAM_DOMAIN` と `ACCESS_AUD` が未登録か間違っています（[手順 9-5](#9-5-worker-に-access-の設定を登録する)）。ローカルでは `.dev.vars` に `DEV_USER_EMAIL` がありません。原因はログに `access denied: ...` と出ます |
+| 「〜 はまだ登録されていません」と出る（API は 403）                                                                   | Access は通りましたが、`users` テーブルにメールアドレスがありません。[手順 9-6](#9-6-ユーザーを登録する) で登録してください                                                                                                         |
+| `npm run db:migrate:remote` やデプロイで `The database ... could not be found [code: 7404]` と出る                    | `wrangler.jsonc` の `DB` の `database_id` が実際のデータベースと一致していません。`npx wrangler d1 list` で ID を確認し、[手順 7](#7-本番用の-d1-データベースを作成する) のとおり置き換えてください                                 |
+| `requires compatibility date "..."` で起動しない                                                                      | `wrangler.jsonc` の `compatibility_date` がローカルの実行環境より新しすぎます。表示された日付以前に下げてください                                                                                                                   |
+| 本番で日記一覧などが空になる                                                                                          | ローカルと本番の D1 は別のデータベースです。ローカルで書いた日記は本番には反映されません                                                                                                                                            |
