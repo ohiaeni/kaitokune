@@ -43,6 +43,19 @@ jobs:
       - name: Test
         run: npm test
 
+      # 生成ファイルを手元で更新し忘れていないかを確認する（routeTree.gen.ts は上の Build で再生成される）
+      - name: Check generated files
+        run: |
+          npm run db:generate
+          npm run cf-typegen
+          # 新しいマイグレーションは未追跡ファイルになるので git status で確認する
+          if [ -n "$(git status --porcelain)" ]; then
+            git status --short
+            git diff
+            echo "::error::生成ファイルが最新ではありません。手元で npm run db:generate（スキーマ）/ npm run cf-typegen（wrangler.jsonc）/ npm run build（ルート）を実行し、生成されたファイルをコミットしてください"
+            exit 1
+          fi
+
   # ワークフローの構文・式・シェルスクリプト（shellcheck）を確認する
   actionlint:
     runs-on: ubuntu-latest
