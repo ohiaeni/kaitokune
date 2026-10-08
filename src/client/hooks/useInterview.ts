@@ -17,16 +17,13 @@ export function useInterview(date: string) {
 
   useEffect(() => saveDraft(date, draft), [date, draft]);
 
-  const run = useCallback(async (kind: Exclude<Busy, null>, fn: () => Promise<void>) => {
+  /** 処理を実行する。失敗したらエラーと再試行の操作を error に入れるので、呼び出し側で待つ必要はない */
+  const run = useCallback((kind: Exclude<Busy, null>, fn: () => Promise<void>) => {
     setBusy(kind);
     setError(null);
-    try {
-      await fn();
-    } catch (e) {
-      setError({ error: e, retry: () => run(kind, fn) });
-    } finally {
-      setBusy(null);
-    }
+    fn()
+      .catch((e: unknown) => setError({ error: e, retry: () => run(kind, fn) }))
+      .finally(() => setBusy(null));
   }, []);
 
   const askNext = useCallback(

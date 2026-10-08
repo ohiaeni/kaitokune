@@ -41,7 +41,8 @@
           }
         },
         "noMisusedPromises": "error",
-        "useExhaustiveSwitchCases": "error"
+        "useExhaustiveSwitchCases": "error",
+        "noFloatingPromises": "error"
       },
       "correctness": {
         "noUndeclaredDependencies": "error",
