@@ -72,9 +72,9 @@ kaitokune/
 │   ├── worker/               # Cloudflare Worker（Hono）
 │   │   ├── app.ts            # アプリ本体（認証・DB・AI の注入、エラーハンドリング）
 │   │   ├── access.ts         # Cloudflare Access の JWT の検証
-│   │   ├── routes/           # chat.ts（質問・日記生成）, entries.ts（CRUD）, usage.ts（消費状況）
+│   │   ├── routes/           # chat.ts（質問・日記生成）, entries.ts（CRUD）, usage.ts（消費状況）。入力の検証とレスポンスだけ
 │   │   ├── ai/               # プロバイダ（workers-ai / gemini）、フォールバック、プロンプト
-│   │   ├── db/schema.ts      # Drizzle スキーマ
+│   │   ├── db/               # Drizzle スキーマ（schema.ts）と、テーブルごとのデータアクセス（ユーザーで絞り込む）
 │   │   ├── export/           # エクスポートの Markdown の生成
 │   │   ├── usage.ts          # 1 日の AI 呼び出し上限
 │   │   └── cloudflare-usage.ts # GraphQL Analytics API から無料枠の消費状況を取得

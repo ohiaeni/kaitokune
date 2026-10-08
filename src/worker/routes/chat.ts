@@ -1,5 +1,4 @@
 import { zValidator } from "@hono/zod-validator";
-import { and, desc, eq, lt } from "drizzle-orm";
 import { Hono } from "hono";
 import { todayIn } from "../../shared/date";
 import {
@@ -10,11 +9,11 @@ import {
   type NextResponse,
   nextRequestSchema,
 } from "../../shared/schemas";
-import { entries } from "../db/schema";
+import { listRecentEntries } from "../db/entries";
+import { listNotes } from "../db/notes";
 import type { AppEnv } from "../types";
 import { consumeAiQuota } from "../usage";
 import { validationHook } from "../validation";
-import { listNotes } from "./notes";
 
 const RECENT_ENTRIES = 3;
 const RECENT_EXCERPT_LENGTH = 150;
@@ -31,14 +30,9 @@ export const chatRoutes = new Hono<AppEnv>()
     // 最初の質問だけ、直近の日記を文脈に入れてパーソナライズする
     const recent =
       qa.length === 0
-        ? (
-            await db
-              .select({ date: entries.date, body: entries.body })
-              .from(entries)
-              .where(and(eq(entries.userId, userId), lt(entries.date, date)))
-              .orderBy(desc(entries.date))
-              .limit(RECENT_ENTRIES)
-          ).map((e) => `${e.date}: ${e.body.slice(0, RECENT_EXCERPT_LENGTH)}`)
+        ? (await listRecentEntries(db, userId, date, RECENT_ENTRIES)).map(
+            (e) => `${e.date}: ${e.body.slice(0, RECENT_EXCERPT_LENGTH)}`,
+          )
         : [];
 
     const notes = (await listNotes(db, userId, date)).map((n) => n.body);

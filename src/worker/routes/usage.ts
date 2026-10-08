@@ -1,9 +1,8 @@
-import { desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { todayIn } from "../../shared/date";
 import type { CloudflareUsage, UsageResponse } from "../../shared/schemas";
 import { fetchCloudflareUsage } from "../cloudflare-usage";
-import { aiUsage } from "../db/schema";
+import { listAiUsage } from "../db/ai-usage";
 import type { AppEnv } from "../types";
 
 const HISTORY_DAYS = 7;
@@ -11,13 +10,7 @@ const HISTORY_DAYS = 7;
 export const usageRoutes = new Hono<AppEnv>().get("/", async (c) => {
   const date = todayIn(c.env.TIMEZONE);
   const limit = Number(c.env.AI_DAILY_LIMIT);
-  const rows = await c
-    .get("db")
-    .select({ date: aiUsage.date, count: aiUsage.count })
-    .from(aiUsage)
-    .where(eq(aiUsage.userId, c.get("userId")))
-    .orderBy(desc(aiUsage.date))
-    .limit(HISTORY_DAYS);
+  const rows = await listAiUsage(c.get("db"), c.get("userId"), HISTORY_DAYS);
   // 上限を超えて断った呼び出しも数えているので、実際に AI を呼んだ回数（上限まで）に直す
   const history = rows.map((r) => ({ date: r.date, count: Math.min(r.count, limit) }));
 

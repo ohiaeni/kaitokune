@@ -7,7 +7,7 @@ AI の質問に答えるだけで日記が書ける、少人数（今は 2 人�
 - `src/client/`: React SPA（Vite・TanStack Router / Query・Tailwind CSS）
 - `src/worker/`: Cloudflare Worker（Hono）。`/api/*` を処理し、それ以外は静的アセットを返す
   - `ai/`: Workers AI（メイン）と Gemini（予備）のプロバイダ、フォールバック、プロンプト
-  - `db/schema.ts`: Drizzle のスキーマ（D1）
+  - `db/`: Drizzle のスキーマ（`schema.ts`）と、テーブルごとのデータアクセス（`entries.ts`・`notes.ts` など）。クエリはここにだけ書き、`routes/` からは `drizzle-orm` を使わない
 - `src/shared/`: クライアントと Worker で共有する Zod スキーマ・定数・型
 - `test/`: Vitest。`@cloudflare/vitest-pool-workers` で Workers ランタイムとローカル D1 を使い、AI はモックする
 
@@ -17,7 +17,7 @@ AI の質問に答えるだけで日記が書ける、少人数（今は 2 人�
 - **生成ファイルは手で編集しない**: `src/client/routeTree.gen.ts`（TanStack Router）、`worker-configuration.d.ts`（`npm run cf-typegen`）、`migrations/`（`npm run db:generate`）
 - **スキーマを変えたらマイグレーションを生成する**: `src/worker/db/schema.ts` を変えたら `npm run db:generate` を実行し、生成された SQL もコミットする
 - **`wrangler.jsonc` を変えたら型を更新する**: `npm run cf-typegen` を実行する
-- **データは必ずユーザーごとに分ける**: 利用者は `users` テーブルに登録した人だけで、アプリにログイン画面はない（本番は Cloudflare Access で保護し、Worker が JWT を検証してユーザーを決める）。ユーザーのデータを持つテーブルには `user_id` を持たせ、すべてのクエリを `c.get("userId")` で絞り込む。API の返り値に `user_id` を含めない
+- **データは必ずユーザーごとに分ける**: 利用者は `users` テーブルに登録した人だけで、アプリにログイン画面はない（本番は Cloudflare Access で保護し、Worker が JWT を検証してユーザーを決める）。ユーザーのデータを持つテーブルには `user_id` を持たせ、すべてのクエリを `c.get("userId")` で絞り込む（`src/worker/db/` の関数は `(db, userId, ...)` を受け取り、必ず `userId` で絞り込む）。API の返り値に `user_id` を含めない
 
 ### よく使うコマンド
 
