@@ -1,10 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { MONTH_PATTERN } from "../../shared/constants";
+import { MonthCalendar } from "../components/MonthCalendar";
 import { Button, ErrorMessage, Spinner } from "../components/ui";
 import { api, queryKeys } from "../lib/api";
 import { currentMonth, formatDate, formatMonth, shiftMonth } from "../lib/date";
 import { moodEmoji } from "../lib/mood";
+import { loadJson, saveJson } from "../lib/storage";
 
 export const Route = createFileRoute("/entries/")({
   validateSearch: (search: Record<string, unknown>): { month?: string } => {
@@ -14,11 +17,25 @@ export const Route = createFileRoute("/entries/")({
   component: EntriesPage,
 });
 
+type View = "list" | "calendar";
+
+const VIEWS: { value: View; label: string }[] = [
+  { value: "list", label: "一覧" },
+  { value: "calendar", label: "カレンダー" },
+];
+// 詳細画面から「一覧に戻る」で戻っても同じ表示になるよう、URL ではなく localStorage に持たせる
+const VIEW_KEY = "kaitokune:entries-view";
+
 function EntriesPage() {
   const month = Route.useSearch().month ?? currentMonth();
   const navigate = Route.useNavigate();
   const list = useQuery({ queryKey: queryKeys.entryList(month), queryFn: () => api.listEntries(month) });
   const isCurrent = month >= currentMonth();
+  const [view, setView] = useState<View>(() => (loadJson<View>(VIEW_KEY) === "calendar" ? "calendar" : "list"));
+  const changeView = (next: View) => {
+    setView(next);
+    saveJson(VIEW_KEY, next);
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -41,10 +58,31 @@ function EntriesPage() {
         </Button>
       </div>
 
+      <fieldset className="flex self-center rounded-full bg-stone-200/60 p-1 dark:bg-stone-800">
+        <legend className="sr-only">表示</legend>
+        {VIEWS.map((v) => (
+          <button
+            key={v.value}
+            type="button"
+            aria-pressed={view === v.value}
+            onClick={() => changeView(v.value)}
+            className={`rounded-full px-4 py-1 text-sm transition ${
+              view === v.value
+                ? "bg-white font-medium text-stone-900 shadow-sm dark:bg-stone-950 dark:text-stone-50"
+                : "text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100"
+            }`}
+          >
+            {v.label}
+          </button>
+        ))}
+      </fieldset>
+
       {list.isPending ? (
         <Spinner />
       ) : list.isError ? (
         <ErrorMessage error={list.error} onRetry={() => list.refetch()} />
+      ) : view === "calendar" ? (
+        <MonthCalendar month={month} entries={list.data} />
       ) : list.data.length === 0 ? (
         <p className="py-10 text-center text-sm text-stone-500">この月の日記はまだありません</p>
       ) : (
