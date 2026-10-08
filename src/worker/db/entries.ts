@@ -73,9 +73,14 @@ export async function searchEntries(db: DrizzleD1Database, userId: number, q: st
       .where(and(eq(qaLogs.userId, userId), inArray(qaLogs.entryDate, qaOnly)))
       .orderBy(asc(qaLogs.entryDate), asc(qaLogs.position));
     for (const log of logs) {
-      if (qaTexts.has(log.date)) continue;
-      if (log.answer.toLowerCase().includes(lower)) qaTexts.set(log.date, log.answer);
-      else if (log.question.toLowerCase().includes(lower)) qaTexts.set(log.date, log.question);
+      if (qaTexts.has(log.date)) {
+        continue;
+      }
+      if (log.answer.toLowerCase().includes(lower)) {
+        qaTexts.set(log.date, log.answer);
+      } else if (log.question.toLowerCase().includes(lower)) {
+        qaTexts.set(log.date, log.question);
+      }
     }
   }
 
@@ -89,7 +94,9 @@ export async function searchEntries(db: DrizzleD1Database, userId: number, q: st
 /** 日記と会話ログを返す。なければ null */
 export async function getEntry(db: DrizzleD1Database, userId: number, date: string): Promise<EntryDetail | null> {
   const [entry] = await db.select(entryColumns).from(entries).where(ownEntry(userId, date));
-  if (!entry) return null;
+  if (!entry) {
+    return null;
+  }
   const qa = await db
     .select({ question: qaLogs.question, answer: qaLogs.answer })
     .from(qaLogs)
@@ -139,10 +146,16 @@ export async function changeEntryDate(
   newDate: string,
 ): Promise<{ status: "ok"; entry: Entry } | { status: "not_found" } | { status: "conflict" }> {
   const [entry] = await db.select(entryColumns).from(entries).where(ownEntry(userId, date));
-  if (!entry) return { status: "not_found" };
-  if (newDate === date) return { status: "ok", entry };
+  if (!entry) {
+    return { status: "not_found" };
+  }
+  if (newDate === date) {
+    return { status: "ok", entry };
+  }
   const [existing] = await db.select({ date: entries.date }).from(entries).where(ownEntry(userId, newDate));
-  if (existing) return { status: "conflict" };
+  if (existing) {
+    return { status: "conflict" };
+  }
 
   // (user_id, date) は主キーで qa_logs から参照されているため、新しい日付の行を作って会話ログを付け替えてから古い行を消す
   const [[moved]] = await db.batch([

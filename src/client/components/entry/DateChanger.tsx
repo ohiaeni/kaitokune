@@ -33,14 +33,18 @@ export function DateChanger({
       className="flex flex-col gap-3"
       onSubmit={(e) => {
         e.preventDefault();
-        if (!newDate || newDate === date || newDate > max) return;
+        if (!newDate || newDate === date || newDate > max) {
+          return;
+        }
         const hasDraft = loadDraft(newDate) !== null;
-        if (hasDraft && !confirm(`${formatDate(newDate)}の書きかけの会話は削除されます。日付を変更しますか？`)) return;
+        if (hasDraft && !confirm(`${formatDate(newDate)}の書きかけの会話は削除されます。日付を変更しますか？`)) {
+          return;
+        }
         change.mutate({ date, newDate });
       }}
     >
       <label className="flex flex-col gap-1">
-        <span className="text-sm text-muted-foreground">新しい日付</span>
+        <span className="text-muted-foreground text-sm">新しい日付</span>
         <Input
           type="date"
           value={newDate}

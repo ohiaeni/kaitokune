@@ -28,7 +28,7 @@ export function createGemini(apiKey: string, model: string, fetcher: typeof fetc
       );
       if (!res.ok) {
         const detail = (await res.text().catch(() => "")).slice(0, 300);
-        throw new ProviderError(name, `HTTP ${res.status} ${detail}`, res.status);
+        throw new ProviderError(`HTTP ${res.status} ${detail}`, { provider: name, status: res.status });
       }
 
       const data = (await res.json()) as GeminiResponse;
@@ -36,7 +36,9 @@ export function createGemini(apiKey: string, model: string, fetcher: typeof fetc
         ?.map((p) => p.text ?? "")
         .join("")
         .trim();
-      if (!text) throw new ProviderError(name, "empty response");
+      if (!text) {
+        throw new ProviderError("empty response", { provider: name });
+      }
       return text;
     },
   };

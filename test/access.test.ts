@@ -9,12 +9,13 @@ import type { Bindings } from "../src/worker/env";
 const TEAM = "https://example.cloudflareaccess.com";
 const AUD = "test-aud";
 const KID = "key-1";
+const BASE64_PADDING = /=+$/;
 
 function base64Url(bytes: ArrayBuffer | Uint8Array): string {
   return btoa(String.fromCharCode(...new Uint8Array(bytes)))
     .replace(/\+/g, "-")
     .replace(/\//g, "_")
-    .replace(/=+$/, "");
+    .replace(BASE64_PADDING, "");
 }
 
 const encodeJson = (value: unknown) => base64Url(new TextEncoder().encode(JSON.stringify(value)));
@@ -56,9 +57,9 @@ async function sign(
 /** Access の公開鍵の配布元を真似る */
 function certsFetcher(keys: JsonWebKey[] = [publicJwk]) {
   const urls: string[] = [];
-  const fetcher = (async (input: RequestInfo | URL) => {
+  const fetcher = ((input: RequestInfo | URL) => {
     urls.push(String(input));
-    return Response.json({ keys });
+    return Promise.resolve(Response.json({ keys }));
   }) as typeof fetch;
   return { fetcher, urls };
 }
@@ -87,9 +88,9 @@ describe("createAccessVerifier", () => {
     const otherJwk = { ...((await crypto.subtle.exportKey("jwk", other.publicKey)) as JsonWebKey), kid: "key-2" };
     let keys: JsonWebKey[] = [publicJwk];
     const urls: string[] = [];
-    const verify = createAccessVerifier((async (input: RequestInfo | URL) => {
+    const verify = createAccessVerifier(((input: RequestInfo | URL) => {
       urls.push(String(input));
-      return Response.json({ keys });
+      return Promise.resolve(Response.json({ keys }));
     }) as typeof fetch);
 
     await verify(await sign(), config);

@@ -21,7 +21,7 @@ export function EntryList({ entries, highlight }: { entries: EntrySummary[]; hig
                 {findMood(e.mood)?.emoji}
               </span>
             </div>
-            <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+            <p className="mt-1 line-clamp-2 text-muted-foreground text-sm">
               {highlight ? <Highlight text={e.excerpt} q={highlight} /> : e.excerpt}
             </p>
           </Link>

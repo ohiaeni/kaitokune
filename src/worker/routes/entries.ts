@@ -35,7 +35,9 @@ export const entryRoutes = new Hono<AppEnv>()
   .get("/:date", dateParam, async (c) => {
     const { date } = c.req.valid("param");
     const detail = await getEntry(c.get("db"), c.get("userId"), date);
-    if (!detail) return c.json<ApiErrorBody>(notFoundBody(date), 404);
+    if (!detail) {
+      return c.json<ApiErrorBody>(notFoundBody(date), 404);
+    }
     return c.json<EntryDetail>(detail);
   })
   .put("/:date", dateParam, zValidator("json", saveEntryRequestSchema, validationHook), async (c) => {
@@ -50,7 +52,9 @@ export const entryRoutes = new Hono<AppEnv>()
       return c.json<ApiErrorBody>({ error: "invalid_request", message: "未来の日付には変更できません" }, 400);
     }
     const result = await changeEntryDate(c.get("db"), c.get("userId"), date, newDate);
-    if (result.status === "not_found") return c.json<ApiErrorBody>(notFoundBody(date), 404);
+    if (result.status === "not_found") {
+      return c.json<ApiErrorBody>(notFoundBody(date), 404);
+    }
     if (result.status === "conflict") {
       return c.json<ApiErrorBody>({ error: "conflict", message: `${newDate} にはすでに日記があります` }, 409);
     }

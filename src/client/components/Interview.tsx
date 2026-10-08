@@ -45,10 +45,12 @@ export function Interview({ date }: { date: string }) {
         <Button
           variant="ghost"
           size="sm"
-          className="self-start text-xs text-muted-foreground"
+          className="self-start text-muted-foreground text-xs"
           disabled={busy !== null}
           onClick={() => {
-            if (confirm("会話を最初からやり直しますか？")) restart();
+            if (confirm("会話を最初からやり直しますか？")) {
+              restart();
+            }
           }}
         >
           最初からやり直す

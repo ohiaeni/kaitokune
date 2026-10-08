@@ -2,7 +2,9 @@ import type { QA } from "../../../shared/schemas";
 
 /** 日記のもとになった AI との会話（折りたたみ）。会話がなければ何も出さない */
 export function QaLog({ qa }: { qa: QA[] }) {
-  if (qa.length === 0) return null;
+  if (qa.length === 0) {
+    return null;
+  }
   return (
     <details className="rounded-xl border px-4 py-3 text-sm">
       <summary className="cursor-pointer text-muted-foreground">AI との会話を見る</summary>

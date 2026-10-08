@@ -19,7 +19,9 @@ export function contains(column: SQLiteColumn, pattern: string): SQL {
 /** 一致した箇所の前後を切り出す。LIKE と同じく ASCII の大文字・小文字は区別しない */
 export function excerptAround(text: string, q: string): string {
   const index = text.toLowerCase().indexOf(q.toLowerCase());
-  if (index < 0) return text.slice(0, EXCERPT_LENGTH);
+  if (index < 0) {
+    return text.slice(0, EXCERPT_LENGTH);
+  }
   const start = Math.max(0, index - SEARCH_CONTEXT);
   const end = start + EXCERPT_LENGTH;
   return `${start > 0 ? "…" : ""}${text.slice(start, end)}${end < text.length ? "…" : ""}`;

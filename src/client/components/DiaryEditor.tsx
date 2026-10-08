@@ -9,7 +9,7 @@ function MoodPicker({ value, onChange }: { value: number | null; onChange: (mood
   const labelId = useId();
   return (
     <div className="flex flex-col gap-2">
-      <span id={labelId} className="text-sm text-muted-foreground">
+      <span id={labelId} className="text-muted-foreground text-sm">
         今日の気分
       </span>
       <ToggleGroup
@@ -57,11 +57,13 @@ export function DiaryEditor({
       className="flex flex-col gap-4"
       onSubmit={(e) => {
         e.preventDefault();
-        if (body.trim()) onSave(body.trim(), mood);
+        if (body.trim()) {
+          onSave(body.trim(), mood);
+        }
       }}
     >
       <label className="flex flex-col gap-1">
-        <span className="text-sm text-muted-foreground">日記（自由に直せます）</span>
+        <span className="text-muted-foreground text-sm">日記（自由に直せます）</span>
         <Textarea
           value={body}
           onChange={(e) => setBody(e.target.value)}
@@ -69,7 +71,7 @@ export function DiaryEditor({
           maxLength={10000}
           className="field-sizing-fixed resize-y leading-relaxed"
         />
-        <span className="self-end text-xs text-muted-foreground">{body.length} 文字</span>
+        <span className="self-end text-muted-foreground text-xs">{body.length} 文字</span>
       </label>
       <MoodPicker value={mood} onChange={setMood} />
       <div className="flex flex-wrap items-center gap-2">

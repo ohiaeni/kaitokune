@@ -10,7 +10,7 @@ export function MonthNav({ month, onChange }: { month: string; onChange: (month:
       <Button variant="ghost" size="icon-lg" aria-label="前の月" onClick={() => onChange(shiftMonth(month, -1))}>
         <ChevronLeftIcon />
       </Button>
-      <h1 className="text-xl font-bold">{formatMonth(month)}</h1>
+      <h1 className="font-bold text-xl">{formatMonth(month)}</h1>
       <Button
         variant="ghost"
         size="icon-lg"

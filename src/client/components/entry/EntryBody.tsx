@@ -8,7 +8,7 @@ export function EntryBody({ entry }: { entry: Entry }) {
   return (
     <Card className="block p-4">
       {mood && (
-        <p className="mb-3 text-sm text-muted-foreground">
+        <p className="mb-3 text-muted-foreground text-sm">
           <span className="mr-1 text-xl" aria-hidden>
             {mood.emoji}
           </span>

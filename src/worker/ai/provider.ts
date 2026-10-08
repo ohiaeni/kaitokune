@@ -11,13 +11,16 @@ export interface TextGenerator {
   generate(prompt: Prompt): Promise<string>;
 }
 
+type ProviderErrorOptions = ErrorOptions & { provider: string; status?: number };
+
 export class ProviderError extends Error {
-  constructor(
-    readonly provider: string,
-    message: string,
-    readonly status?: number,
-  ) {
-    super(`[${provider}] ${message}`);
+  readonly provider: string;
+  readonly status?: number;
+
+  constructor(message: string, { provider, status, ...options }: ProviderErrorOptions) {
+    super(`[${provider}] ${message}`, options);
     this.name = "ProviderError";
+    this.provider = provider;
+    this.status = status;
   }
 }

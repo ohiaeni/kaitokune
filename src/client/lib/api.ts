@@ -12,14 +12,17 @@ import type {
   UsageResponse,
 } from "../../shared/schemas";
 
+type ApiErrorOptions = ErrorOptions & { status: number; code: ApiErrorCode | "network" };
+
 export class ApiError extends Error {
-  constructor(
-    readonly status: number,
-    readonly code: ApiErrorCode | "network",
-    message: string,
-  ) {
-    super(message);
+  readonly status: number;
+  readonly code: ApiErrorCode | "network";
+
+  constructor(message: string, { status, code, ...options }: ApiErrorOptions) {
+    super(message, options);
     this.name = "ApiError";
+    this.status = status;
+    this.code = code;
   }
 }
 
@@ -30,12 +33,19 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       ...init,
       headers: init?.body ? { "content-type": "application/json", ...init.headers } : init?.headers,
     });
-  } catch {
-    throw new ApiError(0, "network", "通信できませんでした。ネットワークを確認してください");
+  } catch (e) {
+    throw new ApiError("通信できませんでした。ネットワークを確認してください", {
+      status: 0,
+      code: "network",
+      cause: e,
+    });
   }
   if (!res.ok) {
     const body = (await res.json().catch(() => null)) as ApiErrorBody | null;
-    throw new ApiError(res.status, body?.error ?? "internal", body?.message ?? `エラーが発生しました（${res.status}）`);
+    throw new ApiError(body?.message ?? `エラーが発生しました（${res.status}）`, {
+      status: res.status,
+      code: body?.error ?? "internal",
+    });
   }
   return (res.status === 204 ? undefined : await res.json()) as T;
 }
@@ -57,7 +67,9 @@ export const api = {
     try {
       return await request<EntryDetail>(`/entries/${date}`);
     } catch (e) {
-      if (e instanceof ApiError && e.status === 404) return null;
+      if (e instanceof ApiError && e.status === 404) {
+        return null;
+      }
       throw e;
     }
   },

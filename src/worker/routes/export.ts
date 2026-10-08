@@ -21,7 +21,9 @@ export const exportRoutes = new Hono<AppEnv>().get(
     const filename = `kaitokune-${todayIn(c.env.TIMEZONE)}.${format === "json" ? "json" : "md"}`;
     c.header("content-disposition", `attachment; filename="${filename}"`);
     c.header("cache-control", "no-store");
-    if (format === "json") return c.json(file);
+    if (format === "json") {
+      return c.json(file);
+    }
     c.header("content-type", "text/markdown; charset=utf-8");
     return c.body(toMarkdown(file));
   },

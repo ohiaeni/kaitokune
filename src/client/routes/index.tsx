@@ -2,10 +2,9 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { formatDate } from "../../shared/date";
 import { EntryView } from "../components/EntryView";
-import { ErrorMessage } from "../components/ErrorMessage";
 import { Interview } from "../components/Interview";
-import { Loading } from "../components/Loading";
 import { NotesPanel } from "../components/NotesPanel";
+import { QueryResult } from "../components/QueryResult";
 import { today } from "../lib/date";
 import { useEntry } from "../lib/queries";
 
@@ -19,25 +18,25 @@ function TodayPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-bold">
+      <h1 className="font-bold text-2xl">
         {formatDate(date)}
-        <span className="ml-2 text-base font-normal text-muted-foreground">今日の日記</span>
+        <span className="ml-2 font-normal text-base text-muted-foreground">今日の日記</span>
       </h1>
-      {entry.isPending ? (
-        <Loading />
-      ) : entry.isError ? (
-        <ErrorMessage error={entry.error} onRetry={() => entry.refetch()} />
-      ) : entry.data ? (
-        <EntryView
-          detail={entry.data}
-          onDateChanged={(newDate) => navigate({ to: "/entries/$date", params: { date: newDate } })}
-        />
-      ) : (
-        <>
-          <NotesPanel date={date} />
-          <Interview date={date} />
-        </>
-      )}
+      <QueryResult query={entry}>
+        {(detail) =>
+          detail ? (
+            <EntryView
+              detail={detail}
+              onDateChanged={(newDate) => navigate({ to: "/entries/$date", params: { date: newDate } })}
+            />
+          ) : (
+            <>
+              <NotesPanel date={date} />
+              <Interview date={date} />
+            </>
+          )
+        }
+      </QueryResult>
     </div>
   );
 }

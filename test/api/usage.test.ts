@@ -8,11 +8,11 @@ describe("GET /api/usage", () => {
   const analyticsEnv = { CF_ANALYTICS_TOKEN: "token", CF_ACCOUNT_ID: "account" };
 
   /** GraphQL Analytics API のモック。受け取ったリクエストを記録する */
-  function fakeAnalytics(response: Response | (() => never)) {
+  function fakeAnalytics(response: Response | Error) {
     const requests: Request[] = [];
-    const fetcher = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const fetcher = ((input: RequestInfo | URL, init?: RequestInit) => {
       requests.push(new Request(input, init));
-      return typeof response === "function" ? response() : response;
+      return response instanceof Error ? Promise.reject(response) : Promise.resolve(response);
     }) as typeof fetch;
     return { fetcher, requests };
   }
@@ -93,15 +93,10 @@ describe("GET /api/usage", () => {
   });
 
   it("reports Cloudflare errors without failing the whole response", async () => {
-    const cases: [Response | (() => never), string][] = [
+    const cases: [Response | Error, string][] = [
       [new Response("forbidden", { status: 403 }), "HTTP 403"],
       [Response.json({ data: null, errors: [{ message: "not authorized" }] }), "not authorized"],
-      [
-        () => {
-          throw new Error("network down");
-        },
-        "接続できませんでした",
-      ],
+      [new Error("network down"), "接続できませんでした"],
     ];
     for (const [response, message] of cases) {
       const { request } = setup({}, analyticsEnv, fakeAnalytics(response).fetcher);

@@ -11,9 +11,10 @@ function generator(name: string, impl: () => string | Promise<string>): TextGene
   const g = {
     name,
     calls: 0,
-    async generate() {
+    generate() {
       g.calls++;
-      return impl();
+      // impl が投げた例外も reject として返す
+      return Promise.resolve().then(impl);
     },
   };
   return g;
@@ -29,7 +30,7 @@ describe("generateWithFallback", () => {
 
   it("falls back when a provider throws (e.g. 429)", async () => {
     const a = generator("a", () => {
-      throw new ProviderError("a", "HTTP 429", 429);
+      throw new ProviderError("HTTP 429", { provider: "a", status: 429 });
     });
     const b = generator("b", () => "B");
     expect(await generateWithFallback([a, b], prompt, (t) => t)).toBe("B");
@@ -93,9 +94,11 @@ describe("parseDiary", () => {
 describe("createGemini", () => {
   it("sends the API key and JSON mode, and joins the response parts", async () => {
     let captured: Request | undefined;
-    const fetcher = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const fetcher = ((input: RequestInfo | URL, init?: RequestInit) => {
       captured = new Request(input, init);
-      return Response.json({ candidates: [{ content: { parts: [{ text: '{"question":' }, { text: '"Q"}' }] } }] });
+      return Promise.resolve(
+        Response.json({ candidates: [{ content: { parts: [{ text: '{"question":' }, { text: '"Q"}' }] } }] }),
+      );
     }) as typeof fetch;
 
     const gemini = createGemini("test-key", "gemini-flash-latest", fetcher);

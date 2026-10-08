@@ -3,7 +3,7 @@ import { useState } from "react";
 import { MAX_NOTES, NOTE_MAX_LENGTH } from "../../shared/constants";
 import { useAddNote, useDeleteNote, useNotes } from "../lib/queries";
 import { ErrorMessage } from "./ErrorMessage";
-import { Loading } from "./Loading";
+import { QueryResult } from "./QueryResult";
 import { Button } from "./ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
@@ -18,7 +18,9 @@ export function NotesPanel({ date }: { date: string }) {
   const isFull = (notes.data?.length ?? 0) >= MAX_NOTES;
   const submit = () => {
     const body = text.trim();
-    if (body && !add.isPending && !isFull) add.mutate(body, { onSuccess: () => setText("") });
+    if (body && !add.isPending && !isFull) {
+      add.mutate(body, { onSuccess: () => setText("") });
+    }
   };
 
   return (
@@ -30,32 +32,30 @@ export function NotesPanel({ date }: { date: string }) {
         <CardDescription className="text-xs">思いついたことを書いておくと、AI が質問や日記に使います</CardDescription>
       </CardHeader>
 
-      {notes.isPending ? (
-        <Loading />
-      ) : notes.isError ? (
-        <ErrorMessage error={notes.error} onRetry={() => notes.refetch()} />
-      ) : (
-        notes.data.length > 0 && (
-          <ul className="flex flex-col gap-1.5">
-            {notes.data.map((n) => (
-              <li key={n.id} className="flex items-start gap-2 text-sm">
-                <span className="mt-2 size-1.5 shrink-0 rounded-full bg-primary" aria-hidden />
-                <span className="flex-1 whitespace-pre-wrap py-0.5">{n.body}</span>
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label={`メモ「${n.body}」を削除`}
-                  disabled={remove.isPending}
-                  onClick={() => remove.mutate(n.id)}
-                  className="-my-1 text-muted-foreground"
-                >
-                  <XIcon />
-                </Button>
-              </li>
-            ))}
-          </ul>
-        )
-      )}
+      <QueryResult query={notes}>
+        {(data) =>
+          data.length > 0 && (
+            <ul className="flex flex-col gap-1.5">
+              {data.map((n) => (
+                <li key={n.id} className="flex items-start gap-2 text-sm">
+                  <span className="mt-2 size-1.5 shrink-0 rounded-full bg-primary" aria-hidden />
+                  <span className="flex-1 whitespace-pre-wrap py-0.5">{n.body}</span>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label={`メモ「${n.body}」を削除`}
+                    disabled={remove.isPending}
+                    onClick={() => remove.mutate(n.id)}
+                    className="-my-1 text-muted-foreground"
+                  >
+                    <XIcon />
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </QueryResult>
 
       <form
         className="flex gap-2"

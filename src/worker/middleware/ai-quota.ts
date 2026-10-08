@@ -17,7 +17,9 @@ export class DailyLimitError extends Error {
 async function consumeAiQuota(db: DrizzleD1Database, userId: number, env: Bindings): Promise<void> {
   const count = await incrementAiUsage(db, userId, todayIn(env.TIMEZONE));
   const limit = Number(env.AI_DAILY_LIMIT);
-  if (count > limit) throw new DailyLimitError(limit);
+  if (count > limit) {
+    throw new DailyLimitError(limit);
+  }
 }
 
 /**

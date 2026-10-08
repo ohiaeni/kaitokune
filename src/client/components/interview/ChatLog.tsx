@@ -36,7 +36,7 @@ export function ChatLog({ draft, thinking }: { draft: Draft; thinking: boolean }
 
 function Bubble({ from, children }: { from: "ai" | "me"; children: ReactNode }) {
   return from === "ai" ? (
-    <div className="max-w-[85%] self-start whitespace-pre-wrap rounded-2xl rounded-tl-sm bg-card px-4 py-2.5 leading-relaxed text-card-foreground shadow-sm dark:bg-secondary">
+    <div className="max-w-[85%] self-start whitespace-pre-wrap rounded-2xl rounded-tl-sm bg-card px-4 py-2.5 text-card-foreground leading-relaxed shadow-sm dark:bg-secondary">
       {children}
     </div>
   ) : (
