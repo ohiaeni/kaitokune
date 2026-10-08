@@ -26,6 +26,7 @@ AI の質問に答えるだけで日記が書ける、自分 1 人で使うア�
 | `npm run dev` | 開発サーバー（Workers AI はリモートで動くので `npx wrangler login` が必要） |
 | `npm run dev:local` | Cloudflare に接続しない開発サーバー（AI は `.dev.vars` の Gemini だけ） |
 | `npm run check` | Biome の lint・フォーマットのチェック（`npm run format` で自動修正） |
+| `npm run knip` | 未使用のファイル・export・依存関係の検出（設定は `knip.json`） |
 | `npm run build` | 型チェック（`tsc -b`）とビルド |
 | `npm test` | テスト（AI はモックするので無料枠を消費しない） |
 | `npm run db:generate` | スキーマの変更からマイグレーションを生成 |

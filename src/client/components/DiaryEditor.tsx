@@ -2,7 +2,7 @@ import { type ReactNode, useState } from "react";
 import { MOODS } from "../lib/mood";
 import { Button } from "./ui";
 
-export function MoodPicker({ value, onChange }: { value: number | null; onChange: (mood: number | null) => void }) {
+function MoodPicker({ value, onChange }: { value: number | null; onChange: (mood: number | null) => void }) {
   return (
     <fieldset className="flex flex-col gap-2">
       <legend className="mb-2 text-sm text-stone-600 dark:text-stone-400">今日の気分</legend>
