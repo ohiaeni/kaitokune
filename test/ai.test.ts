@@ -29,7 +29,7 @@ describe("generateWithFallback", () => {
 
   it("falls back when a provider throws (e.g. 429)", async () => {
     const a = generator("a", () => {
-      throw new ProviderError("a", "HTTP 429", 429);
+      throw new ProviderError("HTTP 429", { provider: "a", status: 429 });
     });
     const b = generator("b", () => "B");
     expect(await generateWithFallback([a, b], prompt, (t) => t)).toBe("B");

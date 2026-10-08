@@ -94,7 +94,8 @@
         "noSubstr": "error",
         "useSingleVarDeclarator": "error",
         "useConsistentBuiltinInstantiation": "error",
-        "noNestedTernary": "error"
+        "noNestedTernary": "error",
+        "useErrorCause": "error"
       },
       "complexity": {
         "noForEach": "error",

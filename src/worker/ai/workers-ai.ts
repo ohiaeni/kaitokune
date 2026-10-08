@@ -51,11 +51,12 @@ export function createWorkersAI(ai: Ai, model: string): TextGenerator {
           } as never,
         );
       } catch (e) {
-        throw new ProviderError(name, e instanceof Error ? e.message : String(e));
+        throw new ProviderError(e instanceof Error ? e.message : String(e), { provider: name, cause: e });
       }
 
       const text = extractText(result);
-      if (text === null) throw new ProviderError(name, `unexpected response: ${JSON.stringify(result).slice(0, 300)}`);
+      if (text === null)
+        throw new ProviderError(`unexpected response: ${JSON.stringify(result).slice(0, 300)}`, { provider: name });
       return text;
     },
   };
