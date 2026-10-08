@@ -1,5 +1,5 @@
 import { zValidator } from "@hono/zod-validator";
-import { asc } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
 import { Hono } from "hono";
 import { type ExportFile, exportQuerySchema, MOODS, type QA } from "../../shared/schemas";
@@ -7,15 +7,17 @@ import { entries, qaLogs } from "../db/schema";
 import type { AppEnv } from "../types";
 import { todayIn } from "../usage";
 import { validationHook } from "../validation";
+import { entryColumns } from "./entries";
 
 const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
 
-async function loadAll(db: DrizzleD1Database): Promise<ExportFile["entries"]> {
+async function loadAll(db: DrizzleD1Database, userId: number): Promise<ExportFile["entries"]> {
   const [rows, logs] = await db.batch([
-    db.select().from(entries).orderBy(asc(entries.date)),
+    db.select(entryColumns).from(entries).where(eq(entries.userId, userId)).orderBy(asc(entries.date)),
     db
       .select({ entryDate: qaLogs.entryDate, question: qaLogs.question, answer: qaLogs.answer })
       .from(qaLogs)
+      .where(eq(qaLogs.userId, userId))
       .orderBy(asc(qaLogs.entryDate), asc(qaLogs.position)),
   ]);
   const qaByDate = new Map<string, QA[]>();
@@ -61,7 +63,7 @@ export const exportRoutes = new Hono<AppEnv>().get(
       format: "kaitokune",
       version: 1,
       exportedAt: new Date().toISOString(),
-      entries: await loadAll(c.get("db")),
+      entries: await loadAll(c.get("db"), c.get("userId")),
     };
     const filename = `kaitokune-${todayIn(c.env.TIMEZONE)}.${format === "json" ? "json" : "md"}`;
     c.header("content-disposition", `attachment; filename="${filename}"`);
