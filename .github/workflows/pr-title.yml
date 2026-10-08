@@ -1,0 +1,33 @@
+name: PR タイトル
+
+# squash マージでは PR のタイトルがそのまま main のコミットメッセージになるので、
+# CLAUDE.md の `<型>: <要約>` の形式になっているかを確認する
+on:
+  pull_request:
+    # タイトルを直したときも再確認する
+    types: [opened, edited, synchronize, reopened]
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  pr-title:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Check PR title
+        env:
+          # タイトルは利用者が自由に入力できるので、run に直接埋め込まず環境変数で渡す
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          # 型は CLAUDE.md の「ラベル」の表と揃える。Dependabot の `chore(deps): …` のようにスコープも許可する
+          pattern='^(feat|fix|docs|chore|style|refactor|ci|test)(\([a-z0-9-]+\))?!?: .+'
+          if [[ "$TITLE" =~ $pattern ]]; then
+            echo "OK: $TITLE"
+          else
+            echo "::error::PR のタイトルは「<型>: <要約>」の形式にしてください（型: feat / fix / docs / chore / style / refactor / ci / test）。現在のタイトル: $TITLE"
+            exit 1
+          fi
