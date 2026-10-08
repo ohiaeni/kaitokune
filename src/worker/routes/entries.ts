@@ -4,6 +4,7 @@ import type { DrizzleD1Database } from "drizzle-orm/d1";
 import type { SQLiteColumn } from "drizzle-orm/sqlite-core";
 import { Hono } from "hono";
 import { z } from "zod";
+import { todayIn } from "../../shared/date";
 import {
   type ApiErrorBody,
   changeDateRequestSchema,
@@ -17,7 +18,6 @@ import {
 } from "../../shared/schemas";
 import { entries, qaLogs } from "../db/schema";
 import type { AppEnv } from "../types";
-import { todayIn } from "../usage";
 import { validationHook } from "../validation";
 
 const EXCERPT_LENGTH = 80;

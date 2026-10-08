@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { DATE_PATTERN } from "../../shared/constants";
+import { formatDate } from "../../shared/date";
 import { EntryView } from "../components/EntryView";
 import { ErrorMessage, Spinner } from "../components/ui";
 import { api, queryKeys } from "../lib/api";
-import { formatDate } from "../lib/date";
 
 export const Route = createFileRoute("/entries/$date")({
   beforeLoad: ({ params }) => {

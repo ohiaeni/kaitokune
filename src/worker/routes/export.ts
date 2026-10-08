@@ -2,14 +2,13 @@ import { zValidator } from "@hono/zod-validator";
 import { asc, eq } from "drizzle-orm";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
 import { Hono } from "hono";
-import { type ExportFile, exportQuerySchema, MOODS, type QA } from "../../shared/schemas";
+import { todayIn } from "../../shared/date";
+import { type ExportFile, exportQuerySchema, type QA } from "../../shared/schemas";
 import { entries, qaLogs } from "../db/schema";
+import { toMarkdown } from "../export/markdown";
 import type { AppEnv } from "../types";
-import { todayIn } from "../usage";
 import { validationHook } from "../validation";
 import { entryColumns } from "./entries";
-
-const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
 
 async function loadAll(db: DrizzleD1Database, userId: number): Promise<ExportFile["entries"]> {
   const [rows, logs] = await db.batch([
@@ -27,31 +26,6 @@ async function loadAll(db: DrizzleD1Database, userId: number): Promise<ExportFil
     qaByDate.set(entryDate, qa);
   }
   return rows.map((entry) => ({ ...entry, qa: qaByDate.get(entry.date) ?? [] }));
-}
-
-/** "2026-10-08" → "2026年10月8日（木）" */
-function formatDate(date: string): string {
-  const [y, m, d] = date.split("-").map(Number);
-  return `${y}年${m}月${d}日（${WEEKDAYS[new Date(Date.UTC(y, m - 1, d)).getUTCDay()]}）`;
-}
-
-/** 人が読むための Markdown。1 日ごとに見出し・気分・本文を並べ、AI との会話は折りたたむ */
-function toMarkdown(file: ExportFile): string {
-  const sections = file.entries.map((entry) => {
-    const lines = [`## ${formatDate(entry.date)}`, ""];
-    const mood = MOODS.find((m) => m.value === entry.mood);
-    if (mood) lines.push(`気分: ${mood.emoji} ${mood.label}`, "");
-    lines.push(entry.body);
-    if (entry.qa.length > 0) {
-      lines.push("", "<details>", "<summary>AI との会話</summary>", "");
-      for (const { question, answer } of entry.qa) lines.push(`**Q. ${question}**`, "", `A. ${answer}`, "");
-      lines.push("</details>");
-    }
-    return lines.join("\n");
-  });
-  return [`# kaitokune の日記`, "", `${file.exportedAt} にエクスポート（${file.entries.length} 件）`, ...sections]
-    .join("\n\n")
-    .concat("\n");
 }
 
 export const exportRoutes = new Hono<AppEnv>().get(

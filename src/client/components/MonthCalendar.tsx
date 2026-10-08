@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
+import { findMood } from "../../shared/constants";
+import { formatDate, WEEKDAYS } from "../../shared/date";
 import type { EntrySummary } from "../../shared/schemas";
-import { calendarDays, formatDate, today, WEEKDAYS } from "../lib/date";
-import { MOODS } from "../lib/mood";
+import { calendarDays, today } from "../lib/date";
 
 /** 月のカレンダー。日記のある日には気分の絵文字を出し、押すと詳細画面に移る */
 export function MonthCalendar({ month, entries }: { month: string; entries: EntrySummary[] }) {
@@ -47,7 +48,7 @@ export function MonthCalendar({ month, entries }: { month: string; entries: Entr
           );
         }
 
-        const mood = MOODS.find((m) => m.value === entry.mood);
+        const mood = findMood(entry.mood);
         return (
           <Link
             key={date}

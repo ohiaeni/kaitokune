@@ -1,6 +1,7 @@
 import { zValidator } from "@hono/zod-validator";
 import { and, desc, eq, lt } from "drizzle-orm";
 import { Hono } from "hono";
+import { todayIn } from "../../shared/date";
 import {
   type ComposeResponse,
   composeRequestSchema,
@@ -11,7 +12,7 @@ import {
 } from "../../shared/schemas";
 import { entries } from "../db/schema";
 import type { AppEnv } from "../types";
-import { consumeAiQuota, todayIn } from "../usage";
+import { consumeAiQuota } from "../usage";
 import { validationHook } from "../validation";
 import { listNotes } from "./notes";
 

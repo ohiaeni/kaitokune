@@ -20,6 +20,11 @@ export const MOODS = [
   { value: 5, emoji: "😄", label: "最高" },
 ] as const;
 
+/** 気分の値に対応する表示。未設定（null）や範囲外なら undefined */
+export function findMood(value: number | null): (typeof MOODS)[number] | undefined {
+  return MOODS.find((m) => m.value === value);
+}
+
 /** 1 日に残せるメモの最大件数（AI に渡す文字数を抑えるため） */
 export const MAX_NOTES = 20;
 /** メモ 1 件の最大文字数 */

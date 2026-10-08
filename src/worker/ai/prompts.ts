@@ -1,14 +1,7 @@
 import { z } from "zod";
+import { formatDate } from "../../shared/date";
 import type { NextResponse, QA } from "../../shared/schemas";
 import type { Prompt } from "./provider";
-
-const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
-
-function formatDate(date: string): string {
-  const [y, m, d] = date.split("-").map(Number);
-  const weekday = WEEKDAYS[new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
-  return `${y}年${m}月${d}日（${weekday}）`;
-}
 
 function formatQA(qa: QA[]): string {
   return qa.map((x, i) => `Q${i + 1}: ${x.question}\nA${i + 1}: ${x.answer}`).join("\n\n");
@@ -46,7 +39,7 @@ export function buildNextQuestionPrompt(input: {
     output,
   ].join("\n");
 
-  const parts = [`今日の日付: ${formatDate(input.date)}`];
+  const parts = [`今日の日付: ${formatDate(input.date, { withYear: true })}`];
   if (input.notes.length > 0) {
     parts.push(`# 今日のメモ（ユーザーが日中に書き留めたもの）\n${formatNotes(input.notes)}`);
   }
@@ -98,7 +91,7 @@ export function buildComposePrompt(input: { date: string; qa: QA[]; notes: strin
     "- 日付・タイトル・見出し・箇条書きは付けず、本文だけを出力する",
   ].join("\n");
 
-  const parts = [`日付: ${formatDate(input.date)}`];
+  const parts = [`日付: ${formatDate(input.date, { withYear: true })}`];
   if (input.notes.length > 0) parts.push(`# 今日のメモ\n${formatNotes(input.notes)}`);
   parts.push(`# インタビューの内容\n${formatQA(input.qa)}`, "この内容で今日の日記を書いてください。");
   const user = parts.join("\n\n");

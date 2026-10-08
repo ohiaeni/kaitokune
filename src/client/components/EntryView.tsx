@@ -1,9 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { findMood } from "../../shared/constants";
+import { formatDate } from "../../shared/date";
 import type { EntryDetail } from "../../shared/schemas";
 import { api, queryKeys } from "../lib/api";
-import { formatDate, today } from "../lib/date";
-import { MOODS } from "../lib/mood";
+import { today } from "../lib/date";
 import { loadJson, removeItem } from "../lib/storage";
 import { DiaryEditor } from "./DiaryEditor";
 import { draftKey } from "./Interview";
@@ -81,7 +82,7 @@ export function EntryView({
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [changingDate, setChangingDate] = useState(false);
-  const mood = MOODS.find((m) => m.value === entry.mood);
+  const mood = findMood(entry.mood);
 
   const save = useMutation({
     mutationFn: ({ body, mood }: { body: string; mood: number | null }) => api.saveEntry(entry.date, { body, mood }),

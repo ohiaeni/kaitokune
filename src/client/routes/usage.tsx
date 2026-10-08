@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { formatDate } from "../../shared/date";
 import type { CloudflareUsage, UsageMeter } from "../../shared/schemas";
 import { Button, Card, ErrorMessage, Spinner } from "../components/ui";
 import { api, queryKeys } from "../lib/api";
-import { formatDate } from "../lib/date";
 
 export const Route = createFileRoute("/usage")({ component: UsagePage });
 
