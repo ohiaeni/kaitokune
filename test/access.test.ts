@@ -56,9 +56,9 @@ async function sign(
 /** Access の公開鍵の配布元を真似る */
 function certsFetcher(keys: JsonWebKey[] = [publicJwk]) {
   const urls: string[] = [];
-  const fetcher = (async (input: RequestInfo | URL) => {
+  const fetcher = ((input: RequestInfo | URL) => {
     urls.push(String(input));
-    return Response.json({ keys });
+    return Promise.resolve(Response.json({ keys }));
   }) as typeof fetch;
   return { fetcher, urls };
 }
@@ -87,9 +87,9 @@ describe("createAccessVerifier", () => {
     const otherJwk = { ...((await crypto.subtle.exportKey("jwk", other.publicKey)) as JsonWebKey), kid: "key-2" };
     let keys: JsonWebKey[] = [publicJwk];
     const urls: string[] = [];
-    const verify = createAccessVerifier((async (input: RequestInfo | URL) => {
+    const verify = createAccessVerifier(((input: RequestInfo | URL) => {
       urls.push(String(input));
-      return Response.json({ keys });
+      return Promise.resolve(Response.json({ keys }));
     }) as typeof fetch);
 
     await verify(await sign(), config);

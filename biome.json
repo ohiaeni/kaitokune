@@ -67,7 +67,8 @@
         "noNestedPromises": "error",
         "useArraySortCompare": "error",
         "noEqualsToNull": "error",
-        "noForIn": "error"
+        "noForIn": "error",
+        "useAwait": "error"
       },
       "style": {
         "useThrowOnlyError": "error",
