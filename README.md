@@ -93,7 +93,7 @@ kaitokune/
 
 Cloudflare アカウントの作成からデプロイ、アクセス制限までの詳しい手順は **[docs/setup.md](docs/setup.md)** にまとめています。以下はローカルで動かすまでの要約です。
 
-必要なもの: Node.js 22 以上、Cloudflare アカウント（無料）、任意で Google AI Studio の API キー（無料）。
+必要なもの: Node.js 24 以上（npm 11 以上。バージョンは `.node-version` に記載）、Cloudflare アカウント（無料）、任意で Google AI Studio の API キー（無料）。
 
 ```sh
 npm install
