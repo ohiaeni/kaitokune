@@ -19,3 +19,8 @@ export const MOODS = [
   { value: 4, emoji: "🙂", label: "よい" },
   { value: 5, emoji: "😄", label: "最高" },
 ] as const;
+
+/** 1 日に残せるメモの最大件数（AI に渡す文字数を抑えるため） */
+export const MAX_NOTES = 20;
+/** メモ 1 件の最大文字数 */
+export const NOTE_MAX_LENGTH = 200;

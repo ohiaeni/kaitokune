@@ -3,6 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { EntryView } from "../components/EntryView";
 import { Interview } from "../components/Interview";
+import { NotesPanel } from "../components/NotesPanel";
 import { ErrorMessage, Spinner } from "../components/ui";
 import { api, queryKeys } from "../lib/api";
 import { formatDate, today } from "../lib/date";
@@ -31,7 +32,10 @@ function TodayPage() {
           onDateChanged={(newDate) => navigate({ to: "/entries/$date", params: { date: newDate } })}
         />
       ) : (
-        <Interview date={date} />
+        <>
+          <NotesPanel date={date} />
+          <Interview date={date} />
+        </>
       )}
     </div>
   );

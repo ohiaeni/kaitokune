@@ -31,6 +31,7 @@ AI からの質問に答えるだけで、毎日の日記がかんたんに書�
 │   ├─ /api/chat/compose  … 回答 → 日記本文を生成 │
 │   ├─ /api/entries       … 日記の CRUD          │
 │   ├─ /api/export        … 日記のエクスポート     │
+│   ├─ /api/notes         … その日のメモ          │
 │   └─ /api/usage         … 無料枠の消費状況     │
 │   ※ それ以外のパスは静的アセット（SPA）を返す     │
 └───────┬─────────────────────────┬────────────┘
@@ -90,6 +91,7 @@ kaitokune/
 | --- | --- | --- |
 | `entries` | `date`（PK, YYYY-MM-DD）, `body`, `mood`（1〜5, 任意）, `created_at`, `updated_at` | 1 日 1 件の日記 |
 | `qa_logs` | `entry_date`（→ entries）, `position`, `question`, `answer` | 日記のもとになった AI との会話 |
+| `notes` | `date`, `body`, `created_at` | 日記を書く前にメモしておいた、その日の出来事や思ったこと（日記の生成で AI に渡す） |
 | `ai_usage` | `date`（PK）, `count` | AI 呼び出し回数（利用上限用） |
 
 ## セットアップ

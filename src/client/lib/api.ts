@@ -6,6 +6,7 @@ import type {
   EntryDetail,
   EntrySummary,
   NextResponse,
+  Note,
   QA,
   SaveEntryRequest,
   UsageResponse,
@@ -69,6 +70,13 @@ export const api = {
 
   deleteEntry: (date: string) => request<void>(`/entries/${date}`, { method: "DELETE" }),
 
+  listNotes: (date: string) => request<Note[]>(`/notes?date=${date}`),
+
+  addNote: (date: string, body: string) =>
+    request<Note>("/notes", { method: "POST", body: JSON.stringify({ date, body }) }),
+
+  deleteNote: (id: number) => request<void>(`/notes/${id}`, { method: "DELETE" }),
+
   getUsage: () => request<UsageResponse>("/usage"),
 };
 
@@ -77,5 +85,6 @@ export const queryKeys = {
   entryList: (month?: string) => ["entries", "list", month ?? "all"] as const,
   entrySearch: (q: string) => ["entries", "search", q] as const,
   entry: (date: string) => ["entries", "detail", date] as const,
+  notes: (date: string) => ["notes", date] as const,
   usage: ["usage"] as const,
 };

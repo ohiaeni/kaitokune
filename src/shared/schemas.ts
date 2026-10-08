@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { DATE_PATTERN, MAX_QUESTIONS, MONTH_PATTERN, SEARCH_QUERY_MAX_LENGTH } from "./constants";
+import { DATE_PATTERN, MAX_QUESTIONS, MONTH_PATTERN, NOTE_MAX_LENGTH, SEARCH_QUERY_MAX_LENGTH } from "./constants";
 
 export * from "./constants";
 
@@ -57,6 +57,12 @@ export type ExportFile = {
   exportedAt: string;
   entries: (Entry & { qa: QA[] })[];
 };
+
+export const createNoteRequestSchema = z.object({
+  date: dateSchema,
+  body: z.string().trim().min(1).max(NOTE_MAX_LENGTH),
+});
+export type Note = { id: number; date: string; body: string; createdAt: number };
 
 export type ApiErrorCode = "daily_limit" | "ai_unavailable" | "not_found" | "conflict" | "invalid_request" | "internal";
 export type ApiErrorBody = { error: ApiErrorCode; message: string };
