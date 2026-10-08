@@ -1,14 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { formatDate } from "../../shared/date";
 import type { CloudflareUsage } from "../../shared/schemas";
-import { Button, Card, ErrorMessage, Meter, Spinner } from "../components/ui";
+import { Button, Card, ErrorMessage, Meter, QueryResult } from "../components/ui";
 import { useUsage } from "../lib/queries";
 
 export const Route = createFileRoute("/usage")({ component: UsagePage });
 
 function formatBytes(n: number): string {
-  if (n >= 1e9) return `${(n / 1e9).toFixed(2)} GB`;
-  if (n >= 1e6) return `${(n / 1e6).toFixed(1)} MB`;
+  if (n >= 1e9) {
+    return `${(n / 1e9).toFixed(2)} GB`;
+  }
+  if (n >= 1e6) {
+    return `${(n / 1e6).toFixed(1)} MB`;
+  }
   return `${Math.ceil(n / 1e3)} KB`;
 }
 
@@ -28,10 +32,12 @@ function CloudflareSection({ usage }: { usage: CloudflareUsage }) {
       </p>
     );
   }
-  if (usage.status === "error") return <ErrorMessage error={new Error(usage.message)} />;
+  if (usage.status === "error") {
+    return <ErrorMessage error={new Error(usage.message)} />;
+  }
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-xs text-stone-500 dark:text-stone-400">
+      <p className="text-stone-500 text-xs dark:text-stone-400">
         {usage.date}（UTC）の値です。容量以外は毎日 {utcMidnightLocal()} にリセットされます。反映まで数分かかります。
       </p>
       <Meter label="Workers のリクエスト" meter={usage.workersRequests} />
@@ -49,37 +55,35 @@ function UsagePage() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">使用量</h1>
+        <h1 className="font-bold text-2xl">使用量</h1>
         <Button variant="ghost" disabled={usage.isFetching} onClick={() => usage.refetch()}>
           {usage.isFetching ? "更新中…" : "更新"}
         </Button>
       </div>
-      {usage.isPending ? (
-        <Spinner />
-      ) : usage.isError ? (
-        <ErrorMessage error={usage.error} onRetry={() => usage.refetch()} />
-      ) : (
-        <>
-          <Card className="flex flex-col gap-4">
-            <h2 className="font-bold">AI の利用回数（あなたの 1 日の上限）</h2>
-            <Meter label={`今日（${formatDate(usage.data.ai.date)}）`} meter={usage.data.ai.today} />
-            {usage.data.ai.history.length > 0 && (
-              <ul className="flex flex-col gap-1 text-sm text-stone-600 dark:text-stone-400">
-                {usage.data.ai.history.map((h) => (
-                  <li key={h.date} className="flex justify-between tabular-nums">
-                    <span>{formatDate(h.date)}</span>
-                    <span>{h.count} 回</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Card>
-          <Card className="flex flex-col gap-4">
-            <h2 className="font-bold">Cloudflare の無料枠</h2>
-            <CloudflareSection usage={usage.data.cloudflare} />
-          </Card>
-        </>
-      )}
+      <QueryResult query={usage}>
+        {(data) => (
+          <>
+            <Card className="flex flex-col gap-4">
+              <h2 className="font-bold">AI の利用回数（あなたの 1 日の上限）</h2>
+              <Meter label={`今日（${formatDate(data.ai.date)}）`} meter={data.ai.today} />
+              {data.ai.history.length > 0 && (
+                <ul className="flex flex-col gap-1 text-sm text-stone-600 dark:text-stone-400">
+                  {data.ai.history.map((h) => (
+                    <li key={h.date} className="flex justify-between tabular-nums">
+                      <span>{formatDate(h.date)}</span>
+                      <span>{h.count} 回</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+            <Card className="flex flex-col gap-4">
+              <h2 className="font-bold">Cloudflare の無料枠</h2>
+              <CloudflareSection usage={data.cloudflare} />
+            </Card>
+          </>
+        )}
+      </QueryResult>
     </div>
   );
 }

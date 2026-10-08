@@ -17,16 +17,13 @@ export function useInterview(date: string) {
 
   useEffect(() => saveDraft(date, draft), [date, draft]);
 
-  const run = useCallback(async (kind: Exclude<Busy, null>, fn: () => Promise<void>) => {
+  /** 処理を実行する。失敗したらエラーと再試行の操作を error に入れるので、呼び出し側で待つ必要はない */
+  const run = useCallback((kind: Exclude<Busy, null>, fn: () => Promise<void>) => {
     setBusy(kind);
     setError(null);
-    try {
-      await fn();
-    } catch (e) {
-      setError({ error: e, retry: () => run(kind, fn) });
-    } finally {
-      setBusy(null);
-    }
+    fn()
+      .catch((e: unknown) => setError({ error: e, retry: () => run(kind, fn) }))
+      .finally(() => setBusy(null));
   }, []);
 
   const askNext = useCallback(
@@ -42,15 +39,21 @@ export function useInterview(date: string) {
 
   // 最初の質問を自動で取りに行く（StrictMode の二重実行を避ける）
   useEffect(() => {
-    if (started.current) return;
+    if (started.current) {
+      return;
+    }
     started.current = true;
-    if (!draft.pending && !draft.done && draft.composed === null) askNext(draft.qa);
+    if (!draft.pending && !draft.done && draft.composed === null) {
+      askNext(draft.qa);
+    }
   }, [askNext, draft]);
 
   /** 回答待ちの質問に答える。受け付けたら true（入力欄を空にしてよい） */
   const submitAnswer = (answer: string): boolean => {
     const text = answer.trim();
-    if (!draft.pending || !text || busy) return false;
+    if (!draft.pending || !text || busy) {
+      return false;
+    }
     const qa = [...draft.qa, { question: draft.pending, answer: text }];
     setDraft((d) => ({ ...d, qa, pending: null }));
     askNext(qa);

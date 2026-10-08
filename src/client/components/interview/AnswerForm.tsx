@@ -16,7 +16,9 @@ export function AnswerForm({
 }) {
   const [answer, setAnswer] = useState("");
   const submit = () => {
-    if (onSubmit(answer)) setAnswer("");
+    if (onSubmit(answer)) {
+      setAnswer("");
+    }
   };
 
   return (
@@ -51,7 +53,7 @@ export function AnswerForm({
             質問はここまでにする
           </Button>
         )}
-        <span className="ml-auto hidden text-xs text-stone-500 sm:inline">⌘ / Ctrl + Enter で送信</span>
+        <span className="ml-auto hidden text-stone-500 text-xs sm:inline">⌘ / Ctrl + Enter で送信</span>
       </div>
     </form>
   );

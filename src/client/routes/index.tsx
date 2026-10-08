@@ -4,7 +4,7 @@ import { formatDate } from "../../shared/date";
 import { EntryView } from "../components/EntryView";
 import { Interview } from "../components/Interview";
 import { NotesPanel } from "../components/NotesPanel";
-import { ErrorMessage, Spinner } from "../components/ui";
+import { QueryResult } from "../components/ui";
 import { today } from "../lib/date";
 import { useEntry } from "../lib/queries";
 
@@ -18,25 +18,25 @@ function TodayPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-bold">
+      <h1 className="font-bold text-2xl">
         {formatDate(date)}
-        <span className="ml-2 text-base font-normal text-stone-500">今日の日記</span>
+        <span className="ml-2 font-normal text-base text-stone-500">今日の日記</span>
       </h1>
-      {entry.isPending ? (
-        <Spinner />
-      ) : entry.isError ? (
-        <ErrorMessage error={entry.error} onRetry={() => entry.refetch()} />
-      ) : entry.data ? (
-        <EntryView
-          detail={entry.data}
-          onDateChanged={(newDate) => navigate({ to: "/entries/$date", params: { date: newDate } })}
-        />
-      ) : (
-        <>
-          <NotesPanel date={date} />
-          <Interview date={date} />
-        </>
-      )}
+      <QueryResult query={entry}>
+        {(detail) =>
+          detail ? (
+            <EntryView
+              detail={detail}
+              onDateChanged={(newDate) => navigate({ to: "/entries/$date", params: { date: newDate } })}
+            />
+          ) : (
+            <>
+              <NotesPanel date={date} />
+              <Interview date={date} />
+            </>
+          )
+        }
+      </QueryResult>
     </div>
   );
 }

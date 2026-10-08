@@ -7,7 +7,7 @@ export function ErrorMessage({ error, onRetry }: { error: unknown; onRetry?: () 
   return (
     <div
       role="alert"
-      className="flex flex-col gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200"
+      className="flex flex-col gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-red-800 text-sm dark:border-red-900 dark:bg-red-950/40 dark:text-red-200"
     >
       <p>{message}</p>
       {isLimit && <p className="text-xs opacity-80">無料枠を守るための上限です。明日になるとリセットされます。</p>}

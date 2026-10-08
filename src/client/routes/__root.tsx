@@ -13,7 +13,7 @@ function RootLayout() {
   return (
     <div className="mx-auto flex min-h-dvh max-w-xl flex-col px-4">
       <header className="sticky top-0 z-10 -mx-4 flex items-center justify-between bg-stone-50/90 px-4 py-3 backdrop-blur dark:bg-stone-950/90">
-        <Link to="/" className="text-lg font-bold tracking-tight">
+        <Link to="/" className="font-bold text-lg tracking-tight">
           kaitokune
         </Link>
         <nav className="flex gap-1">
@@ -31,7 +31,7 @@ function RootLayout() {
       <main className="flex-1 pt-2 pb-16">
         <Outlet />
       </main>
-      <footer className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-t border-stone-200 py-4 text-xs text-stone-500 dark:border-stone-800">
+      <footer className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-stone-200 border-t py-4 text-stone-500 text-xs dark:border-stone-800">
         <span>日記をエクスポート</span>
         {/* API がファイル名付きで返すので、ルーターを通さず普通のリンクでダウンロードする */}
         <a href="/api/export?format=json" download className="underline hover:text-stone-800 dark:hover:text-stone-200">

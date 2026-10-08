@@ -66,7 +66,9 @@ export function EntryView({
           variant="danger"
           disabled={remove.isPending}
           onClick={() => {
-            if (confirm("この日記を削除しますか？元に戻せません。")) remove.mutate(entry.date);
+            if (confirm("この日記を削除しますか？元に戻せません。")) {
+              remove.mutate(entry.date);
+            }
           }}
         >
           {remove.isPending ? "削除中…" : "削除"}

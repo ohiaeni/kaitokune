@@ -4,6 +4,7 @@ export { Card } from "./Card";
 export { EmptyState } from "./EmptyState";
 export { ErrorMessage } from "./ErrorMessage";
 export { Meter } from "./Meter";
+export { QueryResult } from "./QueryResult";
 export { SegmentedControl } from "./SegmentedControl";
 export { Spinner } from "./Spinner";
 export { TextArea, TextInput } from "./TextInput";

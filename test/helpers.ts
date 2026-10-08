@@ -12,16 +12,22 @@ type ComposeInput = Parameters<DiaryAI["composeDiary"]>[0];
 function fakeAI(options: { done?: boolean; fail?: boolean } = {}) {
   const calls: { next: NextInput[]; compose: ComposeInput[] } = { next: [], compose: [] };
   const ai: DiaryAI = {
-    async nextQuestion(input) {
+    nextQuestion(input) {
       calls.next.push(input);
-      if (options.fail) throw new AllProvidersFailedError([new Error("down")]);
-      if (options.done && input.allowDone) return { done: true };
-      return { question: `質問${input.qa.length + 1}` };
+      if (options.fail) {
+        return Promise.reject(new AllProvidersFailedError([new Error("down")]));
+      }
+      if (options.done && input.allowDone) {
+        return Promise.resolve({ done: true });
+      }
+      return Promise.resolve({ question: `質問${input.qa.length + 1}` });
     },
-    async composeDiary(input) {
+    composeDiary(input) {
       calls.compose.push(input);
-      if (options.fail) throw new AllProvidersFailedError([new Error("down")]);
-      return `日記: ${input.qa.map((x) => x.answer).join("、")}`;
+      if (options.fail) {
+        return Promise.reject(new AllProvidersFailedError([new Error("down")]));
+      }
+      return Promise.resolve(`日記: ${input.qa.map((x) => x.answer).join("、")}`);
     },
   };
   return { ai, calls };

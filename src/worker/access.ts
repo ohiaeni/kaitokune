@@ -22,9 +22,12 @@ type Jwk = JsonWebKey & { kid?: string };
 /** 公開鍵を取り直すまでの時間。Access は鍵を定期的に入れ替えるので、知らない kid が来たら期限前でも取り直す */
 const KEYS_TTL_MS = 60 * 60 * 1000;
 
+const SCHEME = /^https?:\/\//;
+const TRAILING_SLASHES = /\/+$/;
+
 /** "<team>.cloudflareaccess.com" と "https://<team>.cloudflareaccess.com/" のどちらで設定されていても同じ形にする */
 export function normalizeTeamDomain(teamDomain: string): string {
-  return `https://${teamDomain.replace(/^https?:\/\//, "").replace(/\/+$/, "")}`;
+  return `https://${teamDomain.replace(SCHEME, "").replace(TRAILING_SLASHES, "")}`;
 }
 
 function base64UrlDecode(input: string): Uint8Array<ArrayBuffer> {
@@ -38,11 +41,36 @@ function base64UrlDecode(input: string): Uint8Array<ArrayBuffer> {
 function decodeJson(input: string): Record<string, unknown> {
   try {
     const value: unknown = JSON.parse(new TextDecoder().decode(base64UrlDecode(input)));
-    if (typeof value === "object" && value !== null) return value as Record<string, unknown>;
+    if (typeof value === "object" && value !== null) {
+      return value as Record<string, unknown>;
+    }
   } catch {
     // 下で AccessError にする
   }
   throw new AccessError("malformed token");
+}
+
+/** 署名を確かめたあとのペイロードの中身（宛先・発行元・有効期限・メールアドレス）を確かめ、メールアドレスを返す */
+function checkClaims(payload: Record<string, unknown>, config: AccessConfig, teamDomain: string, now: number): string {
+  const audiences = Array.isArray(payload.aud) ? payload.aud : [payload.aud];
+  if (!audiences.includes(config.aud)) {
+    throw new AccessError("invalid audience");
+  }
+  if (payload.iss !== teamDomain) {
+    throw new AccessError("invalid issuer");
+  }
+  const nowSec = now / 1000;
+  if (typeof payload.exp !== "number" || payload.exp <= nowSec) {
+    throw new AccessError("token expired");
+  }
+  if (typeof payload.nbf === "number" && payload.nbf > nowSec) {
+    throw new AccessError("token not yet valid");
+  }
+  // サービストークンなど、メールアドレスを持たないトークンは日記の持ち主にできない
+  if (typeof payload.email !== "string" || payload.email === "") {
+    throw new AccessError("token has no email");
+  }
+  return payload.email;
 }
 
 /** チームドメインごとに公開鍵をキャッシュし、JWT を検証する関数を作る */
@@ -51,7 +79,9 @@ export function createAccessVerifier(fetcher: typeof fetch) {
 
   async function loadKeys(teamDomain: string): Promise<Map<string, CryptoKey>> {
     const res = await fetcher(`${teamDomain}/cdn-cgi/access/certs`);
-    if (!res.ok) throw new Error(`failed to fetch Access certs: ${res.status}`);
+    if (!res.ok) {
+      throw new Error(`failed to fetch Access certs: ${res.status}`);
+    }
     const { keys = [] } = (await res.json()) as { keys?: Jwk[] };
     const entries = await Promise.all(
       keys
@@ -70,21 +100,28 @@ export function createAccessVerifier(fetcher: typeof fetch) {
 
   async function findKey(teamDomain: string, kid: string): Promise<CryptoKey | undefined> {
     const cached = cache.get(teamDomain);
-    if (cached && cached.expiresAt > Date.now() && cached.keys.has(kid)) return cached.keys.get(kid);
+    if (cached && cached.expiresAt > Date.now() && cached.keys.has(kid)) {
+      return cached.keys.get(kid);
+    }
     return (await loadKeys(teamDomain)).get(kid);
   }
 
-  /** 検証できたらメールアドレスを返す。検証できなければ AccessError を投げる */
-  return async function verify(token: string, config: AccessConfig, now = Date.now()): Promise<string> {
-    const teamDomain = normalizeTeamDomain(config.teamDomain);
+  /** JWT の署名を確かめ、ペイロードを返す */
+  async function verifySignature(token: string, teamDomain: string): Promise<Record<string, unknown>> {
     const parts = token.split(".");
-    if (parts.length !== 3) throw new AccessError("malformed token");
+    if (parts.length !== 3) {
+      throw new AccessError("malformed token");
+    }
     const [headerPart, payloadPart, signaturePart] = parts;
 
     const header = decodeJson(headerPart);
-    if (header.alg !== "RS256" || typeof header.kid !== "string") throw new AccessError("unsupported token");
+    if (header.alg !== "RS256" || typeof header.kid !== "string") {
+      throw new AccessError("unsupported token");
+    }
     const key = await findKey(teamDomain, header.kid);
-    if (!key) throw new AccessError("unknown signing key");
+    if (!key) {
+      throw new AccessError("unknown signing key");
+    }
 
     const valid = await crypto.subtle.verify(
       "RSASSA-PKCS1-v1_5",
@@ -92,18 +129,17 @@ export function createAccessVerifier(fetcher: typeof fetch) {
       base64UrlDecode(signaturePart),
       new TextEncoder().encode(`${headerPart}.${payloadPart}`),
     );
-    if (!valid) throw new AccessError("invalid signature");
+    if (!valid) {
+      throw new AccessError("invalid signature");
+    }
+    return decodeJson(payloadPart);
+  }
 
-    const payload = decodeJson(payloadPart);
-    const audiences = Array.isArray(payload.aud) ? payload.aud : [payload.aud];
-    if (!audiences.includes(config.aud)) throw new AccessError("invalid audience");
-    if (payload.iss !== teamDomain) throw new AccessError("invalid issuer");
-    const nowSec = now / 1000;
-    if (typeof payload.exp !== "number" || payload.exp <= nowSec) throw new AccessError("token expired");
-    if (typeof payload.nbf === "number" && payload.nbf > nowSec) throw new AccessError("token not yet valid");
-    // サービストークンなど、メールアドレスを持たないトークンは日記の持ち主にできない
-    if (typeof payload.email !== "string" || payload.email === "") throw new AccessError("token has no email");
-    return payload.email;
+  /** 検証できたらメールアドレスを返す。検証できなければ AccessError を投げる */
+  return async function verify(token: string, config: AccessConfig, now = Date.now()): Promise<string> {
+    const teamDomain = normalizeTeamDomain(config.teamDomain);
+    const payload = await verifySignature(token, teamDomain);
+    return checkClaims(payload, config, teamDomain, now);
   };
 }
 

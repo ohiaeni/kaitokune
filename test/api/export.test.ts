@@ -2,6 +2,9 @@ import { beforeEach, describe, expect, it } from "vitest";
 import type { ExportFile } from "../../src/shared/schemas";
 import { qa, resetDb, setup } from "../helpers";
 
+const JSON_ATTACHMENT = /^attachment; filename="kaitokune-\d{4}-\d{2}-\d{2}\.json"$/;
+const MARKDOWN_FILENAME = /\.md"$/;
+
 beforeEach(resetDb);
 describe("GET /api/export", () => {
   it("exports every entry with its conversation as JSON", async () => {
@@ -11,9 +14,7 @@ describe("GET /api/export", () => {
 
     const res = await request("/api/export?format=json");
     expect(res.status).toBe(200);
-    expect(res.headers.get("content-disposition")).toMatch(
-      /^attachment; filename="kaitokune-\d{4}-\d{2}-\d{2}\.json"$/,
-    );
+    expect(res.headers.get("content-disposition")).toMatch(JSON_ATTACHMENT);
     const file = await res.json<ExportFile>();
     expect(file).toMatchObject({ format: "kaitokune", version: 1 });
     expect(file.entries.map((e) => [e.date, e.body, e.mood, e.qa])).toEqual([
@@ -29,7 +30,7 @@ describe("GET /api/export", () => {
 
     const res = await request("/api/export?format=markdown");
     expect(res.headers.get("content-type")).toBe("text/markdown; charset=utf-8");
-    expect(res.headers.get("content-disposition")).toMatch(/\.md"$/);
+    expect(res.headers.get("content-disposition")).toMatch(MARKDOWN_FILENAME);
     const text = await res.text();
     expect(text).toContain("（1 件）");
     expect(text).toContain("## 2026年10月8日（木）\n\n気分: 🙂 よい\n\n本文です\n\n<details>");

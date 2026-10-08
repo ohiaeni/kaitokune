@@ -12,11 +12,17 @@ import type { AppEnv } from "../types";
 async function authenticate(env: Bindings, token: string | undefined, verify: AccessVerifier): Promise<string> {
   const { ACCESS_TEAM_DOMAIN: teamDomain, ACCESS_AUD: aud, DEV_USER_EMAIL: devEmail } = env;
   if (teamDomain || aud) {
-    if (!teamDomain || !aud) throw new AccessError("ACCESS_TEAM_DOMAIN and ACCESS_AUD must be set together");
-    if (!token) throw new AccessError("missing Cf-Access-Jwt-Assertion header");
+    if (!teamDomain || !aud) {
+      throw new AccessError("ACCESS_TEAM_DOMAIN and ACCESS_AUD must be set together");
+    }
+    if (!token) {
+      throw new AccessError("missing Cf-Access-Jwt-Assertion header");
+    }
     return (await verify(token, { teamDomain, aud })).toLowerCase();
   }
-  if (devEmail) return devEmail.toLowerCase();
+  if (devEmail) {
+    return devEmail.toLowerCase();
+  }
   throw new AccessError("ACCESS_TEAM_DOMAIN / ACCESS_AUD (or DEV_USER_EMAIL for local development) is not set");
 }
 

@@ -1,7 +1,7 @@
 import { type EntriesView, useEntriesView } from "../../hooks/useEntriesView";
 import { useEntryList } from "../../lib/queries";
 import { MonthCalendar } from "../MonthCalendar";
-import { EmptyState, ErrorMessage, SegmentedControl, Spinner } from "../ui";
+import { EmptyState, QueryResult, SegmentedControl } from "../ui";
 import { EntryList } from "./EntryList";
 import { MonthNav } from "./MonthNav";
 
@@ -21,17 +21,17 @@ export function MonthEntries({ month, onMonthChange }: { month: string; onMonthC
 
       <SegmentedControl legend="表示" options={VIEWS} value={view} onChange={setView} />
 
-      {list.isPending ? (
-        <Spinner />
-      ) : list.isError ? (
-        <ErrorMessage error={list.error} onRetry={() => list.refetch()} />
-      ) : view === "calendar" ? (
-        <MonthCalendar month={month} entries={list.data} />
-      ) : list.data.length === 0 ? (
-        <EmptyState>この月の日記はまだありません</EmptyState>
-      ) : (
-        <EntryList entries={list.data} />
-      )}
+      <QueryResult query={list}>
+        {(entries) => {
+          if (view === "calendar") {
+            return <MonthCalendar month={month} entries={entries} />;
+          }
+          if (entries.length === 0) {
+            return <EmptyState>この月の日記はまだありません</EmptyState>;
+          }
+          return <EntryList entries={entries} />;
+        }}
+      </QueryResult>
     </>
   );
 }
