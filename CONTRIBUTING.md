@@ -25,7 +25,8 @@ main ブランチは保護されていて直接 push できません。変更は
 
 | コマンド              | 内容                                                                             |
 | --------------------- | -------------------------------------------------------------------------------- |
-| `npm run dev`         | 開発サーバー（Workers AI を使うので `npx wrangler login` が必要）                |
+| `npm run dev`         | 開発サーバー（Cloudflare に接続せず、AI はモック）                               |
+| `npm run dev:remote`  | 本物の Workers AI を使う開発サーバー（`npx wrangler login` が必要）              |
 | `npm run dev:local`   | Cloudflare に接続しない開発サーバー（AI は `.dev.vars` の Gemini だけ）          |
 | `npm run check`       | Biome の lint・フォーマットと Prettier のチェック（`npm run format` で自動修正） |
 | `npm run spell`       | cspell のスペルチェック                                                          |

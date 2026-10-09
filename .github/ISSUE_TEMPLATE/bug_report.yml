@@ -26,6 +26,7 @@ body:
       options:
         - 本番（Cloudflare）
         - ローカル（npm run dev）
+        - ローカル（npm run dev:remote）
         - ローカル（npm run dev:local）
     validations:
       required: true

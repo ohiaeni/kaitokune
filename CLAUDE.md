@@ -8,7 +8,7 @@ AI の質問に答えるだけで日記が書ける、少人数（今は 2 人�
   - `mocks/`: `npm run dev:mock` のときだけ使う、MSW による `/api/*` のモック。API を変えたらここも合わせる
   - `components/ui/`: shadcn/ui の部品。`npx shadcn@latest add <部品名>` で追加し、色は `index.css` のテーマ変数（stone・amber）で決める
 - `src/worker/`: Cloudflare Worker（Hono）。`/api/*` を処理し、それ以外は静的アセットを返す
-  - `ai/`: Workers AI（メイン）と Gemini（予備）のプロバイダ、フォールバック、プロンプト
+  - `ai/`: Workers AI（メイン）と Gemini（予備）のプロバイダ、フォールバック、プロンプト。`mock.ts` は `npm run dev` で使うモック。プロンプトを変えたらここも合わせる
   - `db/`: Drizzle のスキーマ（`schema.ts`）と、テーブルごとのデータアクセス（`entries.ts`・`notes.ts` など）。クエリはここにだけ書き、`routes/` からは `drizzle-orm` を使わない
 - `src/shared/`: クライアントと Worker で共有する Zod スキーマ・定数・型
 - `test/`: Vitest。`@cloudflare/vitest-pool-workers` で Workers ランタイムとローカル D1 を使い、AI はモックする
@@ -25,7 +25,8 @@ AI の質問に答えるだけで日記が書ける、少人数（今は 2 人�
 
 | コマンド                   | 内容                                                                                               |
 | -------------------------- | -------------------------------------------------------------------------------------------------- |
-| `npm run dev`              | 開発サーバー（Workers AI はリモートで動くので `npx wrangler login` が必要）                        |
+| `npm run dev`              | 開発サーバー（Cloudflare に接続せず、AI は `src/worker/ai/mock.ts` のモック）                      |
+| `npm run dev:remote`       | 本物の Workers AI を使う開発サーバー（リモートで動くので `npx wrangler login` が必要）             |
 | `npm run dev:local`        | Cloudflare に接続しない開発サーバー（AI は `.dev.vars` の Gemini だけ）                            |
 | `npm run dev:mock`         | Worker を起動せず、`src/client/mocks/` の MSW で API をモックする開発サーバー（画面の確認用）      |
 | `npm run check`            | Biome の lint・フォーマットと、Prettier（Markdown・YAML）のチェック（`npm run format` で自動修正） |

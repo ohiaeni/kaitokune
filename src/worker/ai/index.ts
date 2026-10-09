@@ -2,6 +2,7 @@ import type { ComposeResponse, NextResponse, QA } from "../../shared/schemas";
 import type { Bindings } from "../env";
 import { generateWithFallback } from "./fallback";
 import { createGemini } from "./gemini";
+import { createMockAI } from "./mock";
 import { buildComposePrompt, buildNextQuestionPrompt, parseComposed, parseNextQuestion } from "./prompts";
 import type { TextGenerator } from "./provider";
 import { createWorkersAI } from "./workers-ai";
@@ -29,8 +30,14 @@ export function createDiaryAI(generators: TextGenerator[]): DiaryAI {
   };
 }
 
-/** 環境変数から、メイン（Workers AI）→ 予備（Gemini）の順でプロバイダを組み立てる */
+/**
+ * 環境変数から、メイン（Workers AI）→ 予備（Gemini）の順でプロバイダを組み立てる。
+ * AI_MOCK=1（`npm run dev`）のときはモックだけを使う。ただし Access の設定がある（本番）ときは無視する
+ */
 export function createGeneratorsFromEnv(env: Bindings): TextGenerator[] {
+  if (env.AI_MOCK === "1" && !env.ACCESS_TEAM_DOMAIN && !env.ACCESS_AUD) {
+    return [createMockAI()];
+  }
   const generators: TextGenerator[] = [createWorkersAI(env.AI, env.WORKERS_AI_MODEL)];
   if (env.GEMINI_API_KEY) {
     generators.push(createGemini(env.GEMINI_API_KEY, env.GEMINI_MODEL));

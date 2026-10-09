@@ -7,3 +7,5 @@ CF_ANALYTICS_TOKEN=
 CF_ACCOUNT_ID=
 # ローカル開発で使うユーザーのメールアドレス。本番では Access の JWT から決めるので設定しない（docs/setup.md）
 DEV_USER_EMAIL=owner@example.invalid
+# 任意: ローカル開発での 1 日の AI 呼び出し上限（wrangler.jsonc の値を上書きする）。npm run dev のモックの呼び出しも数える
+# AI_DAILY_LIMIT=100

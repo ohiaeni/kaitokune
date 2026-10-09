@@ -15,4 +15,9 @@ export type Bindings = Env & {
    * ACCESS_TEAM_DOMAIN・ACCESS_AUD があるときは無視する（本番で JWT の検証を飛ばせないようにする）
    */
   DEV_USER_EMAIL?: string;
+  /**
+   * ローカル開発専用。"1" なら AI を呼ばずにモックの応答を返す（`npm run dev` のときに vite.config.ts が入れる）。
+   * ACCESS_TEAM_DOMAIN・ACCESS_AUD があるときは無視する（本番でモックにならないようにする）
+   */
+  AI_MOCK?: string;
 };
