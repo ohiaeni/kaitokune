@@ -27,7 +27,10 @@ function fakeAI(options: { done?: boolean; fail?: boolean } = {}) {
       if (options.fail) {
         return Promise.reject(new AllProvidersFailedError([new Error("down")]));
       }
-      return Promise.resolve(`日記: ${input.qa.map((x) => x.answer).join("、")}`);
+      return Promise.resolve({
+        body: `日記: ${input.qa.map((x) => x.answer).join("、")}`,
+        suggestions: ["散歩する"],
+      });
     },
   };
   return { ai, calls };

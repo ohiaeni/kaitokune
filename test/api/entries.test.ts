@@ -28,6 +28,36 @@ describe("/api/entries", () => {
     expect(detail.qa).toHaveLength(3);
   });
 
+  it("saves the suggestions and keeps them when only the body is edited", async () => {
+    const { request } = setup();
+    await request("/api/entries/2026-10-08", {
+      method: "PUT",
+      json: { body: "本文", qa: qa(3), suggestions: ["散歩する", "早く寝る"] },
+    });
+    await request("/api/entries/2026-10-08", { method: "PUT", json: { body: "書き直した本文" } });
+    const detail = await (await request("/api/entries/2026-10-08")).json<EntryDetail>();
+    expect(detail.entry.suggestions).toEqual(["散歩する", "早く寝る"]);
+
+    // 日付を変えても提案は残る
+    await request("/api/entries/2026-10-08", { method: "PATCH", json: { date: "2026-10-07" } });
+    const moved = await (await request("/api/entries/2026-10-07")).json<EntryDetail>();
+    expect(moved.entry.suggestions).toEqual(["散歩する", "早く寝る"]);
+  });
+
+  it("returns no suggestions for an entry saved without them", async () => {
+    const { request } = setup();
+    const put = await request("/api/entries/2026-10-08", { method: "PUT", json: { body: "本文" } });
+    expect((await put.json<Entry>()).suggestions).toEqual([]);
+  });
+
+  it("rejects too many or too long suggestions", async () => {
+    const { request } = setup();
+    const save = (suggestions: string[]) =>
+      request("/api/entries/2026-10-08", { method: "PUT", json: { body: "本文", suggestions } });
+    expect((await save(["a", "b", "c", "d"])).status).toBe(400);
+    expect((await save(["a".repeat(101)])).status).toBe(400);
+  });
+
   it("lists entries for a month, newest first", async () => {
     const { request } = setup();
     for (const date of ["2026-09-30", "2026-10-01", "2026-10-15"]) {

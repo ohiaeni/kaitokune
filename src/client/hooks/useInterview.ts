@@ -66,13 +66,13 @@ export function useInterview(date: string) {
   /** 回答から日記を生成する（生成後に呼べば書き直し） */
   const compose = () =>
     run("compose", async () => {
-      const { body } = await api.compose(date, draft.qa);
-      setDraft((d) => ({ ...d, composed: body }));
+      const { body, suggestions } = await api.compose(date, draft.qa);
+      setDraft((d) => ({ ...d, composed: body, suggestions }));
     });
 
   const save = (body: string, mood: number | null) =>
     run("save", async () => {
-      await saveEntry.mutateAsync({ date, payload: { body, mood, qa: draft.qa } });
+      await saveEntry.mutateAsync({ date, payload: { body, mood, qa: draft.qa, suggestions: draft.suggestions } });
       removeDraft(date);
     });
 
@@ -83,7 +83,7 @@ export function useInterview(date: string) {
   };
 
   /** 生成した日記を捨てて、会話の画面に戻る */
-  const backToChat = () => setDraft((d) => ({ ...d, composed: null }));
+  const backToChat = () => setDraft((d) => ({ ...d, composed: null, suggestions: [] }));
 
   return { draft, busy, error, submitAnswer, finishQuestions, compose, save, restart, backToChat };
 }

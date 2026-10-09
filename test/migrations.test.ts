@@ -27,8 +27,8 @@ describe("migrations", () => {
     const all = async (query: string) => (await db.prepare(query).all()).results;
     expect(await all("SELECT id, email FROM users")).toEqual([{ id: 1, email: "owner@example.invalid" }]);
     expect(await all("SELECT * FROM entries ORDER BY date")).toEqual([
-      { user_id: 1, date: "2026-10-01", body: "一日目", mood: 3, created_at: 1, updated_at: 2 },
-      { user_id: 1, date: "2026-10-02", body: "二日目", mood: null, created_at: 3, updated_at: 4 },
+      { user_id: 1, date: "2026-10-01", body: "一日目", mood: 3, suggestions: "[]", created_at: 1, updated_at: 2 },
+      { user_id: 1, date: "2026-10-02", body: "二日目", mood: null, suggestions: "[]", created_at: 3, updated_at: 4 },
     ]);
     expect(await all("SELECT id, user_id, entry_date, position, question, answer FROM qa_logs ORDER BY id")).toEqual([
       { id: 1, user_id: 1, entry_date: "2026-10-01", position: 0, question: "Q1", answer: "A1" },

@@ -2,27 +2,40 @@ import { describe, expect, it } from "vitest";
 import type { ExportFile } from "../src/shared/schemas";
 import { toMarkdown } from "../src/worker/export/markdown";
 
-const entry = (date: string, body: string, mood: number | null, qa: ExportFile["entries"][number]["qa"] = []) => ({
+const entry = (
+  date: string,
+  body: string,
+  mood: number | null,
+  qa: ExportFile["entries"][number]["qa"] = [],
+  suggestions: string[] = [],
+) => ({
   date,
   body,
   mood,
+  suggestions,
   createdAt: 0,
   updatedAt: 0,
   qa,
 });
 
 describe("toMarkdown", () => {
-  it("lists each day with its mood, body and folded conversation", () => {
+  it("lists each day with its mood, body, suggestions and folded conversation", () => {
     const file: ExportFile = {
       format: "kaitokune",
-      version: 1,
+      version: 2,
       exportedAt: "2026-10-08T12:00:00.000Z",
       entries: [
         entry("2026-10-07", "一日目", null),
-        entry("2026-10-08", "二日目", 4, [
-          { question: "質問1", answer: "回答1" },
-          { question: "質問2", answer: "回答2" },
-        ]),
+        entry(
+          "2026-10-08",
+          "二日目",
+          4,
+          [
+            { question: "質問1", answer: "回答1" },
+            { question: "質問2", answer: "回答2" },
+          ],
+          ["散歩する", "早く寝る"],
+        ),
       ],
     };
     expect(toMarkdown(file)).toBe(
@@ -44,6 +57,11 @@ describe("toMarkdown", () => {
         "",
         "二日目",
         "",
+        "明日やってみること:",
+        "",
+        "- 散歩する",
+        "- 早く寝る",
+        "",
         "<details>",
         "<summary>AI との会話</summary>",
         "",
@@ -62,7 +80,7 @@ describe("toMarkdown", () => {
   });
 
   it("writes only the header when there are no entries", () => {
-    const file: ExportFile = { format: "kaitokune", version: 1, exportedAt: "2026-10-08T12:00:00.000Z", entries: [] };
+    const file: ExportFile = { format: "kaitokune", version: 2, exportedAt: "2026-10-08T12:00:00.000Z", entries: [] };
     expect(toMarkdown(file)).toBe("# kaitokune の日記\n\n\n\n2026-10-08T12:00:00.000Z にエクスポート（0 件）\n");
   });
 });

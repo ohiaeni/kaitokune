@@ -140,7 +140,7 @@ describe("createAccessVerifier", () => {
 describe("authentication middleware", () => {
   const ai: DiaryAI = {
     nextQuestion: async () => ({ done: true }),
-    composeDiary: async () => "",
+    composeDiary: async () => ({ body: "", suggestions: [] }),
   };
 
   function request(envOverrides: Partial<Bindings>, headers: Record<string, string> = {}) {

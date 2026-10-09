@@ -1,5 +1,13 @@
 import { z } from "zod";
-import { DATE_PATTERN, MAX_QUESTIONS, MONTH_PATTERN, NOTE_MAX_LENGTH, SEARCH_QUERY_MAX_LENGTH } from "./constants";
+import {
+  DATE_PATTERN,
+  MAX_QUESTIONS,
+  MAX_SUGGESTIONS,
+  MONTH_PATTERN,
+  NOTE_MAX_LENGTH,
+  SEARCH_QUERY_MAX_LENGTH,
+  SUGGESTION_MAX_LENGTH,
+} from "./constants";
 
 export * from "./constants";
 
@@ -24,7 +32,13 @@ export const composeRequestSchema = z.object({
   date: dateSchema,
   qa: z.array(qaSchema).min(1).max(MAX_QUESTIONS),
 });
-export type ComposeResponse = { body: string };
+export type ComposeResponse = {
+  body: string;
+  /** 明日やってみること（AI が提案できなかったときは空） */
+  suggestions: string[];
+};
+
+const suggestionsSchema = z.array(z.string().trim().min(1).max(SUGGESTION_MAX_LENGTH)).max(MAX_SUGGESTIONS);
 
 const moodSchema = z.number().int().min(1).max(5);
 
@@ -32,6 +46,7 @@ export const saveEntryRequestSchema = z.object({
   body: z.string().trim().min(1).max(10000),
   mood: moodSchema.nullable().optional(),
   qa: z.array(qaSchema).max(MAX_QUESTIONS).optional(),
+  suggestions: suggestionsSchema.optional(),
 });
 export type SaveEntryRequest = z.infer<typeof saveEntryRequestSchema>;
 
@@ -41,6 +56,8 @@ export type Entry = {
   date: string;
   body: string;
   mood: number | null;
+  /** 日記と一緒に AI が提案した、明日やってみること */
+  suggestions: string[];
   createdAt: number;
   updatedAt: number;
 };
@@ -52,7 +69,7 @@ export const exportQuerySchema = z.object({ format: z.enum(["json", "markdown"])
 /** JSON でエクスポートしたファイルの中身。将来インポートに使うため、形を変えたら version を上げる */
 export type ExportFile = {
   format: "kaitokune";
-  version: 1;
+  version: 2;
   /** エクスポートした日時（ISO 8601） */
   exportedAt: string;
   entries: (Entry & { qa: QA[] })[];

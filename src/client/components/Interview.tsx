@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { MIN_QUESTIONS } from "../../shared/constants";
 import { useInterview } from "../hooks/useInterview";
 import { ErrorMessage } from "./ErrorMessage";
+import { Suggestions } from "./entry/Suggestions";
 import { AnswerForm } from "./interview/AnswerForm";
 import { ChatLog } from "./interview/ChatLog";
 import { ComposedEditor } from "./interview/ComposedEditor";
@@ -23,6 +24,7 @@ export function Interview({ date }: { date: string }) {
     return (
       <section className="flex flex-col gap-4">
         <ComposedEditor body={draft.composed} busy={busy} onSave={save} onRecompose={compose} onBack={backToChat} />
+        <Suggestions suggestions={draft.suggestions} />
         {errorMessage}
       </section>
     );

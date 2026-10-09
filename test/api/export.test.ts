@@ -9,17 +9,20 @@ beforeEach(resetDb);
 describe("GET /api/export", () => {
   it("exports every entry with its conversation as JSON", async () => {
     const { request } = setup();
-    await request("/api/entries/2026-10-08", { method: "PUT", json: { body: "二日目", mood: 5, qa: qa(2) } });
+    await request("/api/entries/2026-10-08", {
+      method: "PUT",
+      json: { body: "二日目", mood: 5, qa: qa(2), suggestions: ["散歩する"] },
+    });
     await request("/api/entries/2026-10-07", { method: "PUT", json: { body: "一日目" } });
 
     const res = await request("/api/export?format=json");
     expect(res.status).toBe(200);
     expect(res.headers.get("content-disposition")).toMatch(JSON_ATTACHMENT);
     const file = await res.json<ExportFile>();
-    expect(file).toMatchObject({ format: "kaitokune", version: 1 });
-    expect(file.entries.map((e) => [e.date, e.body, e.mood, e.qa])).toEqual([
-      ["2026-10-07", "一日目", null, []],
-      ["2026-10-08", "二日目", 5, qa(2)],
+    expect(file).toMatchObject({ format: "kaitokune", version: 2 });
+    expect(file.entries.map((e) => [e.date, e.body, e.mood, e.qa, e.suggestions])).toEqual([
+      ["2026-10-07", "一日目", null, [], []],
+      ["2026-10-08", "二日目", 5, qa(2), ["散歩する"]],
     ]);
     expect(file.entries[0].createdAt).toEqual(expect.any(Number));
   });

@@ -76,7 +76,7 @@ describe("POST /api/chat/compose", () => {
   it("returns the composed diary", async () => {
     const { request } = setup();
     const res = await request("/api/chat/compose", { method: "POST", json: { date: "2026-10-08", qa: qa(2) } });
-    expect(await res.json()).toEqual({ body: "日記: 回答1、回答2" });
+    expect(await res.json()).toEqual({ body: "日記: 回答1、回答2", suggestions: ["散歩する"] });
   });
 
   it("requires at least one answer", async () => {

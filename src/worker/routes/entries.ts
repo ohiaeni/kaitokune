@@ -42,8 +42,8 @@ export const entryRoutes = new Hono<AppEnv>()
   })
   .put("/:date", dateParam, zValidator("json", saveEntryRequestSchema, validationHook), async (c) => {
     const { date } = c.req.valid("param");
-    const { body, mood = null, qa } = c.req.valid("json");
-    return c.json<Entry>(await saveEntry(c.get("db"), c.get("userId"), date, { body, mood, qa }));
+    const { body, mood = null, qa, suggestions } = c.req.valid("json");
+    return c.json<Entry>(await saveEntry(c.get("db"), c.get("userId"), date, { body, mood, qa, suggestions }));
   })
   .patch("/:date", dateParam, zValidator("json", changeDateRequestSchema, validationHook), async (c) => {
     const { date } = c.req.valid("param");

@@ -13,6 +13,7 @@ const entryColumns = {
   date: entries.date,
   body: entries.body,
   mood: entries.mood,
+  suggestions: entries.suggestions,
   createdAt: entries.createdAt,
   updatedAt: entries.updatedAt,
 };
@@ -107,19 +108,22 @@ export async function getEntry(db: DrizzleD1Database, userId: number, date: stri
 
 /**
  * 日記を作成・更新する。
- * qa を渡したときだけ会話ログを丸ごと入れ替える（本文だけの編集では既存のログを残す）
+ * qa・suggestions は渡したときだけ丸ごと入れ替える（本文だけの編集では既存の会話ログと提案を残す）
  */
 export async function saveEntry(
   db: DrizzleD1Database,
   userId: number,
   date: string,
-  { body, mood, qa }: { body: string; mood: number | null; qa?: QA[] },
+  { body, mood, qa, suggestions }: { body: string; mood: number | null; qa?: QA[]; suggestions?: string[] },
 ): Promise<Entry> {
   const now = Date.now();
   const upsert = db
     .insert(entries)
-    .values({ userId, date, body, mood, createdAt: now, updatedAt: now })
-    .onConflictDoUpdate({ target: [entries.userId, entries.date], set: { body, mood, updatedAt: now } })
+    .values({ userId, date, body, mood, suggestions, createdAt: now, updatedAt: now })
+    .onConflictDoUpdate({
+      target: [entries.userId, entries.date],
+      set: { body, mood, ...(suggestions ? { suggestions } : {}), updatedAt: now },
+    })
     .returning(entryColumns);
 
   if (!qa) {

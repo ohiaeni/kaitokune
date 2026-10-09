@@ -6,6 +6,7 @@ import { ErrorMessage } from "./ErrorMessage";
 import { DateChanger } from "./entry/DateChanger";
 import { EntryBody } from "./entry/EntryBody";
 import { QaLog } from "./entry/QaLog";
+import { Suggestions } from "./entry/Suggestions";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 
@@ -47,6 +48,7 @@ export function EntryView({
   return (
     <section className="flex flex-col gap-4">
       <EntryBody entry={entry} />
+      <Suggestions suggestions={entry.suggestions} />
       <QaLog qa={qa} />
 
       {changingDate && (
