@@ -142,6 +142,7 @@ npm run dev                       # http://localhost:5173
 
 - Workers AI は開発中もリモート（自分のアカウントの無料枠）で動く。そのため `npm run dev` には Cloudflare へのログインが必要。
 - ログインせずに試すときは `npm run dev:local` を使う。この場合 Workers AI は使えず、`.dev.vars` に設定した Gemini だけで動く。
+- 画面だけを直すときは `npm run dev:mock` を使う。Worker を起動せず、[MSW](https://mswjs.io/) が `/api/*` をモックする（`src/client/mocks/`）ので、ログインや API キーが要らず、AI の無料枠も使わない。データはメモリ上にだけあり、ページを読み込み直すと元に戻る。画面左下のセレクトボックスで、日記が 0 件・大量、AI のエラー、利用上限への到達などの状態に切り替えられる。エクスポートはモックしない。
 - ローカルでは Access を通らないので、`.dev.vars` の `DEV_USER_EMAIL` のユーザーとして動く。初期値の `owner@example.invalid` はマイグレーションで作られるユーザー（id=1）。
 - `npm install` で Git フック（[lefthook](https://lefthook.dev/)）が入り、コミット前に変更したファイルへ Biome の lint・フォーマットと、Prettier（Markdown・YAML）の整形がかかる。設定は `lefthook.yml`。
 
@@ -150,6 +151,7 @@ npm run dev                       # http://localhost:5173
 | コマンド                              | 内容                                                                                 |
 | ------------------------------------- | ------------------------------------------------------------------------------------ |
 | `npm run dev` / `npm run dev:local`   | 開発サーバー（後者は Cloudflare に接続しない）                                       |
+| `npm run dev:mock`                    | Worker を起動せず、API をモックして画面だけを動かす開発サーバー                      |
 | `npm test`                            | テスト（AI はモックするので無料枠を消費しない）                                      |
 | `npm run typecheck` / `npm run check` | 型チェック / Biome による lint・フォーマットと、Prettier（Markdown・YAML）のチェック |
 | `npm run spell`                       | cspell によるスペルチェック（辞書は `cspell.config.yaml`）                           |
