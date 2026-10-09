@@ -1,6 +1,13 @@
 {
   "name": "kaitokune",
   "private": true,
+  "description": "AI の質問に答えるだけで日記が書けるアプリ。Cloudflare の無料枠だけで動く",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ohiaeni/kaitokune.git"
+  },
+  "homepage": "https://github.com/ohiaeni/kaitokune#readme",
   "type": "module",
   "engines": {
     "node": ">=24",

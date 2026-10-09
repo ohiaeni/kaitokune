@@ -1,9 +1,21 @@
 # kaitokune
 
+[![CI](https://github.com/ohiaeni/kaitokune/actions/workflows/ci.yml/badge.svg)](https://github.com/ohiaeni/kaitokune/actions/workflows/ci.yml)
+[![最新リリース](https://img.shields.io/github/v/release/ohiaeni/kaitokune)](https://github.com/ohiaeni/kaitokune/releases/latest)
+[![ライセンス](https://img.shields.io/github/license/ohiaeni/kaitokune)](LICENSE)
+
 AI からの質問に答えるだけで、毎日の日記がかんたんに書けるアプリ。
 
 > **絶対条件: 完全無料で運用できること**
 > ホスティング・DB・AI のすべてを、クレジットカード登録不要／従量課金なしの無料枠で構成する。
+
+<p align="center">
+  <img src="docs/images/today.png" alt="今日の日記: AI の質問に答えていく会話の画面" width="250">
+  <img src="docs/images/entries.png" alt="これまで: 月ごとの日記の一覧" width="250">
+  <img src="docs/images/entry.png" alt="日記の詳細: 本文と「明日やってみること」の提案" width="250">
+</p>
+
+<sub>※ 画面はダミーデータで撮影したもの。</sub>
 
 ## 使い方の流れ
 
@@ -74,18 +86,30 @@ kaitokune/
 │   │   ├── middleware/       # 認証（auth.ts）、DB などの注入（context.ts）、1 日の AI 呼び出し上限（ai-quota.ts）
 │   │   ├── errors.ts         # エラーを API のエラー（ステータスと本文）に変換
 │   │   ├── access.ts         # Cloudflare Access の JWT の検証
-│   │   ├── routes/           # chat.ts（質問・日記生成）, entries.ts（CRUD）, usage.ts（消費状況）。入力の検証とレスポンスだけ
+│   │   ├── routes/           # 入力の検証とレスポンスだけ
+│   │   │   ├── chat.ts       #   質問・日記と提案の生成
+│   │   │   ├── entries.ts    #   日記の CRUD・検索・日付の変更
+│   │   │   ├── export.ts     #   日記のエクスポート
+│   │   │   ├── notes.ts      #   その日のメモ
+│   │   │   └── usage.ts      #   無料枠の消費状況
 │   │   ├── ai/               # プロバイダ（workers-ai / gemini）、フォールバック、プロンプト
-│   │   ├── db/               # Drizzle スキーマ（schema.ts）と、テーブルごとのデータアクセス（ユーザーで絞り込む）
+│   │   ├── db/               # データアクセス（クエリはここにだけ書き、必ずユーザーで絞り込む）
+│   │   │   ├── schema.ts     #   Drizzle のスキーマ
+│   │   │   ├── users.ts      #   利用者
+│   │   │   ├── entries.ts    #   日記と会話の記録
+│   │   │   ├── search.ts     #   キーワード検索
+│   │   │   ├── notes.ts      #   その日のメモ
+│   │   │   └── ai-usage.ts   #   AI 呼び出し回数
 │   │   ├── export/           # エクスポートの Markdown の生成
 │   │   └── cloudflare-usage.ts # GraphQL Analytics API から無料枠の消費状況を取得
 │   ├── shared/               # クライアントと Worker で共有する Zod スキーマ・定数・型・日付の表示
 │   └── client/               # React SPA
 │       ├── routes/           # / （今日の日記）, /entries（一覧）, /entries/$date（詳細）, /usage（使用量）
-│       ├── components/       # Interview（会話）, DiaryEditor, EntryView など
+│       ├── components/       # Interview（会話）, DiaryEditor, EntryView, NotesPanel など。画面ごとの部品は interview/ entries/ entry/ usage/、shadcn/ui の部品は ui/
 │       ├── hooks/            # 画面の状態と操作（useInterview など）
 │       └── lib/              # API クライアント、TanStack Query のフック（queries.ts）、日付、localStorage
 ├── test/                     # Vitest（Workers ランタイム上で実行）
+├── docs/                     # セットアップ手順（setup.md）・画面のスクリーンショット
 ├── migrations/               # drizzle-kit が生成する D1 マイグレーション
 └── wrangler.jsonc            # バインディング（D1 / AI）と設定値
 ```
@@ -159,7 +183,13 @@ npm run deploy                          # https://kaitokune.<サブドメイン>
 ## 開発ロードマップ
 
 - [x] **MVP**: 会話型の質問 → 日記の生成 → 編集・保存、一覧・詳細、利用上限、フォールバック
-- [x] 振り返り: カレンダー表示
+- [x] 過去の日記の日付の変更（#12）
+- [x] その日のメモを残して日記の生成に使う（#15）
+- [x] 振り返り: キーワード検索（#42）、カレンダー表示（#44）
+- [x] 日記のエクスポート（#43）
+- [x] 無料枠の消費状況を表示する使用量画面（#45）
+- [x] 複数ユーザー対応（Cloudflare Access の JWT 検証、ユーザーごとのデータの分離）（#52）
+- [x] 日記と一緒に「明日やってみること」を提案する（#90）
 - [ ] 振り返り: 気分の推移グラフ
 - [ ] PWA 化、毎晩のリマインド通知（Cron Trigger + Web Push。どちらも無料）
 - [ ] 音声入力（Web Speech API）、週・月ごとの振り返りを AI がまとめる機能
@@ -179,6 +209,19 @@ npm run deploy                          # https://kaitokune.<サブドメイン>
 - **Next.js + Supabase 構成**: 情報は多いが、Vercel Hobby は非商用に限られ、Supabase の無料プロジェクトはしばらく使わないと一時停止される。
 
 </details>
+
+## 変更履歴
+
+バージョンごとの変更点は [Releases](https://github.com/ohiaeni/kaitokune/releases) を参照。リリースノートは、直前の本番版からマージされた PR をラベルごとにまとめて自動生成している。
+
+## コントリビュート・セキュリティ
+
+- 開発の進め方（issue・PR の運用、よく使うコマンド）は [CONTRIBUTING.md](CONTRIBUTING.md) を参照。
+- 脆弱性を見つけた場合は、公開の issue ではなく [SECURITY.md](SECURITY.md) の方法で報告してほしい。
+
+## ライセンス
+
+[MIT](LICENSE)
 
 ## 注意事項
 
