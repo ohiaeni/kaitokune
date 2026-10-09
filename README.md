@@ -136,12 +136,12 @@ Cloudflare アカウントの作成からデプロイ、アクセス制限まで
 npm install
 cp .dev.vars.example .dev.vars    # DEV_USER_EMAIL はそのままでよい。Gemini を使う場合は GEMINI_API_KEY を記入
 npm run db:migrate:local          # ローカル D1 にテーブルを作成
-npx wrangler login                # Workers AI を使うために必要（ブラウザでログイン）
-npm run dev                       # http://localhost:5173
+npm run dev                       # http://localhost:5173（AI はモック）
 ```
 
-- Workers AI は開発中もリモート（自分のアカウントの無料枠）で動く。そのため `npm run dev` には Cloudflare へのログインが必要。
-- ログインせずに試すときは `npm run dev:local` を使う。この場合 Workers AI は使えず、`.dev.vars` に設定した Gemini だけで動く。
+- `npm run dev` は Cloudflare に接続せず、AI だけをモックする（`src/worker/ai/mock.ts`）。Worker と D1 は本物のまま動き、AI は毎回同じ質問と、回答をつなげただけの日記を返すので、ログインや API キーが要らず、AI の無料枠も使わない。モックの呼び出しも `AI_DAILY_LIMIT` に数えるので、利用上限の画面も確かめられる（上限を変えたいときは `.dev.vars` に `AI_DAILY_LIMIT` を書く）。
+- 本物の AI を試すときは `npx wrangler login` してから `npm run dev:remote` を使う。Workers AI は開発中もリモート（自分のアカウントの無料枠）で動く。
+- ログインせずに本物の AI を試すときは `npm run dev:local` を使う。この場合 Workers AI は使えず、`.dev.vars` に設定した Gemini だけで動く。
 - 画面だけを直すときは `npm run dev:mock` を使う。Worker を起動せず、[MSW](https://mswjs.io/) が `/api/*` をモックする（`src/client/mocks/`）ので、ログインや API キーが要らず、AI の無料枠も使わない。データはメモリ上にだけあり、ページを読み込み直すと元に戻る。画面左下のセレクトボックスで、日記が 0 件・大量、AI のエラー、利用上限への到達などの状態に切り替えられる。エクスポートはモックしない。
 - ローカルでは Access を通らないので、`.dev.vars` の `DEV_USER_EMAIL` のユーザーとして動く。初期値の `owner@example.invalid` はマイグレーションで作られるユーザー（id=1）。
 - `npm install` で Git フック（[lefthook](https://lefthook.dev/)）が入り、コミット前に変更したファイルへ Biome の lint・フォーマットと、Prettier（Markdown・YAML）の整形がかかる。設定は `lefthook.yml`。
@@ -150,7 +150,8 @@ npm run dev                       # http://localhost:5173
 
 | コマンド                              | 内容                                                                                 |
 | ------------------------------------- | ------------------------------------------------------------------------------------ |
-| `npm run dev` / `npm run dev:local`   | 開発サーバー（後者は Cloudflare に接続しない）                                       |
+| `npm run dev`                         | 開発サーバー（Cloudflare に接続せず、AI はモック）                                   |
+| `npm run dev:remote` / `dev:local`    | 本物の AI を使う開発サーバー（前者は Workers AI、後者は Gemini だけ）                |
 | `npm run dev:mock`                    | Worker を起動せず、API をモックして画面だけを動かす開発サーバー                      |
 | `npm test`                            | テスト（AI はモックするので無料枠を消費しない）                                      |
 | `npm run typecheck` / `npm run check` | 型チェック / Biome による lint・フォーマットと、Prettier（Markdown・YAML）のチェック |

@@ -14,7 +14,8 @@
     "not_found_handling": "single-page-application",
     "run_worker_first": ["/api/*"]
   },
-  // AI は開発中もリモート（自分のアカウントの無料枠）を使う。`npx wrangler login` が必要
+  // npm run dev:remote では開発中もリモート（自分のアカウントの無料枠）を使う。`npx wrangler login` が必要
+  // （npm run dev はモック、npm run dev:local は Gemini だけで動き、Workers AI に接続しない。vite.config.ts）
   "ai": { "binding": "AI" },
   "d1_databases": [
     {

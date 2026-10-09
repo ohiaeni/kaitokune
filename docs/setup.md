@@ -75,7 +75,7 @@ npx wrangler whoami
 
 ### 4-2. workers.dev のサブドメインを登録する（初回のみ）
 
-`npm run dev` で Workers AI をリモートに接続するときと、本番にデプロイするときに、アカウントの workers.dev サブドメインが必要です。
+`npm run dev:remote` で Workers AI をリモートに接続するときと、本番にデプロイするときに、アカウントの workers.dev サブドメインが必要です。
 
 1. ダッシュボードの **Workers & Pages** を開く（初回は Workers のオンボーディング画面が表示されます）
 2. 好きなサブドメイン名（例: `your-name`）を入力して登録する
@@ -83,7 +83,7 @@ npx wrangler whoami
 登録したサブドメインは、本番の URL `https://kaitokune.<サブドメイン>.workers.dev` に使われます。サブドメインの登録だけならアプリは公開されません。
 
 > [!NOTE]
-> Workers AI はローカル開発中も Cloudflare 上で実行されるため、`npm run dev` にはログインとサブドメインの登録が必要です。開発中の AI 呼び出しも自分のアカウントの無料枠から消費されます。
+> Workers AI はローカル開発中も Cloudflare 上で実行されるため、`npm run dev:remote` にはログインとサブドメインの登録が必要です。開発中の AI 呼び出しも自分のアカウントの無料枠から消費されます。`npm run dev` は AI をモックするので、ログインもサブドメインも要りません。
 
 ## 5. （任意）Gemini API キーを発行する
 
@@ -119,11 +119,15 @@ npm run dev                      # http://localhost:5173 で起動
 
 ブラウザで <http://localhost:5173> を開き、AI から最初の質問が表示されれば成功です。
 
-| こんなとき                          | 使うコマンド                                                            |
-| ----------------------------------- | ----------------------------------------------------------------------- |
-| 通常の開発（Workers AI を使う）     | `npm run dev`                                                           |
-| Cloudflare にログインせずに試したい | `npm run dev:local`（Workers AI は使えず、手順 5 の Gemini だけで動く） |
-| テストを実行したい                  | `npm test`（AI はモックするので無料枠を消費しない）                     |
+`npm run dev` は Cloudflare に接続せず、AI だけをモックします（`src/worker/ai/mock.ts`）。Worker と D1 は本物のまま動き、AI は毎回同じ質問と、回答をつなげただけの日記を返します。モックの呼び出しも `AI_DAILY_LIMIT` に数えるので、利用上限に達したときの画面も確かめられます。上限を変えたいときは `.dev.vars` に `AI_DAILY_LIMIT=100` のように書いてください。
+
+| こんなとき                                      | 使うコマンド                                                                    |
+| ----------------------------------------------- | ------------------------------------------------------------------------------- |
+| 通常の開発（AI はモック）                       | `npm run dev`                                                                   |
+| 本物の Workers AI を試したい                    | `npm run dev:remote`（手順 4 のログインが必要。自分のアカウントの無料枠を使う） |
+| Cloudflare にログインせずに本物の AI を試したい | `npm run dev:local`（Workers AI は使えず、手順 5 の Gemini だけで動く）         |
+| 画面だけを確認したい                            | `npm run dev:mock`（Worker を起動せず、MSW で API をモックする）                |
+| テストを実行したい                              | `npm test`（AI はモックするので無料枠を消費しない）                             |
 
 ローカルのデータは `.wrangler/state/` に保存されます。消したいときはこのディレクトリを削除して、`npm run db:migrate:local` をやり直してください。
 
@@ -367,17 +371,17 @@ npm run deploy
 
 ## トラブルシューティング
 
-| 症状                                                                                                                  | 原因と対処                                                                                                                                                                                                                          |
-| --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm run dev` が `it's necessary to set a CLOUDFLARE_API_TOKEN` で止まる                                              | Cloudflare にログインしていません。`npx wrangler login` を実行するか、`npm run dev:local` を使ってください                                                                                                                          |
-| `npm run dev` が `You need to register a workers.dev subdomain` / `Failed to start the remote proxy session` で止まる | workers.dev のサブドメインが未登録です。エラーに表示される URL か、[手順 4-2](#4-2-workersdev-のサブドメインを登録する初回のみ) の方法で登録してから、もう一度実行してください                                                      |
-| 画面に「AI に接続できませんでした」と出る（API は 502）                                                               | すべての AI プロバイダが失敗しています。ターミナル（本番では `npx wrangler tail`）に `AI provider ... failed` と原因が出ます                                                                                                        |
-| ログに `Binding AI needs to be run remotely` と出る                                                                   | `npm run dev:local` では Workers AI を使えません。Gemini のキーを設定するか、`npm run dev` を使ってください                                                                                                                         |
-| ログに `workers-ai:... failed` と `internal error; reference = ...` が出る                                            | `WORKERS_AI_MODEL` のモデルが提供終了している可能性があります。`npx wrangler ai models list` で現在のモデルを確認し、`wrangler.jsonc` を変更してください（日本語に強い Gemma / Qwen 系がおすすめ）                                  |
-| ログに `unexpected response` と出て、`content` が空で `reasoning` だけが入っている                                    | 推論（thinking）モデルが思考だけで出力上限を使い切っています。思考を無効にできないモデルの場合は、別のモデルに変更してください                                                                                                      |
-| 「今日の AI 利用上限に達しました」と出る（API は 429）                                                                | 自分の `AI_DAILY_LIMIT`（1 人あたり）に達しました。`TIMEZONE` の日付が変わるとリセットされます                                                                                                                                      |
-| 「ログインを確認できませんでした」と出る（API は 401）                                                                | 本番では `ACCESS_TEAM_DOMAIN` と `ACCESS_AUD` が未登録か間違っています（[手順 9-5](#9-5-worker-に-access-の設定を登録する)）。ローカルでは `.dev.vars` に `DEV_USER_EMAIL` がありません。原因はログに `access denied: ...` と出ます |
-| 「〜 はまだ登録されていません」と出る（API は 403）                                                                   | Access は通りましたが、`users` テーブルにメールアドレスがありません。[手順 9-6](#9-6-ユーザーを登録する) で登録してください                                                                                                         |
-| `npm run db:migrate:remote` やデプロイで `The database ... could not be found [code: 7404]` と出る                    | `wrangler.jsonc` の `DB` の `database_id` が実際のデータベースと一致していません。`npx wrangler d1 list` で ID を確認し、[手順 7](#7-本番用の-d1-データベースを作成する) のとおり置き換えてください                                 |
-| `requires compatibility date "..."` で起動しない                                                                      | `wrangler.jsonc` の `compatibility_date` がローカルの実行環境より新しすぎます。表示された日付以前に下げてください                                                                                                                   |
-| 本番で日記一覧などが空になる                                                                                          | ローカルと本番の D1 は別のデータベースです。ローカルで書いた日記は本番には反映されません                                                                                                                                            |
+| 症状                                                                                                                         | 原因と対処                                                                                                                                                                                                                          |
+| ---------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run dev:remote` が `it's necessary to set a CLOUDFLARE_API_TOKEN` で止まる                                              | Cloudflare にログインしていません。`npx wrangler login` を実行するか、`npm run dev:local` を使ってください                                                                                                                          |
+| `npm run dev:remote` が `You need to register a workers.dev subdomain` / `Failed to start the remote proxy session` で止まる | workers.dev のサブドメインが未登録です。エラーに表示される URL か、[手順 4-2](#4-2-workersdev-のサブドメインを登録する初回のみ) の方法で登録してから、もう一度実行してください                                                      |
+| 画面に「AI に接続できませんでした」と出る（API は 502）                                                                      | すべての AI プロバイダが失敗しています。ターミナル（本番では `npx wrangler tail`）に `AI provider ... failed` と原因が出ます                                                                                                        |
+| ログに `Binding AI needs to be run remotely` と出る                                                                          | `npm run dev:local` では Workers AI を使えません。Gemini のキーを設定するか、`npm run dev:remote` を使ってください                                                                                                                  |
+| ログに `workers-ai:... failed` と `internal error; reference = ...` が出る                                                   | `WORKERS_AI_MODEL` のモデルが提供終了している可能性があります。`npx wrangler ai models list` で現在のモデルを確認し、`wrangler.jsonc` を変更してください（日本語に強い Gemma / Qwen 系がおすすめ）                                  |
+| ログに `unexpected response` と出て、`content` が空で `reasoning` だけが入っている                                           | 推論（thinking）モデルが思考だけで出力上限を使い切っています。思考を無効にできないモデルの場合は、別のモデルに変更してください                                                                                                      |
+| 「今日の AI 利用上限に達しました」と出る（API は 429）                                                                       | 自分の `AI_DAILY_LIMIT`（1 人あたり）に達しました。`TIMEZONE` の日付が変わるとリセットされます                                                                                                                                      |
+| 「ログインを確認できませんでした」と出る（API は 401）                                                                       | 本番では `ACCESS_TEAM_DOMAIN` と `ACCESS_AUD` が未登録か間違っています（[手順 9-5](#9-5-worker-に-access-の設定を登録する)）。ローカルでは `.dev.vars` に `DEV_USER_EMAIL` がありません。原因はログに `access denied: ...` と出ます |
+| 「〜 はまだ登録されていません」と出る（API は 403）                                                                          | Access は通りましたが、`users` テーブルにメールアドレスがありません。[手順 9-6](#9-6-ユーザーを登録する) で登録してください                                                                                                         |
+| `npm run db:migrate:remote` やデプロイで `The database ... could not be found [code: 7404]` と出る                           | `wrangler.jsonc` の `DB` の `database_id` が実際のデータベースと一致していません。`npx wrangler d1 list` で ID を確認し、[手順 7](#7-本番用の-d1-データベースを作成する) のとおり置き換えてください                                 |
+| `requires compatibility date "..."` で起動しない                                                                             | `wrangler.jsonc` の `compatibility_date` がローカルの実行環境より新しすぎます。表示された日付以前に下げてください                                                                                                                   |
+| 本番で日記一覧などが空になる                                                                                                 | ローカルと本番の D1 は別のデータベースです。ローカルで書いた日記は本番には反映されません                                                                                                                                            |
