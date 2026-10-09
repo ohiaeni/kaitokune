@@ -29,6 +29,17 @@ if (!root) {
   throw new Error("#root not found");
 }
 
+/** npm run dev:mock のときだけ API をモックする。本番ビルドでは条件が false になり、モックはバンドルされない */
+async function enableMocking(): Promise<void> {
+  if (import.meta.env.MODE !== "mock") {
+    return;
+  }
+  const { startMockWorker } = await import("./mocks/browser");
+  await startMockWorker();
+}
+
+await enableMocking();
+
 createRoot(root).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>

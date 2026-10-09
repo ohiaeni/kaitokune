@@ -5,6 +5,7 @@
 AI の質問に答えるだけで日記が書ける、少人数（今は 2 人）で使うアプリ。詳しい構成・データモデル・設定値は [README.md](README.md)、Cloudflare のセットアップは [docs/setup.md](docs/setup.md) を参照する。
 
 - `src/client/`: React SPA（Vite・TanStack Router / Query・Tailwind CSS）
+  - `mocks/`: `npm run dev:mock` のときだけ使う、MSW による `/api/*` のモック。API を変えたらここも合わせる
   - `components/ui/`: shadcn/ui の部品。`npx shadcn@latest add <部品名>` で追加し、色は `index.css` のテーマ変数（stone・amber）で決める
 - `src/worker/`: Cloudflare Worker（Hono）。`/api/*` を処理し、それ以外は静的アセットを返す
   - `ai/`: Workers AI（メイン）と Gemini（予備）のプロバイダ、フォールバック、プロンプト
@@ -26,6 +27,7 @@ AI の質問に答えるだけで日記が書ける、少人数（今は 2 人�
 | -------------------------- | -------------------------------------------------------------------------------------------------- |
 | `npm run dev`              | 開発サーバー（Workers AI はリモートで動くので `npx wrangler login` が必要）                        |
 | `npm run dev:local`        | Cloudflare に接続しない開発サーバー（AI は `.dev.vars` の Gemini だけ）                            |
+| `npm run dev:mock`         | Worker を起動せず、`src/client/mocks/` の MSW で API をモックする開発サーバー（画面の確認用）      |
 | `npm run check`            | Biome の lint・フォーマットと、Prettier（Markdown・YAML）のチェック（`npm run format` で自動修正） |
 | `npm run spell`            | cspell のスペルチェック（正しい単語が指摘されたら `cspell.config.yaml` の `words` に足す）         |
 | `npm run knip`             | 未使用のファイル・export・依存関係の検出（設定は `knip.json`）                                     |

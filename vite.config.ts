@@ -3,9 +3,10 @@ import { cloudflare } from "@cloudflare/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
+import { msw } from "msw/vite";
 import { defineConfig } from "vite";
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   resolve: {
     // shadcn/ui の部品が使うパスエイリアス（tsconfig.app.json の paths と合わせる）
     alias: { "@": fileURLToPath(new URL("./src/client", import.meta.url)) },
@@ -20,7 +21,10 @@ export default defineConfig({
     }),
     react(),
     tailwindcss(),
-    // LOCAL_ONLY=1 のときは Cloudflare に接続しない（Workers AI は使えず、Gemini だけで動かす）
-    cloudflare({ remoteBindings: process.env.LOCAL_ONLY !== "1" }),
+    // npm run dev:mock（--mode mock）では Worker を起動せず、MSW の Service Worker で /api/* をモックする
+    mode === "mock"
+      ? msw({ mode: "worker-only" })
+      : // LOCAL_ONLY=1 のときは Cloudflare に接続しない（Workers AI は使えず、Gemini だけで動かす）
+        cloudflare({ remoteBindings: process.env.LOCAL_ONLY !== "1" }),
   ],
-});
+}));
