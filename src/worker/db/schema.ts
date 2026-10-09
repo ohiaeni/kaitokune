@@ -24,6 +24,8 @@ export const entries = sqliteTable(
     date: text("date").notNull(),
     body: text("body").notNull(),
     mood: integer("mood"),
+    /** 日記と一緒に AI が提案した「明日やってみること」（文字列の配列の JSON） */
+    suggestions: text("suggestions", { mode: "json" }).$type<string[]>().notNull().default([]),
     createdAt: integer("created_at").notNull(),
     updatedAt: integer("updated_at").notNull(),
   },

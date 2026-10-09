@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { AllProvidersFailedError, generateWithFallback } from "../src/worker/ai/fallback";
 import { createGemini } from "../src/worker/ai/gemini";
-import { buildComposePrompt, buildNextQuestionPrompt, parseDiary, parseNextQuestion } from "../src/worker/ai/prompts";
+import {
+  buildComposePrompt,
+  buildNextQuestionPrompt,
+  parseComposed,
+  parseNextQuestion,
+} from "../src/worker/ai/prompts";
 import { type Prompt, ProviderError, type TextGenerator } from "../src/worker/ai/provider";
 import { extractText } from "../src/worker/ai/workers-ai";
 
@@ -81,13 +86,31 @@ describe("parseNextQuestion", () => {
   });
 });
 
-describe("parseDiary", () => {
-  it("strips code fences and whitespace", () => {
-    expect(parseDiary("```\n今日は朝から雨だった。傘を忘れた。\n```\n")).toBe("今日は朝から雨だった。傘を忘れた。");
+describe("parseComposed", () => {
+  const body = "今日は朝から雨だった。傘を忘れた。";
+
+  it("splits the diary and the suggestions", () => {
+    const text = `${body}\n\n### 明日やってみること\n- 傘を玄関に置いておく\n- 昼休みに 5 分だけ外を歩く\n`;
+    expect(parseComposed(text)).toEqual({ body, suggestions: ["傘を玄関に置いておく", "昼休みに 5 分だけ外を歩く"] });
+  });
+
+  it("accepts variations of the heading and bullets, keeping at most three", () => {
+    const text = `\`\`\`\n${body}\n\n【明日やってみること】：\n1. 一つ目\n・二つ目\n* 三つ目\n- 四つ目\n\`\`\``;
+    expect(parseComposed(text)).toEqual({ body, suggestions: ["一つ目", "二つ目", "三つ目"] });
+  });
+
+  it("drops lines that are not bullets or too long", () => {
+    const text = `${body}\n## 明日やってみること\n明日もいい日になりますように\n- ${"あ".repeat(101)}\n- 早く寝る`;
+    expect(parseComposed(text)).toEqual({ body, suggestions: ["早く寝る"] });
+  });
+
+  it("returns the diary without suggestions when the heading is missing", () => {
+    expect(parseComposed(`\`\`\`\n${body}\n\`\`\`\n`)).toEqual({ body, suggestions: [] });
   });
 
   it("rejects output that is too short", () => {
-    expect(() => parseDiary("はい")).toThrow();
+    expect(() => parseComposed("はい")).toThrow();
+    expect(() => parseComposed("はい\n### 明日やってみること\n- 散歩する")).toThrow();
   });
 });
 

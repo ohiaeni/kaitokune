@@ -29,3 +29,8 @@ export function findMood(value: number | null): (typeof MOODS)[number] | undefin
 export const MAX_NOTES = 20;
 /** メモ 1 件の最大文字数 */
 export const NOTE_MAX_LENGTH = 200;
+
+/** 日記と一緒に AI が提案する「明日やってみること」の最大件数 */
+export const MAX_SUGGESTIONS = 3;
+/** 「明日やってみること」1 件の最大文字数 */
+export const SUGGESTION_MAX_LENGTH = 100;

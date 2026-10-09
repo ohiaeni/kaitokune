@@ -1,6 +1,12 @@
 import { z } from "zod";
 import { formatDate } from "../../shared/date";
-import type { NextResponse, QA } from "../../shared/schemas";
+import {
+  type ComposeResponse,
+  MAX_SUGGESTIONS,
+  type NextResponse,
+  type QA,
+  SUGGESTION_MAX_LENGTH,
+} from "../../shared/schemas";
 import type { Prompt } from "./provider";
 
 function formatQA(qa: QA[]): string {
@@ -82,24 +88,47 @@ export function parseNextQuestion(text: string, allowDone: boolean): NextRespons
   return { question: result.question };
 }
 
+/** 日記の本文と「明日やってみること」を分ける見出し */
+const SUGGESTIONS_HEADING = "### 明日やってみること";
+
 export function buildComposePrompt(input: { date: string; qa: QA[]; notes: string[] }): Prompt {
   const system = [
     "あなたは、インタビューの回答をもとに、本人に代わって日記を書くアシスタントです。",
+    "日記のあとに、その日の内容をもとに「明日やってみること」を提案します。",
     "",
-    "# 書き方のルール",
+    "# 日記の書き方のルール",
     "- 本人の一人称（「私」または主語の省略）で、自然な日記の文体（です・ます調ではなく、だ・である調寄りのくだけた文体）で書く",
     "- 回答（と、あればメモ）に書かれている事実と気持ちだけを使う。書かれていない出来事や感情を創作しない",
     "- メモは本人が日中に書き留めた短い走り書き。回答と合わせて、自然な流れで日記に織り込む",
     "- 回答の言葉づかいや表現をできるだけ活かす",
     "- 200〜400 文字程度。段落に分けて読みやすくする",
-    "- 日付・タイトル・見出し・箇条書きは付けず、本文だけを出力する",
+    "- 日付・タイトル・見出し・箇条書きは付けない",
+    "",
+    "# 明日やってみることの提案のルール",
+    `- 明日、負担なくすぐ試せる小さな行動を 1〜${MAX_SUGGESTIONS} 個提案する（例:「昼休みに 5 分だけ外を歩く」「寝る前にスマホを置いて 10 分早く布団に入る」）`,
+    "- 大きな目標や、準備・お金が必要なことは提案しない",
+    "- その日の出来事や気持ちに寄り添った内容にする。説教・命令・評価の口調にしない",
+    "- 回答やメモに書かれていない事実（予定・持ち物・人間関係など）を前提にしない",
+    "- 1 つあたり 40 文字以内の、短く具体的な日本語にする",
+    "",
+    "# 出力形式",
+    "次の形式のテキストだけを出力する。前後に説明文やコードブロックを付けない。",
+    "",
+    "（日記の本文）",
+    "",
+    SUGGESTIONS_HEADING,
+    "- （提案 1）",
+    "- （提案 2）",
   ].join("\n");
 
   const parts = [`日付: ${formatDate(input.date, { withYear: true })}`];
   if (input.notes.length > 0) {
     parts.push(`# 今日のメモ\n${formatNotes(input.notes)}`);
   }
-  parts.push(`# インタビューの内容\n${formatQA(input.qa)}`, "この内容で今日の日記を書いてください。");
+  parts.push(
+    `# インタビューの内容\n${formatQA(input.qa)}`,
+    "この内容で今日の日記を書き、明日やってみることを提案してください。",
+  );
   const user = parts.join("\n\n");
 
   return { system, user, json: false };
@@ -108,11 +137,31 @@ export function buildComposePrompt(input: { date: string; qa: QA[]; notes: strin
 /** AI が日記をコードブロックで囲んで返したときの、前後の ``` */
 const CODE_FENCE_START = /^```[a-z]*\n?/i;
 const CODE_FENCE_END = /\n?```$/;
+/** 「明日やってみること」の見出しの行。# の数や【】・コロンの揺れを許容する */
+const SUGGESTIONS_HEADING_LINE = /^[ \t]*(?:#+[ \t]*)?[【[*]*明日やってみること[】\]*]*[ \t]*[:：]?[ \t]*$/m;
+/** 箇条書きの記号（- ・ * 1. など） */
+const BULLET = /^(?:[-*・•]|\d+[.)．])\s*/;
 
-export function parseDiary(text: string): string {
-  const body = text.trim().replace(CODE_FENCE_START, "").replace(CODE_FENCE_END, "").trim();
+/**
+ * 日記の本文と、明日やってみることに分ける。
+ * 提案は日記のおまけなので、見出しがない・形式が崩れているときは空にして、日記だけを返す
+ */
+export function parseComposed(text: string): ComposeResponse {
+  const output = text.trim().replace(CODE_FENCE_START, "").replace(CODE_FENCE_END, "");
+  const heading = SUGGESTIONS_HEADING_LINE.exec(output);
+  const body = (heading ? output.slice(0, heading.index) : output).trim();
   if (body.length < 10) {
     throw new Error(`AI output is too short: ${body}`);
   }
-  return body;
+  const suggestions = heading
+    ? output
+        .slice(heading.index + heading[0].length)
+        .split("\n")
+        .map((line) => line.trim())
+        .filter((line) => BULLET.test(line))
+        .map((line) => line.replace(BULLET, "").trim())
+        .filter((line) => line.length > 0 && line.length <= SUGGESTION_MAX_LENGTH)
+        .slice(0, MAX_SUGGESTIONS)
+    : [];
+  return { body, suggestions };
 }

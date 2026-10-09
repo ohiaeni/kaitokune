@@ -42,6 +42,5 @@ export const chatRoutes = new Hono<AppEnv>()
     const db = c.get("db");
     const userId = c.get("userId");
     const notes = (await listNotes(db, userId, date)).map((n) => n.body);
-    const body = await c.get("ai").composeDiary({ date, qa, notes });
-    return c.json<ComposeResponse>({ body });
+    return c.json<ComposeResponse>(await c.get("ai").composeDiary({ date, qa, notes }));
   });

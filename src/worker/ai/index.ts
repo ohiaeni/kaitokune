@@ -1,8 +1,8 @@
-import type { NextResponse, QA } from "../../shared/schemas";
+import type { ComposeResponse, NextResponse, QA } from "../../shared/schemas";
 import type { Bindings } from "../env";
 import { generateWithFallback } from "./fallback";
 import { createGemini } from "./gemini";
-import { buildComposePrompt, buildNextQuestionPrompt, parseDiary, parseNextQuestion } from "./prompts";
+import { buildComposePrompt, buildNextQuestionPrompt, parseComposed, parseNextQuestion } from "./prompts";
 import type { TextGenerator } from "./provider";
 import { createWorkersAI } from "./workers-ai";
 
@@ -15,7 +15,8 @@ export interface DiaryAI {
     recent: string[];
     allowDone: boolean;
   }): Promise<NextResponse>;
-  composeDiary(input: { date: string; qa: QA[]; notes: string[] }): Promise<string>;
+  /** 日記の本文と、明日やってみることの提案を 1 回の呼び出しでまとめて作る */
+  composeDiary(input: { date: string; qa: QA[]; notes: string[] }): Promise<ComposeResponse>;
 }
 
 export function createDiaryAI(generators: TextGenerator[]): DiaryAI {
@@ -24,7 +25,7 @@ export function createDiaryAI(generators: TextGenerator[]): DiaryAI {
       generateWithFallback(generators, buildNextQuestionPrompt(input), (text) =>
         parseNextQuestion(text, input.allowDone),
       ),
-    composeDiary: (input) => generateWithFallback(generators, buildComposePrompt(input), parseDiary),
+    composeDiary: (input) => generateWithFallback(generators, buildComposePrompt(input), parseComposed),
   };
 }
 

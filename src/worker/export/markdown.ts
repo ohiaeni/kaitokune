@@ -2,7 +2,7 @@ import { findMood } from "../../shared/constants";
 import { formatDate } from "../../shared/date";
 import type { ExportFile } from "../../shared/schemas";
 
-/** 人が読むための Markdown。1 日ごとに見出し・気分・本文を並べ、AI との会話は折りたたむ */
+/** 人が読むための Markdown。1 日ごとに見出し・気分・本文・明日やってみることを並べ、AI との会話は折りたたむ */
 export function toMarkdown(file: ExportFile): string {
   const sections = file.entries.map((entry) => {
     const lines = [`## ${formatDate(entry.date, { withYear: true })}`, ""];
@@ -11,6 +11,9 @@ export function toMarkdown(file: ExportFile): string {
       lines.push(`気分: ${mood.emoji} ${mood.label}`, "");
     }
     lines.push(entry.body);
+    if (entry.suggestions.length > 0) {
+      lines.push("", "明日やってみること:", "", ...entry.suggestions.map((x) => `- ${x}`));
+    }
     if (entry.qa.length > 0) {
       lines.push("", "<details>", "<summary>AI との会話</summary>", "");
       for (const { question, answer } of entry.qa) {

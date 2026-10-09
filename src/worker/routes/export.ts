@@ -14,7 +14,7 @@ export const exportRoutes = new Hono<AppEnv>().get(
     const { format } = c.req.valid("query");
     const file: ExportFile = {
       format: "kaitokune",
-      version: 1,
+      version: 2,
       exportedAt: new Date().toISOString(),
       entries: await loadAllForExport(c.get("db"), c.get("userId")),
     };

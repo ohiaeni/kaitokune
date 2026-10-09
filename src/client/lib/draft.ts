@@ -10,14 +10,18 @@ export type Draft = {
   done: boolean;
   /** AI がまとめた日記本文 */
   composed: string | null;
+  /** 日記と一緒に AI が提案した、明日やってみること */
+  suggestions: string[];
 };
 
-export const EMPTY_DRAFT: Draft = { qa: [], pending: null, done: false, composed: null };
+export const EMPTY_DRAFT: Draft = { qa: [], pending: null, done: false, composed: null, suggestions: [] };
 
 const draftKey = (date: string) => `kaitokune:draft:${date}`;
 
 export function loadDraft(date: string): Draft | null {
-  return loadJson<Draft>(draftKey(date));
+  const draft = loadJson<Draft>(draftKey(date));
+  // suggestions を足す前に保存された書きかけの会話にも対応する
+  return draft && { ...EMPTY_DRAFT, ...draft };
 }
 
 export function saveDraft(date: string, draft: Draft): void {
