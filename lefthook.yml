@@ -11,7 +11,8 @@ pre-commit:
     prettier:
       # Biome が対応していない Markdown・YAML は Prettier で整形する
       glob: "*.{md,yml,yaml}"
-      run: npx --no prettier --write {staged_files}
+      # -- がないと、--write を npx が自分のオプションとして受け取ってしまう
+      run: npx --no -- prettier --write {staged_files}
       stage_fixed: true
     cspell:
       # -- がないと、cspell に渡すオプションを npx が自分のものとして受け取ってしまう
