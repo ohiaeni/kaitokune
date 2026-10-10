@@ -11,10 +11,10 @@ disable-model-invocation: true
 
 タグを push すると次のワークフローが動く。タグは一度 push すると簡単には取り消せず、本番版は本番環境を変えるので、手順 4 の確認を飛ばさない。
 
-| 種類                   | タグ                                                       | 動くワークフロー                                                                      |
-| ---------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| ベータ版（`beta`）     | `v<MAJOR>.<MINOR>.<PATCH>-beta.<N>`（例: `v0.2.0-beta.1`） | `release.yml`: リリースノートの下書き（draft の pre-release）を作る。デプロイはしない |
-| 本番版（`production`） | `v<MAJOR>.<MINOR>.<PATCH>`（例: `v0.2.0`）                 | `release.yml`: リリースノートを公開する / `deploy.yml`: 本番にデプロイする            |
+| 種類                   | タグ                                                       | 動くワークフロー                                                                                                 |
+| ---------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| ベータ版（`beta`）     | `v<MAJOR>.<MINOR>.<PATCH>-beta.<N>`（例: `v0.2.0-beta.1`） | `release.yml`: リリースノートの下書き（draft の pre-release）を作る。デプロイはしない                            |
+| 本番版（`production`） | `v<MAJOR>.<MINOR>.<PATCH>`（例: `v0.2.0`）                 | `release.yml`: リリースノートを公開し、同じバージョンのベータ版の下書きを消す / `deploy.yml`: 本番にデプロイする |
 
 リリースノートはどちらも、直前の本番版からの PR を、ラベルごとに分類して自動生成する（`.github/release.yml`）。
 
@@ -89,6 +89,7 @@ gh run watch <databaseId> --exit-status
 - ベータ版: `release.yml` の成功を確かめ、下書きの URL を伝える（`gh release view <タグ名> --json url,isDraft,isPrerelease`）。下書きは GitHub の画面で内容を確かめてから、必要なら手で編集できる
 - 本番版: `release.yml` と `deploy.yml` の両方の成功を確かめる
   - Release の URL を伝える
+  - 同じバージョンのベータ版の下書きが消えたことを確かめる（`gh release list` に `<タグ名>-beta.*` の Draft が残っていない）
   - `deploy.yml` で「Deploy」ステップが実行されたか、Secrets 未登録で飛ばされたかを伝える（`gh run view <databaseId> --json jobs --jq '.jobs[0].steps[] | "\(.name): \(.conclusion)"'`）
   - 両方成功したら、マイルストーンを閉じる: `gh api -X PATCH repos/ohiaeni/kaitokune/milestones/<番号> -f state=closed`
 

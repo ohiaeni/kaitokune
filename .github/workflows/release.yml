@@ -3,7 +3,7 @@ name: Release
 # バージョンのタグを push したら、ノートを自動生成して GitHub Release を作る。
 # ノートの分類は .github/release.yml（PR のラベルごと）。タグの作成は /release スキルで行う
 #
-# - 本番版 v<MAJOR>.<MINOR>.<PATCH>（例: v0.2.0）: Release を公開する（デプロイは deploy.yml）
+# - 本番版 v<MAJOR>.<MINOR>.<PATCH>（例: v0.2.0）: Release を公開し、同じバージョンのベータ版の下書きを消す（デプロイは deploy.yml）
 # - ベータ版 v<MAJOR>.<MINOR>.<PATCH>-beta.<N>（例: v0.2.0-beta.1）: 下書き（draft の pre-release）を作る
 on:
   push:
@@ -53,3 +53,25 @@ jobs:
 
           echo "種類: $kind / 直前の本番版: ${prev:-なし}"
           gh release create "$TAG" "${args[@]}"
+
+      # 本番版を公開したら、同じバージョンのベータ版の下書きは役目を終えるので消す。
+      # 消すのは Release（下書き）だけで、タグは残す（v* のタグはルールセットで保護されている）
+      - name: Delete beta drafts
+        if: ${{ !contains(github.ref_name, '-') }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          drafts=$(
+            gh api "repos/$GITHUB_REPOSITORY/releases" --paginate \
+              --jq '.[] | select(.draft) | .tag_name' \
+              | grep -E "^${TAG//./\\.}-beta\.(0|[1-9][0-9]*)$" || true
+          )
+          if [ -z "$drafts" ]; then
+            echo "消すベータ版の下書きはありません"
+            exit 0
+          fi
+          for draft in $drafts; do
+            echo "下書きを削除: $draft"
+            gh release delete "$draft" --repo "$GITHUB_REPOSITORY" --yes
+          done
