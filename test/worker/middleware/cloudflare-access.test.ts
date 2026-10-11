@@ -1,10 +1,14 @@
 import { env } from "cloudflare:workers";
 import { describe, expect, it } from "vitest";
-import type { ApiErrorBody } from "../src/shared/schemas";
-import type { DiaryAI } from "../src/worker/ai";
-import { createApp } from "../src/worker/app";
-import type { Bindings } from "../src/worker/env";
-import { AccessError, createAccessVerifier, normalizeTeamDomain } from "../src/worker/middleware/cloudflare-access";
+import type { ApiErrorBody } from "../../../src/shared/schemas";
+import type { DiaryAI } from "../../../src/worker/ai";
+import { createApp } from "../../../src/worker/app";
+import type { Bindings } from "../../../src/worker/env";
+import {
+  AccessError,
+  createAccessVerifier,
+  normalizeTeamDomain,
+} from "../../../src/worker/middleware/cloudflare-access";
 
 const TEAM = "https://example.cloudflareaccess.com";
 const AUD = "test-aud";

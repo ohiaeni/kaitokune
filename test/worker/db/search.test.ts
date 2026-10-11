@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { excerptAround, likePattern } from "../src/worker/db/search";
+import { excerptAround, likePattern } from "../../../src/worker/db/search";
 
 describe("likePattern", () => {
   it("escapes LIKE wildcards and the escape character", () => {

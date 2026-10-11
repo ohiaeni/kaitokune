@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { ExportFile } from "../src/shared/schemas";
-import { toMarkdown } from "../src/worker/export/markdown";
+import type { ExportFile } from "../../../src/shared/schemas";
+import { toMarkdown } from "../../../src/worker/export/markdown";
 
 const entry = (
   date: string,
