@@ -4,8 +4,8 @@ import { todayIn } from "../../shared/date";
 import { type ExportFile, exportQuerySchema } from "../../shared/schemas";
 import { loadAllForExport } from "../db/entries";
 import { toMarkdown } from "../export/markdown";
+import { validationHook } from "../lib/validation";
 import type { AppEnv } from "../types";
-import { validationHook } from "../validation";
 
 export const exportRoutes = new Hono<AppEnv>().get(
   "/",

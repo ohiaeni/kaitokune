@@ -10,8 +10,8 @@ import {
 } from "../../shared/schemas";
 import { listRecentEntries } from "../db/entries";
 import { listNotes } from "../db/notes";
+import { validationHook } from "../lib/validation";
 import type { AppEnv } from "../types";
-import { validationHook } from "../validation";
 
 const RECENT_ENTRIES = 3;
 const RECENT_EXCERPT_LENGTH = 150;

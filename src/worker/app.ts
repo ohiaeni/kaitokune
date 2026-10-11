@@ -1,11 +1,11 @@
 import { Hono } from "hono";
 import type { ApiErrorBody } from "../shared/schemas";
-import { createAccessVerifier } from "./access";
 import { createDiaryAI, createGeneratorsFromEnv, type DiaryAI } from "./ai";
 import type { Bindings } from "./env";
-import { handleError } from "./errors";
+import { handleError } from "./lib/errors";
 import { aiQuota } from "./middleware/ai-quota";
 import { auth } from "./middleware/auth";
+import { createAccessVerifier } from "./middleware/cloudflare-access";
 import { injectContext } from "./middleware/context";
 import { chatRoutes } from "./routes/chat";
 import { entryRoutes } from "./routes/entries";

@@ -14,8 +14,8 @@ import {
   searchQuerySchema,
 } from "../../shared/schemas";
 import { changeEntryDate, deleteEntry, getEntry, listEntries, saveEntry, searchEntries } from "../db/entries";
+import { validationHook } from "../lib/validation";
 import type { AppEnv } from "../types";
-import { validationHook } from "../validation";
 
 const dateParam = zValidator("param", z.object({ date: dateSchema }), validationHook);
 
