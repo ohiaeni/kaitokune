@@ -1,9 +1,9 @@
 import { env } from "cloudflare:workers";
 import { describe, expect, it } from "vitest";
-import type { QA } from "../src/shared/schemas";
-import { createDiaryAI, createGeneratorsFromEnv } from "../src/worker/ai";
-import { createMockAI } from "../src/worker/ai/mock";
-import type { Bindings } from "../src/worker/env";
+import type { QA } from "../../../src/shared/schemas";
+import { createDiaryAI, createGeneratorsFromEnv } from "../../../src/worker/ai";
+import { createMockAI } from "../../../src/worker/ai/mock";
+import type { Bindings } from "../../../src/worker/env";
 
 function answers(n: number): QA[] {
   return Array.from({ length: n }, (_, i) => ({ question: `Q${i + 1}`, answer: `回答${i + 1}` }));

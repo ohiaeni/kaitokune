@@ -1,7 +1,7 @@
 import { env } from "cloudflare:workers";
 import { beforeEach, describe, expect, it } from "vitest";
-import type { ApiErrorBody, Entry, EntryDetail, EntrySummary } from "../../src/shared/schemas";
-import { qa, resetDb, setup } from "../helpers";
+import type { ApiErrorBody, Entry, EntryDetail, EntrySummary } from "../../../src/shared/schemas";
+import { qa, resetDb, setup } from "../../helpers";
 
 beforeEach(resetDb);
 describe("/api/entries", () => {

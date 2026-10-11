@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { AllProvidersFailedError, generateWithFallback } from "../src/worker/ai/fallback";
-import { createGemini } from "../src/worker/ai/gemini";
+import { AllProvidersFailedError, generateWithFallback } from "../../../src/worker/ai/fallback";
+import { createGemini } from "../../../src/worker/ai/gemini";
 import {
   buildComposePrompt,
   buildNextQuestionPrompt,
   parseComposed,
   parseNextQuestion,
-} from "../src/worker/ai/prompts";
-import { type Prompt, ProviderError, type TextGenerator } from "../src/worker/ai/provider";
-import { extractText } from "../src/worker/ai/workers-ai";
+} from "../../../src/worker/ai/prompts";
+import { type Prompt, ProviderError, type TextGenerator } from "../../../src/worker/ai/provider";
+import { extractText } from "../../../src/worker/ai/workers-ai";
 
 const prompt: Prompt = { system: "sys", user: "user", json: true };
 

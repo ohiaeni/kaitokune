@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { splitByQuery } from "../src/client/lib/highlight";
+import { splitByQuery } from "../../../src/client/lib/highlight";
 
 describe("splitByQuery", () => {
   it("splits the text into matched and unmatched parts", () => {

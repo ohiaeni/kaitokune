@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import type { EntryDetail, EntrySummary, ExportFile, Note, UsageResponse } from "../../src/shared/schemas";
-import { qa, registerUser, resetDb, setup } from "../helpers";
+import type { EntryDetail, EntrySummary, ExportFile, Note, UsageResponse } from "../../../src/shared/schemas";
+import { qa, registerUser, resetDb, setup } from "../../helpers";
 
 beforeEach(resetDb);
 describe("user isolation", () => {

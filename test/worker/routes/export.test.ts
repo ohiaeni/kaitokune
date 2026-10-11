@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import type { ExportFile } from "../../src/shared/schemas";
-import { qa, resetDb, setup } from "../helpers";
+import type { ExportFile } from "../../../src/shared/schemas";
+import { qa, resetDb, setup } from "../../helpers";
 
 const JSON_ATTACHMENT = /^attachment; filename="kaitokune-\d{4}-\d{2}-\d{2}\.json"$/;
 const MARKDOWN_FILENAME = /\.md"$/;

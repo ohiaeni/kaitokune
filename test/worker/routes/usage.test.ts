@@ -1,7 +1,7 @@
 import { env } from "cloudflare:workers";
 import { beforeEach, describe, expect, it } from "vitest";
-import type { UsageResponse } from "../../src/shared/schemas";
-import { resetDb, setup } from "../helpers";
+import type { UsageResponse } from "../../../src/shared/schemas";
+import { resetDb, setup } from "../../helpers";
 
 beforeEach(resetDb);
 describe("GET /api/usage", () => {
