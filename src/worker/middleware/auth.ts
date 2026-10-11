@@ -1,9 +1,9 @@
 import type { MiddlewareHandler } from "hono";
 import type { ApiErrorBody } from "../../shared/schemas";
-import { AccessError, type AccessVerifier } from "../access";
 import { findUserIdByEmail } from "../db/users";
 import type { Bindings } from "../env";
 import type { AppEnv } from "../types";
+import { AccessError, type AccessVerifier } from "./cloudflare-access";
 
 /**
  * リクエストしたユーザーのメールアドレスを決める。

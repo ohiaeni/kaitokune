@@ -1,10 +1,10 @@
 import type { ErrorHandler } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
-import type { ApiErrorBody } from "../shared/schemas";
-import { AccessError } from "./access";
-import { AllProvidersFailedError } from "./ai/fallback";
-import { DailyLimitError } from "./middleware/ai-quota";
-import type { AppEnv } from "./types";
+import type { ApiErrorBody } from "../../shared/schemas";
+import { AllProvidersFailedError } from "../ai/fallback";
+import { DailyLimitError } from "../middleware/ai-quota";
+import { AccessError } from "../middleware/cloudflare-access";
+import type { AppEnv } from "../types";
 
 /** 投げられたエラーを、API のエラー（ステータスと本文）に変換する */
 function toApiError(err: Error): { status: ContentfulStatusCode; body: ApiErrorBody } {

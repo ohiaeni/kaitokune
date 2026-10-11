@@ -83,9 +83,11 @@ kaitokune/
 ├── src/
 │   ├── worker/               # Cloudflare Worker（Hono）
 │   │   ├── app.ts            # アプリ本体（ミドルウェアとルートをつなぐ）
-│   │   ├── middleware/       # 認証（auth.ts）、DB などの注入（context.ts）、1 日の AI 呼び出し上限（ai-quota.ts）
-│   │   ├── errors.ts         # エラーを API のエラー（ステータスと本文）に変換
-│   │   ├── access.ts         # Cloudflare Access の JWT の検証
+│   │   ├── middleware/       # 認証（auth.ts）、Cloudflare Access の JWT の検証（cloudflare-access.ts）、DB などの注入（context.ts）、1 日の AI 呼び出し上限（ai-quota.ts）
+│   │   ├── lib/              # 共通の処理
+│   │   │   ├── errors.ts     #   エラーを API のエラー（ステータスと本文）に変換
+│   │   │   ├── validation.ts #   入力の検証に失敗したときのレスポンス
+│   │   │   └── cloudflare-usage.ts # GraphQL Analytics API から無料枠の消費状況を取得
 │   │   ├── routes/           # 入力の検証とレスポンスだけ
 │   │   │   ├── chat.ts       #   質問・日記と提案の生成
 │   │   │   ├── entries.ts    #   日記の CRUD・検索・日付の変更
@@ -100,8 +102,7 @@ kaitokune/
 │   │   │   ├── search.ts     #   キーワード検索
 │   │   │   ├── notes.ts      #   その日のメモ
 │   │   │   └── ai-usage.ts   #   AI 呼び出し回数
-│   │   ├── export/           # エクスポートの Markdown の生成
-│   │   └── cloudflare-usage.ts # GraphQL Analytics API から無料枠の消費状況を取得
+│   │   └── export/           # エクスポートの Markdown の生成
 │   ├── shared/               # クライアントと Worker で共有する Zod スキーマ・定数・型・日付の表示
 │   └── client/               # React SPA
 │       ├── routes/           # / （今日の日記）, /entries（一覧）, /entries/$date（詳細）, /usage（使用量）

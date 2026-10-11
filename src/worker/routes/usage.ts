@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { todayIn } from "../../shared/date";
 import type { CloudflareUsage, UsageResponse } from "../../shared/schemas";
-import { fetchCloudflareUsage } from "../cloudflare-usage";
 import { listAiUsage } from "../db/ai-usage";
+import { fetchCloudflareUsage } from "../lib/cloudflare-usage";
 import type { AppEnv } from "../types";
 
 const HISTORY_DAYS = 7;

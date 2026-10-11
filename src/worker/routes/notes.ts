@@ -3,8 +3,8 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { type ApiErrorBody, createNoteRequestSchema, dateSchema, MAX_NOTES, type Note } from "../../shared/schemas";
 import { countNotes, createNote, deleteNote, listNotes } from "../db/notes";
+import { validationHook } from "../lib/validation";
 import type { AppEnv } from "../types";
-import { validationHook } from "../validation";
 
 export const noteRoutes = new Hono<AppEnv>()
   .get("/", zValidator("query", z.object({ date: dateSchema }), validationHook), async (c) => {

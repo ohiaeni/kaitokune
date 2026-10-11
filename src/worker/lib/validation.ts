@@ -1,5 +1,5 @@
 import type { Context } from "hono";
-import type { ApiErrorBody } from "../shared/schemas";
+import type { ApiErrorBody } from "../../shared/schemas";
 
 /** zValidator の失敗時に、API 共通のエラー形式で 400 を返す */
 export function validationHook(
