@@ -2,7 +2,7 @@
 // キャッシュの無効化・削除はここの更新用フックの中だけで行い、コンポーネントからは呼ばない
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Entry, SaveEntryRequest } from "../../shared/schemas";
-import { api } from "./api";
+import { api } from "../lib/api";
 
 const queryKeys = {
   entries: ["entries"] as const,

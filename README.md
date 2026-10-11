@@ -107,8 +107,8 @@ kaitokune/
 │   └── client/               # React SPA
 │       ├── routes/           # / （今日の日記）, /entries（一覧）, /entries/$date（詳細）, /usage（使用量）
 │       ├── components/       # Interview（会話）, DiaryEditor, EntryView, NotesPanel など。画面ごとの部品は interview/ entries/ entry/ usage/、shadcn/ui の部品は ui/
-│       ├── hooks/            # 画面の状態と操作（useInterview など）
-│       └── lib/              # API クライアント、TanStack Query のフック（queries.ts）、日付、localStorage
+│       ├── hooks/            # 画面の状態と操作（useInterview など）、TanStack Query のフック（queries.ts）
+│       └── lib/              # フックではない共通の処理（API クライアント、日付、localStorage、下書き、検索語の強調）
 ├── test/                     # Vitest（Workers ランタイム上で実行）。src/ と同じ分け方（worker/ai・db・export・middleware・routes、shared、client/lib）
 ├── docs/                     # セットアップ手順（setup.md）・画面のスクリーンショット
 ├── migrations/               # drizzle-kit が生成する D1 マイグレーション

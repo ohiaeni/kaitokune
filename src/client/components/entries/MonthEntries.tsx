@@ -1,5 +1,5 @@
+import { useEntryList } from "../../hooks/queries";
 import { type EntriesView, useEntriesView } from "../../hooks/useEntriesView";
-import { useEntryList } from "../../lib/queries";
 import { EmptyState } from "../EmptyState";
 import { MonthCalendar } from "../MonthCalendar";
 import { QueryResult } from "../QueryResult";

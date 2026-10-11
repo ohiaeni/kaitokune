@@ -5,8 +5,8 @@ import { EntryView } from "../components/EntryView";
 import { Interview } from "../components/Interview";
 import { NotesPanel } from "../components/NotesPanel";
 import { QueryResult } from "../components/QueryResult";
+import { useEntry } from "../hooks/queries";
 import { today } from "../lib/date";
-import { useEntry } from "../lib/queries";
 
 export const Route = createFileRoute("/")({ component: TodayPage });
 

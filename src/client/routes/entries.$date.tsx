@@ -4,7 +4,7 @@ import { formatDate } from "../../shared/date";
 import { EmptyState } from "../components/EmptyState";
 import { EntryView } from "../components/EntryView";
 import { QueryResult } from "../components/QueryResult";
-import { useEntry } from "../lib/queries";
+import { useEntry } from "../hooks/queries";
 
 export const Route = createFileRoute("/entries/$date")({
   beforeLoad: ({ params }) => {

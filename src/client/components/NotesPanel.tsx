@@ -1,7 +1,7 @@
 import { XIcon } from "lucide-react";
 import { useState } from "react";
 import { MAX_NOTES, NOTE_MAX_LENGTH } from "../../shared/constants";
-import { useAddNote, useDeleteNote, useNotes } from "../lib/queries";
+import { useAddNote, useDeleteNote, useNotes } from "../hooks/queries";
 import { ErrorMessage } from "./ErrorMessage";
 import { QueryResult } from "./QueryResult";
 import { Button } from "./ui/button";

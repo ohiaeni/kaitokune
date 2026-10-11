@@ -1,4 +1,4 @@
-import { useEntrySearch } from "../../lib/queries";
+import { useEntrySearch } from "../../hooks/queries";
 import { EmptyState } from "../EmptyState";
 import { ErrorMessage } from "../ErrorMessage";
 import { Loading } from "../Loading";

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { QA } from "../../shared/schemas";
 import { api } from "../lib/api";
 import { type Draft, EMPTY_DRAFT, loadDraft, removeDraft, saveDraft } from "../lib/draft";
-import { useSaveEntry } from "../lib/queries";
+import { useSaveEntry } from "./queries";
 
 /** 実行中の処理（質問の取得・日記の生成・保存） */
 export type Busy = "next" | "compose" | "save" | null;

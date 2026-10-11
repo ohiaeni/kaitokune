@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { EntryDetail } from "../../shared/schemas";
-import { useDeleteEntry, useSaveEntry } from "../lib/queries";
+import { useDeleteEntry, useSaveEntry } from "../hooks/queries";
 import { DiaryEditor } from "./DiaryEditor";
 import { ErrorMessage } from "./ErrorMessage";
 import { DateChanger } from "./entry/DateChanger";
