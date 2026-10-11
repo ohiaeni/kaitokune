@@ -6,7 +6,7 @@ import { QueryResult } from "../components/QueryResult";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Meter } from "../components/usage/Meter";
-import { useUsage } from "../lib/queries";
+import { useUsage } from "../hooks/queries";
 
 export const Route = createFileRoute("/usage")({ component: UsagePage });
 
