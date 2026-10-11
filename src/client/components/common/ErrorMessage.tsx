@@ -1,6 +1,6 @@
-import { ApiError } from "../lib/api";
-import { Alert, AlertDescription } from "./ui/alert";
-import { Button } from "./ui/button";
+import { ApiError } from "../../lib/api";
+import { Alert, AlertDescription } from "../ui/alert";
+import { Button } from "../ui/button";
 
 /** API などのエラー。AI の 1 日の上限に達したときは理由を添え、それ以外は onRetry があれば再試行ボタンを出す */
 export function ErrorMessage({ error, onRetry }: { error: unknown; onRetry?: () => void }) {

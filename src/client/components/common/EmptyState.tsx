@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Empty, EmptyDescription } from "./ui/empty";
+import { Empty, EmptyDescription } from "../ui/empty";
 
 /** 表示するものがないときのメッセージ */
 export function EmptyState({ children }: { children: ReactNode }) {

@@ -1,10 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { formatDate } from "../../shared/date";
-import { EntryView } from "../components/EntryView";
-import { Interview } from "../components/Interview";
-import { NotesPanel } from "../components/NotesPanel";
-import { QueryResult } from "../components/QueryResult";
+import { QueryResult } from "../components/common/QueryResult";
+import { EntryView } from "../components/entry-detail/EntryView";
+import { Interview } from "../components/interview/Interview";
+import { NotesPanel } from "../components/notes/NotesPanel";
 import { useEntry } from "../hooks/queries";
 import { today } from "../lib/date";
 

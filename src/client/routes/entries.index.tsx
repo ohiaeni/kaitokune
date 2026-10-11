@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { MONTH_PATTERN, SEARCH_QUERY_MAX_LENGTH } from "../../shared/constants";
-import { MonthEntries } from "../components/entries/MonthEntries";
-import { SearchForm } from "../components/entries/SearchForm";
-import { SearchResults } from "../components/entries/SearchResults";
+import { MonthEntries } from "../components/entry-list/MonthEntries";
+import { SearchForm } from "../components/entry-list/SearchForm";
+import { SearchResults } from "../components/entry-list/SearchResults";
 import { currentMonth } from "../lib/date";
 
 export const Route = createFileRoute("/entries/")({

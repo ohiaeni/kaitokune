@@ -1,10 +1,10 @@
 import { useEntryList } from "../../hooks/queries";
 import { type EntriesView, useEntriesView } from "../../hooks/useEntriesView";
-import { EmptyState } from "../EmptyState";
-import { MonthCalendar } from "../MonthCalendar";
-import { QueryResult } from "../QueryResult";
+import { EmptyState } from "../common/EmptyState";
+import { QueryResult } from "../common/QueryResult";
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
 import { EntryList } from "./EntryList";
+import { MonthCalendar } from "./MonthCalendar";
 import { MonthNav } from "./MonthNav";
 
 const VIEWS: { value: EntriesView; label: string }[] = [

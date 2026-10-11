@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { formatDate } from "../../shared/date";
 import type { CloudflareUsage } from "../../shared/schemas";
-import { ErrorMessage } from "../components/ErrorMessage";
-import { QueryResult } from "../components/QueryResult";
+import { ErrorMessage } from "../components/common/ErrorMessage";
+import { QueryResult } from "../components/common/QueryResult";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Meter } from "../components/usage/Meter";

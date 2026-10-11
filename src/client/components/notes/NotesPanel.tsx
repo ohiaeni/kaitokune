@@ -1,12 +1,12 @@
 import { XIcon } from "lucide-react";
 import { useState } from "react";
-import { MAX_NOTES, NOTE_MAX_LENGTH } from "../../shared/constants";
-import { useAddNote, useDeleteNote, useNotes } from "../hooks/queries";
-import { ErrorMessage } from "./ErrorMessage";
-import { QueryResult } from "./QueryResult";
-import { Button } from "./ui/button";
-import { Card, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { Input } from "./ui/input";
+import { MAX_NOTES, NOTE_MAX_LENGTH } from "../../../shared/constants";
+import { useAddNote, useDeleteNote, useNotes } from "../../hooks/queries";
+import { ErrorMessage } from "../common/ErrorMessage";
+import { QueryResult } from "../common/QueryResult";
+import { Button } from "../ui/button";
+import { Card, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import { Input } from "../ui/input";
 
 /** 日中に思ったことをメモしておく欄。メモは「日記にまとめる」ときに AI に渡す */
 export function NotesPanel({ date }: { date: string }) {
