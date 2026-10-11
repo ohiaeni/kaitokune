@@ -1,7 +1,7 @@
 import { useEntrySearch } from "../../hooks/queries";
-import { EmptyState } from "../EmptyState";
-import { ErrorMessage } from "../ErrorMessage";
-import { Loading } from "../Loading";
+import { EmptyState } from "../common/EmptyState";
+import { ErrorMessage } from "../common/ErrorMessage";
+import { Loading } from "../common/Loading";
 import { EntryList } from "./EntryList";
 
 export function SearchResults({ q }: { q: string }) {

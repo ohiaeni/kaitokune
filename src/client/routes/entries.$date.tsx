@@ -1,9 +1,9 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { DATE_PATTERN } from "../../shared/constants";
 import { formatDate } from "../../shared/date";
-import { EmptyState } from "../components/EmptyState";
-import { EntryView } from "../components/EntryView";
-import { QueryResult } from "../components/QueryResult";
+import { EmptyState } from "../components/common/EmptyState";
+import { QueryResult } from "../components/common/QueryResult";
+import { EntryView } from "../components/entry-detail/EntryView";
 import { useEntry } from "../hooks/queries";
 
 export const Route = createFileRoute("/entries/$date")({

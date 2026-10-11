@@ -1,13 +1,13 @@
 import { useEffect, useRef } from "react";
-import { MIN_QUESTIONS } from "../../shared/constants";
-import { useInterview } from "../hooks/useInterview";
-import { ErrorMessage } from "./ErrorMessage";
-import { Suggestions } from "./entry/Suggestions";
-import { AnswerForm } from "./interview/AnswerForm";
-import { ChatLog } from "./interview/ChatLog";
-import { ComposedEditor } from "./interview/ComposedEditor";
-import { ComposePrompt } from "./interview/ComposePrompt";
-import { Button } from "./ui/button";
+import { MIN_QUESTIONS } from "../../../shared/constants";
+import { useInterview } from "../../hooks/useInterview";
+import { ErrorMessage } from "../common/ErrorMessage";
+import { Suggestions } from "../entry-detail/Suggestions";
+import { Button } from "../ui/button";
+import { AnswerForm } from "./AnswerForm";
+import { ChatLog } from "./ChatLog";
+import { ComposedEditor } from "./ComposedEditor";
+import { ComposePrompt } from "./ComposePrompt";
 
 export function Interview({ date }: { date: string }) {
   const { draft, busy, error, submitAnswer, finishQuestions, compose, save, restart, backToChat } = useInterview(date);

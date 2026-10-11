@@ -3,7 +3,7 @@ import { formatDate } from "../../../shared/date";
 import { useChangeEntryDate } from "../../hooks/queries";
 import { today } from "../../lib/date";
 import { loadDraft, removeDraft } from "../../lib/draft";
-import { ErrorMessage } from "../ErrorMessage";
+import { ErrorMessage } from "../common/ErrorMessage";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 

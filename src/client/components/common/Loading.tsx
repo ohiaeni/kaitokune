@@ -1,4 +1,4 @@
-import { Spinner } from "./ui/spinner";
+import { Spinner } from "../ui/spinner";
 
 /** 読み込み中の表示 */
 export function Loading({ label = "読み込み中…" }: { label?: string }) {

@@ -1,14 +1,14 @@
 import { useState } from "react";
-import type { EntryDetail } from "../../shared/schemas";
-import { useDeleteEntry, useSaveEntry } from "../hooks/queries";
-import { DiaryEditor } from "./DiaryEditor";
-import { ErrorMessage } from "./ErrorMessage";
-import { DateChanger } from "./entry/DateChanger";
-import { EntryBody } from "./entry/EntryBody";
-import { QaLog } from "./entry/QaLog";
-import { Suggestions } from "./entry/Suggestions";
-import { Button } from "./ui/button";
-import { Card } from "./ui/card";
+import type { EntryDetail } from "../../../shared/schemas";
+import { useDeleteEntry, useSaveEntry } from "../../hooks/queries";
+import { DiaryEditor } from "../common/DiaryEditor";
+import { ErrorMessage } from "../common/ErrorMessage";
+import { Button } from "../ui/button";
+import { Card } from "../ui/card";
+import { DateChanger } from "./DateChanger";
+import { EntryBody } from "./EntryBody";
+import { QaLog } from "./QaLog";
+import { Suggestions } from "./Suggestions";
 
 /** 保存済みの日記。表示 / 編集 / 日付変更を切り替え、削除もできる */
 export function EntryView({

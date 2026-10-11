@@ -1,8 +1,8 @@
 import { type ReactNode, useId, useState } from "react";
-import { MOODS } from "../../shared/constants";
-import { Button } from "./ui/button";
-import { Textarea } from "./ui/textarea";
-import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
+import { MOODS } from "../../../shared/constants";
+import { Button } from "../ui/button";
+import { Textarea } from "../ui/textarea";
+import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
 
 /** 気分を 1 つ選ぶ。選んでいるものをもう一度押すと未選択に戻る */
 function MoodPicker({ value, onChange }: { value: number | null; onChange: (mood: number | null) => void }) {

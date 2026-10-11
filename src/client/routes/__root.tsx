@@ -1,5 +1,5 @@
 import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
-import { EmptyState } from "../components/EmptyState";
+import { EmptyState } from "../components/common/EmptyState";
 import { buttonVariants } from "../components/ui/button";
 import { cn } from "../lib/utils";
 

@@ -1,5 +1,5 @@
 import type { Busy } from "../../hooks/useInterview";
-import { DiaryEditor } from "../DiaryEditor";
+import { DiaryEditor } from "../common/DiaryEditor";
 import { Button } from "../ui/button";
 
 /** AI がまとめた日記を直して保存する画面。書き直しと会話に戻る操作も出す */
